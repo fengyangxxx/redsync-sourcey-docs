@@ -245,4 +245,43 @@ command: npm test
 exit: 0
 result: 25 passed; 0 failed; 0 skipped
 included isolated Sourcey result: 29/29 committed dist files byte-identical
-line-ending guard: .gitattributes enforces repository LF checkout bytes
+line-ending fact: the exact source snapshot blobs remain CRLF; generate-mappings.mjs computes canonical repository-LF bytes and binds them to fixed upstream raw SHA-256 plus pinned Git blob SHA-1
+future text policy: .gitattributes is retained for future normalization intent only and does not prove the existing blobs or every checkout are LF
+
+SECOND REPAIR: AUDITABLE BOUNDED PUBLIC GET
+base commit: 66d2f49c233a132ffc15bc673e3605237e92e447
+scope: local implementation and public read-only validation only
+external writes: none
+retry policy:
+  maximum attempts: 4
+  per-attempt timeout: 15000ms with AbortController
+  deterministic backoff: 150ms, 300ms, 600ms
+  retryable: network exceptions, HTTP 429, HTTP 5xx
+  not retryable: all other HTTP 4xx
+  exhausted result: BLOCKED nonzero; no URL/hash/evidence fallback
+  evidence: URL plus every attempt status/error/hash/elapsed time, final count, exhaustion, outcome
+
+command: node --test --test-concurrency=1 tests\validation-skill.test.mjs
+exit: 0
+result: 13 passed; 0 failed; 0 skipped
+retry fixtures:
+  ordinary success: attempt_count=1; unchanged FIXTURE_PASS
+  503,503,200: attempt_count=3; FIXTURE_PASS with all attempts retained
+  503,503,503,503: retry_exhausted=true; FIXTURE_BLOCKED nonzero
+  404: attempt_count=1; immediate FIXTURE_BLOCKED nonzero
+
+PUBLIC READ-ONLY CHECK THROUGH bounded-get.mjs
+targets: five current RTD pages plus five raw.githubusercontent.com pinned source files
+exit: 0
+RTD result: 5/5 HTTP 200; each attempt_count=1; each exact addon count=1; all canonical SHA-256 values equal mappings
+raw source result: 5/5 HTTP 200; each attempt_count=1; all SHA-256 and Git blob SHA-1 values equal mappings
+receipt/workflow/notary: not invoked
+
+FINAL SECOND-REPAIR PACKAGE TESTS
+command: npm run hashes
+exit: 0
+result: sha256 manifest files=106
+command: npm test
+exit: 0
+result: 28 passed; 0 failed; 0 skipped
+included isolated Sourcey result: 29/29 committed dist files byte-identical

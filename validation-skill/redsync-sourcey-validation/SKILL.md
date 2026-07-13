@@ -20,4 +20,7 @@ runtime inputs and explicit public/immutable non-draft artifacts, never commit
 API patch metadata. Final evidence/report files are intentionally not inputs
 because they are created after this run and its receipt. The runner writes `evidence.json` and
 `transcript.txt` under `output_dir`. Every check is `PASS` or `BLOCKED`.
-Failures exit nonzero and remain visible in both artifacts and stdout.
+Idempotent GETs use at most four attempts; only network errors, HTTP 429, and
+HTTP 5xx are retried with bounded deterministic backoff. Every attempt is
+recorded. Failures exit nonzero; exhausted retries are failures and remain
+visible in both artifacts and stdout.

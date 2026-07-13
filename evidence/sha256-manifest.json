@@ -25,8 +25,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 5272,
-      "sha256": "ca2846964a3a35922ce31ba09834fd2b6b63f922e33425109ce5971435dbbda0"
+      "bytes": 5987,
+      "sha256": "b707289cf98dca4bfb7b32a21a4c44d7d01aa200513685229da5ac6702ff337c"
     },
     {
       "path": "dist/go-api.html",
@@ -175,8 +175,8 @@
     },
     {
       "path": "evidence/commands.local.txt",
-      "bytes": 11876,
-      "sha256": "cdf027f38cb958210c58ffeac0a24be8fbc87377d044ec9593b318a4f94e92da"
+      "bytes": 13763,
+      "sha256": "cb82200c3f0fef3ad93b442a2cfdb670b8b0b2249934d4d27b00bfc8d3839811"
     },
     {
       "path": "evidence/evidence.draft.json",
@@ -185,8 +185,8 @@
     },
     {
       "path": "evidence/hume-handoff.md",
-      "bytes": 8980,
-      "sha256": "9f41e03d793b7e3c200cbf3b7cca450c560ab3ea1e3077e4a6bbaee059e23193"
+      "bytes": 9585,
+      "sha256": "5ac3161d96521ec4e0f2129810e0edfea8f268da4267ef4de8aaa87ec6033f30"
     },
     {
       "path": "evidence/inventory.json",
@@ -490,8 +490,8 @@
     },
     {
       "path": "tests/validation-skill.test.mjs",
-      "bytes": 25033,
-      "sha256": "46dddf4485d8bb31b5907cc7194f7890ed2df5017e53952e08d3a004d4089a1c"
+      "bytes": 28696,
+      "sha256": "87937ea62b2afe1823c9e69c7e7252c3305771c79f8a55c9c07628ff8936be3b"
     },
     {
       "path": "upstream-pr-rationale.md",
@@ -505,13 +505,18 @@
     },
     {
       "path": "validation-skill/redsync-sourcey-validation/SKILL.md",
-      "bytes": 1393,
-      "sha256": "f6cb6623e07f9b88a18c11c3a274ddb7be3c54101735ca386ead1d7361014de5"
+      "bytes": 1587,
+      "sha256": "09fc3600ee2f26d9adfe77b441b736f9ce83843378dabaea6d42bc6fbdff245f"
     },
     {
       "path": "validation-skill/redsync-sourcey-validation/X.yaml",
       "bytes": 1995,
-      "sha256": "cc3110b1db06b7053cd40849921c52b64c7d58a0f1997ae56e59d464b59ac7c6"
+      "sha256": "c11294556a918c15723b7486046759b015fb9a482b8c49e5293eba52a48a18a1"
+    },
+    {
+      "path": "validation-skill/redsync-sourcey-validation/scripts/bounded-get.mjs",
+      "bytes": 3647,
+      "sha256": "c494fd56f367cba8d983fc14c2e74c1efc825253d10255b842edb24033e6e112"
     },
     {
       "path": "validation-skill/redsync-sourcey-validation/scripts/extract-root-receipt.mjs",
@@ -525,8 +530,8 @@
     },
     {
       "path": "validation-skill/redsync-sourcey-validation/scripts/run.mjs",
-      "bytes": 27850,
-      "sha256": "53b250ee6b5bb8f3f87a95579f7fe6c802d18b1efe7b8de03c7232ec0a90db83"
+      "bytes": 28245,
+      "sha256": "00b9073d451ad11a7e2672a7898e52c8a7786b2924a2702253d8885e20b94ca8"
     }
   ]
 }

@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { isAbsolute, resolve } from "node:path";
+import { boundedGet } from "./bounded-get.mjs";
 import { canonicalizeReadTheDocsPage } from "./rtd-canonicalizer.mjs";
 
 const EXPECTED_TARGET_REPO = "https://github.com/go-redsync/redsync";
@@ -125,44 +126,42 @@ async function main() {
       fetchedUrl = proxy.href;
     }
 
-    let record;
-    let body = "";
-    let rawBytes = Buffer.alloc(0);
-    try {
-      const response = await fetch(fetchedUrl, {
-        redirect: "follow",
-        signal: AbortSignal.timeout(30000),
-        headers: {
-          accept: "text/html,application/json,text/plain;q=0.9,*/*;q=0.8",
-          "user-agent": "redsync-sourcey-validation/0.1.0",
-        },
-      });
-      const bytes = Buffer.from(await response.arrayBuffer());
-      rawBytes = bytes;
-      body = bytes.toString("utf8");
-      record = {
-        label,
-        url: logicalUrl,
-        fetched_url: inputs.validation_mode === "fixture" ? fetchedUrl : logicalUrl,
-        http_status: response.status,
-        content_sha256: sha256(bytes),
-        bytes: bytes.length,
-        content_type: response.headers.get("content-type") ?? "",
-        checked_text: excerpt(body),
-      };
-    } catch (error) {
-      record = {
-        label,
-        url: logicalUrl,
-        fetched_url: inputs.validation_mode === "fixture" ? fetchedUrl : logicalUrl,
-        http_status: null,
-        content_sha256: null,
-        bytes: 0,
-        content_type: "",
-        checked_text: "",
-        error: error instanceof Error ? error.message : String(error),
-      };
-    }
+    const fetched = await boundedGet(fetchedUrl, {
+      auditUrl: logicalUrl,
+      headers: {
+        accept: "text/html,application/json,text/plain;q=0.9,*/*;q=0.8",
+        "user-agent": "redsync-sourcey-validation/0.1.2",
+      },
+      onAttempt(attemptRecord) {
+        transcript.push(
+          `HTTP_ATTEMPT ${attemptRecord.attempt} STATUS ${attemptRecord.http_status ?? "ERROR"} ` +
+          `RETRYABLE ${attemptRecord.retryable}`,
+        );
+        transcript.push(`HTTP_ATTEMPT_URL ${logicalUrl}`);
+        transcript.push(`HTTP_ATTEMPT_RESULT ${JSON.stringify(attemptRecord)}`);
+      },
+      onBackoff(backoff) {
+        transcript.push(`HTTP_RETRY_BACKOFF_MS ${backoff.backoff_ms}`);
+      },
+    });
+    const rawBytes = fetched.bytes;
+    const body = rawBytes.toString("utf8");
+    const record = {
+      label,
+      url: logicalUrl,
+      fetched_url: inputs.validation_mode === "fixture" ? fetchedUrl : logicalUrl,
+      http_status: fetched.http_status,
+      content_sha256: fetched.content_sha256,
+      bytes: rawBytes.length,
+      content_type: fetched.content_type,
+      checked_text: excerpt(body),
+      error: fetched.error,
+      attempts: fetched.attempts,
+      attempt_count: fetched.attempt_count,
+      max_attempts: fetched.max_attempts,
+      retry_exhausted: fetched.retry_exhausted,
+      final_outcome: fetched.final_outcome,
+    };
 
     httpChecks.push(record);
     responseBodies.set(logicalUrl, { ...record, body, raw_bytes: rawBytes });
@@ -170,6 +169,9 @@ async function main() {
     transcript.push(`HTTP_URL ${logicalUrl}`);
     if (inputs.validation_mode === "fixture") transcript.push(`FETCHED_AS ${fetchedUrl}`);
     transcript.push(`HTTP_STATUS ${record.http_status ?? "ERROR"}`);
+    transcript.push(`HTTP_ATTEMPT_COUNT ${record.attempt_count}`);
+    transcript.push(`HTTP_RETRY_EXHAUSTED ${record.retry_exhausted}`);
+    transcript.push(`HTTP_FINAL_OUTCOME ${record.final_outcome}`);
     transcript.push(`CONTENT_SHA256 ${record.content_sha256 ?? "NONE"}`);
     transcript.push(`CONTENT_BYTES ${record.bytes}`);
     transcript.push(`CHECKED_TEXT ${JSON.stringify(record.checked_text)}`);

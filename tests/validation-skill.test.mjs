@@ -171,11 +171,21 @@ async function fixtureResponse(logicalUrl, options = {}) {
 }
 
 async function startProxy(options) {
+  const requestCounts = new Map();
   const server = createServer(async (request, response) => {
     try {
       const incoming = new URL(request.url, "http://127.0.0.1");
       const logicalUrl = incoming.searchParams.get("url") ?? "";
-      const fixture = await fixtureResponse(logicalUrl, options);
+      const requestCount = (requestCounts.get(logicalUrl) ?? 0) + 1;
+      requestCounts.set(logicalUrl, requestCount);
+      const retryFailureLimit = options.retryFailures ?? 0;
+      const fixture =
+        logicalUrl === mappingsUrl && requestCount <= retryFailureLimit
+          ? {
+              status: options.retryStatus ?? 503,
+              body: `temporary fixture failure ${requestCount}`,
+            }
+          : await fixtureResponse(logicalUrl, options);
       response.writeHead(fixture.status ?? 200, {
         "content-type": logicalUrl.includes("api.github.com")
           ? "application/json"
@@ -353,6 +363,7 @@ test("validation skill declares the complete governed network contract", async (
   const xYaml = await text(new URL("X.yaml", skillRoot));
   const skillMd = await text(new URL("SKILL.md", skillRoot));
   const runner = await text(runnerPath);
+  const boundedGet = await text(new URL("scripts/bounded-get.mjs", skillRoot));
 
   for (const input of [
     "public_url",
@@ -374,6 +385,12 @@ test("validation skill declares the complete governed network contract", async (
   assert.match(xYaml, /cwd_policy:\s*skill-directory/);
   assert.match(skillMd, /name:\s*redsync-sourcey-validation/);
   assert.match(skillMd, /Failures exit nonzero/);
+  assert.match(runner, /boundedGet/);
+  assert.match(boundedGet, /FETCH_MAX_ATTEMPTS = 4/);
+  assert.match(boundedGet, /FETCH_TIMEOUT_MS = 15000/);
+  assert.match(boundedGet, /new AbortController/);
+  assert.match(boundedGet, /status === 429 \|\| status >= 500/);
+  assert.match(boundedGet, /retry_exhausted/);
   for (const content of [xYaml, runner]) {
     assert.doesNotMatch(content, /evidence_path|report_path|evidence\.draft\.json|report\.draft\.md/);
   }
@@ -478,6 +495,9 @@ test("fixture mode exercises every check without claiming a live pass", async ()
   assert.ok(output.checks.every((item) => item.status === "PASS"));
   assert.ok(output.http_checks.length >= 20, `http=${output.http_checks.length}`);
   assert.ok(output.http_checks.every((item) => item.http_status === 200));
+  assert.ok(output.http_checks.every((item) => item.attempt_count === 1));
+  assert.ok(output.http_checks.every((item) => item.attempts.length === 1));
+  assert.ok(output.http_checks.every((item) => item.retry_exhausted === false));
   assert.equal(output.cli_version.output, "runx-cli 0.6.14");
 
   const evidence = JSON.parse(
@@ -511,6 +531,52 @@ test("fixture mode exercises every check without claiming a live pass", async ()
   assert.match(transcript, /HTTP_STATUS 200/);
   assert.match(transcript, /CONTENT_SHA256 [0-9a-f]{64}/);
   assert.match(transcript, /PR_STATE open/);
+});
+
+test("bounded HTTP retry records two transient failures before a clean PASS", async () => {
+  const result = await runFixture({ retryFailures: 2 });
+  assert.equal(result.exitCode, 0, result.stderr || result.stdout);
+  const output = JSON.parse(result.stdout);
+  assert.equal(output.status, "FIXTURE_PASS");
+  const mappingHttp = output.http_checks.find((item) => item.label === "page_source_mappings");
+  assert.equal(mappingHttp.attempt_count, 3);
+  assert.deepEqual(mappingHttp.attempts.map((attempt) => attempt.http_status), [503, 503, 200]);
+  assert.deepEqual(mappingHttp.attempts.map((attempt) => attempt.retryable), [true, true, false]);
+  assert.equal(mappingHttp.retry_exhausted, false);
+  assert.equal(mappingHttp.final_outcome, "response_ok");
+  const transcript = await text(
+    new URL(`file:///${join(result.outputDir, "transcript.txt").replaceAll("\\", "/")}`),
+  );
+  assert.match(transcript, /HTTP_ATTEMPT 1 STATUS 503 RETRYABLE true/);
+  assert.match(transcript, /HTTP_ATTEMPT 2 STATUS 503 RETRYABLE true/);
+  assert.match(transcript, /HTTP_ATTEMPT 3 STATUS 200 RETRYABLE false/);
+  assert.match(transcript, /HTTP_ATTEMPT_COUNT 3/);
+});
+
+test("bounded HTTP retry exhausts at four attempts and remains BLOCKED", async () => {
+  const result = await runFixture({ retryFailures: 4 });
+  assert.notEqual(result.exitCode, 0);
+  const output = JSON.parse(result.stdout);
+  assert.equal(output.status, "FIXTURE_BLOCKED");
+  const mappingHttp = output.http_checks.find((item) => item.label === "page_source_mappings");
+  assert.equal(mappingHttp.attempt_count, 4);
+  assert.deepEqual(mappingHttp.attempts.map((attempt) => attempt.http_status), [503, 503, 503, 503]);
+  assert.ok(mappingHttp.attempts.every((attempt) => attempt.retryable));
+  assert.equal(mappingHttp.retry_exhausted, true);
+  assert.equal(mappingHttp.final_outcome, "retry_exhausted");
+  assert.equal(output.checks.find((item) => item.id === "mappings_shape").status, "BLOCKED");
+});
+
+test("non-retryable HTTP 4xx fails immediately with one recorded attempt", async () => {
+  const result = await runFixture({ retryFailures: 1, retryStatus: 404 });
+  assert.notEqual(result.exitCode, 0);
+  const output = JSON.parse(result.stdout);
+  const mappingHttp = output.http_checks.find((item) => item.label === "page_source_mappings");
+  assert.equal(mappingHttp.attempt_count, 1);
+  assert.equal(mappingHttp.attempts[0].http_status, 404);
+  assert.equal(mappingHttp.attempts[0].retryable, false);
+  assert.equal(mappingHttp.retry_exhausted, false);
+  assert.equal(mappingHttp.final_outcome, "non_retryable_http_error");
 });
 
 test("raw PR or immutable placeholder failures remain BLOCKED and exit nonzero", async () => {

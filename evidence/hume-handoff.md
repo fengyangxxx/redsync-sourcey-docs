@@ -99,6 +99,10 @@ Any replacement of a placeholder or generated artifact changes the reviewed byte
 - Mapping generation hashes `dist` as raw bytes and canonicalizes mapped Go
   source to strict repository LF bytes. Tests bind all five source hashes to
   the pinned GitHub raw values and all five page hashes to tracked `dist`.
+- The committed `source/redsync` snapshot blobs themselves remain CRLF.
+  `.gitattributes` is only a future text-policy declaration; current mapping
+  identity comes from canonical LF conversion plus fixed upstream raw SHA-256
+  and pinned Git blob SHA-1, not from checkout line-ending behavior.
 - Live page proof now fetches both immutable raw docs and public RTD pages. It
   removes exactly one fully identified RTD addon immediately before
   `</head>`, records its count/bytes/hash/identity, and requires the remaining
@@ -118,6 +122,10 @@ Any replacement of a placeholder or generated artifact changes the reviewed byte
 - A direct full live runner probe remained honestly BLOCKED when GitHub Raw
   requests failed intermittently before the old public mappings loaded. That
   diagnostic created no governed receipt and is not final evidence.
+- Public GETs now use a maximum of four attempts with deterministic backoff.
+  Only network exceptions, HTTP 429, and HTTP 5xx are retried; other HTTP 4xx
+  fail immediately. Evidence and transcript retain every attempt and exhausted
+  retries remain nonzero BLOCKED without changing evidence URLs or hashes.
 
 ## Publication QA placeholder repair
 

@@ -46,6 +46,13 @@ installation must not be used for governed evidence.
 - `.github/workflows/validate-sourcey-adoption.yml`: manual-only Linux runner
   for the final live inputs and an ephemeral, verified runx receipt.
 
+The committed `source/redsync` snapshot blobs retain their original CRLF
+representation. Mapping generation does not hash those checkout bytes
+directly: it computes canonical repository-LF bytes, rejects bare CR, and
+requires both the fixed upstream GitHub raw SHA-256 and pinned Git blob SHA-1.
+The root `.gitattributes` is a policy for future text normalization; it is not
+evidence that the existing snapshot blobs or every checkout are LF.
+
 This directory contains no publication receipt and makes no claim that the
 Read the Docs site or upstream PR already exists.
 
@@ -83,8 +90,11 @@ after this validation creates its receipt. Placeholder scanning covers runtime
 inputs and explicit public or immutable non-draft docs, site, mapping, source,
 and PR-body surfaces. GitHub commit API metadata and patch bodies are not
 delivery surfaces and are excluded, so allowed draft patches cannot mask or
-create a final-artifact result. Fixture mode is test-only and always reports
-`live_pass: false`.
+create a final-artifact result. Idempotent public GETs use at most four
+auditable attempts: only network errors, HTTP 429, and HTTP 5xx are retried
+with deterministic backoff; other HTTP 4xx responses fail immediately. Every
+attempt remains in evidence and transcript output, and exhaustion is BLOCKED.
+Fixture mode is test-only and always reports `live_pass: false`.
 
 The GitHub Actions workflow is intentionally limited to manual
 `workflow_dispatch`. It uses no repository secrets, creates a fresh signing
