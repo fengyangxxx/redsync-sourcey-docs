@@ -1,0 +1,517 @@
+{
+  "schema_version": "sha256-manifest/v1",
+  "repository": "https://github.com/go-redsync/redsync",
+  "commit": "79f6ba24a8bf41f35141de700d410a06bb27622f",
+  "files": [
+    {
+      "path": ".github/workflows/validate-sourcey-adoption.yml",
+      "bytes": 9480,
+      "sha256": "c0675ac559d9a57f897979cfc3505dc79a1717cae77154e1e6733b39bd579923"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 68,
+      "sha256": "c9a07e85a644c4284a6c0101b792fe1d148bb6c39e2b03d91b941740ac1472a2"
+    },
+    {
+      "path": ".readthedocs.yaml",
+      "bytes": 244,
+      "sha256": "8db5bd92e47ae61d604c328fa007af5fd4dc362123e0fd6ab6df4c8135b7816f"
+    },
+    {
+      "path": "README.md",
+      "bytes": 4680,
+      "sha256": "ad1e973db848ee774e0008f188c64da1311c4f0186c11c69b7afee7c77771693"
+    },
+    {
+      "path": "dist/go-api.html",
+      "bytes": 27532,
+      "sha256": "290d849724e4964c179b72eb0a6b7e5bb066a76185cc9891bb62a2b4b77fa10c"
+    },
+    {
+      "path": "dist/go-api/index.html",
+      "bytes": 302,
+      "sha256": "c268c9a93ba52cc1753f097db53f617d883be8b1ab12500ca0b160bdfd488658"
+    },
+    {
+      "path": "dist/go-api/package-root.html",
+      "bytes": 72834,
+      "sha256": "af75739a73f365c9421b3ffbe07df8beaab0d24ac879307aee293aeac3375a23"
+    },
+    {
+      "path": "dist/go-api/pkg-examples-goredis-v7.html",
+      "bytes": 24382,
+      "sha256": "72dec16245f7926a4758b09049247ae59c3d33c51e268ba116e1db607d4c87de"
+    },
+    {
+      "path": "dist/go-api/pkg-examples-goredis-v8.html",
+      "bytes": 24388,
+      "sha256": "f4c56775ee9e457629374c046cf3de9ebedac8b34cdc21f58608b98a70fb4d72"
+    },
+    {
+      "path": "dist/go-api/pkg-examples-goredis-v9.html",
+      "bytes": 24380,
+      "sha256": "53792c8035b3eb90bda4ec2fd7b882829995c1cea8cddbe4d73e8358cf8032ec"
+    },
+    {
+      "path": "dist/go-api/pkg-examples-goredis.html",
+      "bytes": 24326,
+      "sha256": "bcf610d5d8e9146c8481efb11f43e45ee5f6a3dac490b2d733d10b3ab657501c"
+    },
+    {
+      "path": "dist/go-api/pkg-examples-redigo.html",
+      "bytes": 24338,
+      "sha256": "64a3c0d5586d58971625495806c7a7773b842fa06585cd0f8c521a253caf8b35"
+    },
+    {
+      "path": "dist/go-api/pkg-examples-valkego.html",
+      "bytes": 24319,
+      "sha256": "ff6e610a766d7af7c869ecb5b4d186ad88900428a39188210520de3f6e6dfd50"
+    },
+    {
+      "path": "dist/go-api/pkg-redis-goredis-v7.html",
+      "bytes": 26587,
+      "sha256": "839b7c555725f91f1b5940644d34a747a531a7efc56ecb51f5842c3a4d352b78"
+    },
+    {
+      "path": "dist/go-api/pkg-redis-goredis-v8.html",
+      "bytes": 26593,
+      "sha256": "9d790336cdd6623c0c94ed5eb57c9f8c5edcb87bd0c47ffbc93249eaafc92f0b"
+    },
+    {
+      "path": "dist/go-api/pkg-redis-goredis-v9.html",
+      "bytes": 26585,
+      "sha256": "8b0e81c14c6f5810bec0c9e9229d252e6d10032dde32d1c42371acf075e9d224"
+    },
+    {
+      "path": "dist/go-api/pkg-redis-goredis.html",
+      "bytes": 26516,
+      "sha256": "227389c6d97609189d7353af73c2c96ef8742fac0799ca7274724be2cbae7e9a"
+    },
+    {
+      "path": "dist/go-api/pkg-redis-redigo.html",
+      "bytes": 30553,
+      "sha256": "397953e75e24cc7c713843f83b67538b41e4f879323e60f474d15c7f0e562772"
+    },
+    {
+      "path": "dist/go-api/pkg-redis-rueidis.html",
+      "bytes": 26542,
+      "sha256": "2c000f02474f2222503db9433b9669195101f46f6af2a19527271fb0bbc50d86"
+    },
+    {
+      "path": "dist/go-api/pkg-redis-valkeygo.html",
+      "bytes": 26545,
+      "sha256": "9f34fd3502cbfe2e9385b721b670981f544b89e4a341a6741ba5230fc4ac6d28"
+    },
+    {
+      "path": "dist/go-api/pkg-redis.html",
+      "bytes": 42300,
+      "sha256": "6d8184491c7a18d2a8716c22c471afe067cacd3aa5a68c3322deaf30bb3eb3ee"
+    },
+    {
+      "path": "dist/hosting-decision.html",
+      "bytes": 22376,
+      "sha256": "1104e4eef41795916e50f0eec5f5a646d21f86bfdc44732d7152d6ea07bba4eb"
+    },
+    {
+      "path": "dist/index.html",
+      "bytes": 22200,
+      "sha256": "678fe2071ef767fc274ae084a4235706a636e62d30c7876363a13445068820f7"
+    },
+    {
+      "path": "dist/introduction.html",
+      "bytes": 22200,
+      "sha256": "678fe2071ef767fc274ae084a4235706a636e62d30c7876363a13445068820f7"
+    },
+    {
+      "path": "dist/llms-full.txt",
+      "bytes": 23567,
+      "sha256": "d4aea36ad33cd1e2cebb12763fdcfe0072b738eae6c0d9ff44c32619e0c8642b"
+    },
+    {
+      "path": "dist/llms.txt",
+      "bytes": 3392,
+      "sha256": "3ce6926790d20531b47e0254941dd5a4b9fa5f08135b317697770ced07db3f5b"
+    },
+    {
+      "path": "dist/maintainer-gap-analysis.html",
+      "bytes": 25783,
+      "sha256": "8900e7ab6b47c5e8753741c54d577f6c8702c09d2476d89e595f2276970beade"
+    },
+    {
+      "path": "dist/reproduce.html",
+      "bytes": 24456,
+      "sha256": "ab3fdd3af05902fa83a4b500d74a52859808378c76fd2c0629cbd7a8f670fcdc"
+    },
+    {
+      "path": "dist/search-index.json",
+      "bytes": 28494,
+      "sha256": "89b3ebcb61193b62e00e87d092dec4a35b779bc7a14503240a692baea1fe0a03"
+    },
+    {
+      "path": "dist/sitemap.xml",
+      "bytes": 1279,
+      "sha256": "80ca47c131c0e2f08e3bbdfca352ec22dc9c2e3373dcdb08fccd182c5a0c33a7"
+    },
+    {
+      "path": "dist/sourcey.css",
+      "bytes": 119628,
+      "sha256": "94ca8810a424f1575cf79485c4d925d6a2e76eac4f534d7f01474c0e082df8b1"
+    },
+    {
+      "path": "dist/sourcey.js",
+      "bytes": 17326,
+      "sha256": "74add4e9f40ef9adf688c36636f9baa0d470bef54e561c26e0236526344cdb15"
+    },
+    {
+      "path": "dist/upstream-pr-rationale.html",
+      "bytes": 23702,
+      "sha256": "615f52b916810b35021c867d390c79b2050603067d1aeec78ef0da11385941ce"
+    },
+    {
+      "path": "evidence/commands.local.txt",
+      "bytes": 7496,
+      "sha256": "d483fd9430c2b7dddfa588c0032dc3a2d6ec2cb514263ca766152ceac982099b"
+    },
+    {
+      "path": "evidence/evidence.draft.json",
+      "bytes": 4755,
+      "sha256": "86863ac9f7b8650ff3896f54437b29f3f8999a2e00a4ca8777f1c5809663027c"
+    },
+    {
+      "path": "evidence/hume-handoff.md",
+      "bytes": 7188,
+      "sha256": "0a25faea1237bf285b156687a912b3b9cbfca7197beab9867d944a83b1098d10"
+    },
+    {
+      "path": "evidence/inventory.json",
+      "bytes": 20200,
+      "sha256": "32d64a8c92aff9a2e9f049dede51a75b3a781f285bff50c139d4ffa114bc0fbc"
+    },
+    {
+      "path": "evidence/page-source-mappings.json",
+      "bytes": 2627,
+      "sha256": "b0ea35724045bbd483e663a54bb2a6c6e99de529d2212ac699010895cc4cdb42"
+    },
+    {
+      "path": "godoc.json",
+      "bytes": 29784,
+      "sha256": "eb1670e8d60a4b649c24f4700a780927d02e95df3f7d21463fa0e0b59d87de68"
+    },
+    {
+      "path": "hosting-decision.md",
+      "bytes": 1238,
+      "sha256": "8112f3955b1033e008ea9c91a064abfbe17386bd665b17e70e610f92ec20b177"
+    },
+    {
+      "path": "introduction.md",
+      "bytes": 809,
+      "sha256": "ca1cd52240b34ee7d1a61906d961f5d8ebd124bc37d7fac9d76f1f28ab9f99e1"
+    },
+    {
+      "path": "maintainer-gap-analysis.md",
+      "bytes": 1701,
+      "sha256": "c918418e3426a392589d3715da1bbb0e132826752707b5b75e7871b8b0a529ea"
+    },
+    {
+      "path": "package-lock.json",
+      "bytes": 146284,
+      "sha256": "331fe5188fdf9055822e096e043e63454fc0fd9f285e2e6bce1479bbe353cd4a"
+    },
+    {
+      "path": "package.json",
+      "bytes": 717,
+      "sha256": "e04c3c797c40b37456dbe2d5cd4ebcd131d35388ebbef98adea55160475db7a2"
+    },
+    {
+      "path": "report.draft.md",
+      "bytes": 3543,
+      "sha256": "73af708129a9783011665de82d3cedde148e1efcf916cbf482146a4bf7567a5c"
+    },
+    {
+      "path": "reproduce.md",
+      "bytes": 1060,
+      "sha256": "db5579f059dc43fdf43ce32a677c3e99ccd78ecd16e7ba718959e86eed83d2b8"
+    },
+    {
+      "path": "scripts/build-site.mjs",
+      "bytes": 1953,
+      "sha256": "565ba5a313b1090fe785c98cc40408e2e9a92474dc7a11932f1c0457b4e1116f"
+    },
+    {
+      "path": "scripts/generate-godoc-snapshot.mjs",
+      "bytes": 1116,
+      "sha256": "bc03e73da3bc08d88719a3be57dcd727376d0ac571105a0ffcf34a73fed968ce"
+    },
+    {
+      "path": "scripts/generate-hashes.mjs",
+      "bytes": 2089,
+      "sha256": "97d39174b368554c41caefe30489730dfe5aa38ed74dfc9d5a427885f9992706"
+    },
+    {
+      "path": "scripts/generate-inventory.mjs",
+      "bytes": 3473,
+      "sha256": "0b8ed56fd22f2b0b8e3e4715ec94d7214ff0716af94452e5c7d487a9cb13c1d5"
+    },
+    {
+      "path": "scripts/generate-mappings.mjs",
+      "bytes": 2417,
+      "sha256": "893d3ebf4ec87c5fd489cc4f593af5f7887dcca4c59f4dffe058bd8c57e8f6ab"
+    },
+    {
+      "path": "source/redsync/.github/dependabot.yml",
+      "bytes": 538,
+      "sha256": "1d5a8de975f997f3bf031bb0a5bc53efd83f9d82919ad82fd537b73c7820483f"
+    },
+    {
+      "path": "source/redsync/.github/stale.yml",
+      "bytes": 320,
+      "sha256": "7b64d9fa92e0d85885135901e42167c6ddbda11040474b401795d22937819bde"
+    },
+    {
+      "path": "source/redsync/.gitignore",
+      "bytes": 28,
+      "sha256": "62f63bc04066db3e08b71c710adc13e01d2f5ae354bdcf442767cb42cc7b15fb"
+    },
+    {
+      "path": "source/redsync/.gitlab-ci.yml",
+      "bytes": 766,
+      "sha256": "109ca6cbcd4e2494aa3aeb08921b77df8f9aa8c4b675a8655bdd9ee976e9a5fc"
+    },
+    {
+      "path": "source/redsync/.source-pin.json",
+      "bytes": 292,
+      "sha256": "945c9b7090270e81e5b5a127d6879840d5352f02be6733682bc7ca1c6dd27497"
+    },
+    {
+      "path": "source/redsync/.travis.yml",
+      "bytes": 122,
+      "sha256": "6485e7a4a8e1704720f01b9385a0e3fbef534e23531ef0f32c3a18fb7ad89783"
+    },
+    {
+      "path": "source/redsync/LICENSE",
+      "bytes": 1509,
+      "sha256": "4cd22ee6993e28c58be0a5c005751ea4a0bf5a89fd3b634c82f4273d0d353757"
+    },
+    {
+      "path": "source/redsync/Makefile",
+      "bytes": 468,
+      "sha256": "dc35118cae55b6045aad9547cd383d237b719f2bf71970dc9cda5ed94497c1cb"
+    },
+    {
+      "path": "source/redsync/README.md",
+      "bytes": 3524,
+      "sha256": "9cbf1ae8b492ab186f2c012b3cdc1a2f02ea0d1812a8c0c5ca493b069bcb6945"
+    },
+    {
+      "path": "source/redsync/doc.go",
+      "bytes": 249,
+      "sha256": "a21ab2c1f724a0e2a7de6a589158497fe2ee1d205718657580beb296ebcba74f"
+    },
+    {
+      "path": "source/redsync/error.go",
+      "bytes": 1345,
+      "sha256": "5f7e7c460b25706df942dfa9967fc48be3c8799f6114099a585b2cb9cae3e1e1"
+    },
+    {
+      "path": "source/redsync/error_test.go",
+      "bytes": 1095,
+      "sha256": "3ed003dbf6e888a39a884e861a69656f56382fadfcdc77c8124f3a78ac02dac8"
+    },
+    {
+      "path": "source/redsync/examples/goredis/main.go",
+      "bytes": 655,
+      "sha256": "6ed70958d436b17fa6d262e1371ce2b86b9ba8d374c29e62ab53a64a5c75a1fe"
+    },
+    {
+      "path": "source/redsync/examples/goredis/v7/main.go",
+      "bytes": 727,
+      "sha256": "ba55bd5c9146017bc91630de772623d57e5334ce59d9b5e662e4b7484b41385b"
+    },
+    {
+      "path": "source/redsync/examples/goredis/v8/main.go",
+      "bytes": 727,
+      "sha256": "78f8d251e99b7bcfc4f44c7cf905f28193e8ef2e4f4efdfac0759e04fd97a012"
+    },
+    {
+      "path": "source/redsync/examples/goredis/v9/main.go",
+      "bytes": 727,
+      "sha256": "2c28fc9e8673ce80a4fe0f1d8b409048a2a16e772e89bc4a24298c5df582fd78"
+    },
+    {
+      "path": "source/redsync/examples/redigo/main.go",
+      "bytes": 836,
+      "sha256": "e65aee31f586a8434ce93e6924f4b1dcc8b4eba3ba05a93673631c5c9a4e7af8"
+    },
+    {
+      "path": "source/redsync/examples/valkego/main.go",
+      "bytes": 964,
+      "sha256": "333f3203d6f79fb93e585b246e86db80024a5b4dd9591e5e5c5e20e1daf7dec4"
+    },
+    {
+      "path": "source/redsync/go.mod",
+      "bytes": 891,
+      "sha256": "2d9d1df17a942d1325bb1739bafddc07c6c7b250468b1d224fcb87602d905aca"
+    },
+    {
+      "path": "source/redsync/go.sum",
+      "bytes": 9807,
+      "sha256": "15e712db5d642a183ec5d95d3ba5867ed7783f7186f984c1bc1db0ff9c62d93a"
+    },
+    {
+      "path": "source/redsync/mutex.go",
+      "bytes": 8487,
+      "sha256": "157464e3d485a08ef826d4674303b1476be727327323aaea65463818371f6f5b"
+    },
+    {
+      "path": "source/redsync/mutex_test.go",
+      "bytes": 10091,
+      "sha256": "592ab7d2f2209adca6cc637711ab56db9b9198549494108436d87a133762e8b1"
+    },
+    {
+      "path": "source/redsync/redis/goredis/goredis.go",
+      "bytes": 2070,
+      "sha256": "7cbb106e05d6ce69814d6fdb18499865f3e803a9c5437099d11cce61eeb90028"
+    },
+    {
+      "path": "source/redsync/redis/goredis/goredis_test.go",
+      "bytes": 138,
+      "sha256": "1a931246c4229dd3b2096d8aa59b8b8cb3f7e0d909ca80554373ab0c3861f9cf"
+    },
+    {
+      "path": "source/redsync/redis/goredis/v7/goredis.go",
+      "bytes": 2151,
+      "sha256": "3ade8c5327fc937d161de38e8240ff9da3f510620630c0a928cd143690d0d494"
+    },
+    {
+      "path": "source/redsync/redis/goredis/v7/goredis_test.go",
+      "bytes": 138,
+      "sha256": "1a931246c4229dd3b2096d8aa59b8b8cb3f7e0d909ca80554373ab0c3861f9cf"
+    },
+    {
+      "path": "source/redsync/redis/goredis/v8/goredis.go",
+      "bytes": 2090,
+      "sha256": "38cf77fea02c1a1401e2d29d443caa18e5e6909b4c9018d65aa6c1ddcddafebb"
+    },
+    {
+      "path": "source/redsync/redis/goredis/v8/goredis_test.go",
+      "bytes": 138,
+      "sha256": "1a931246c4229dd3b2096d8aa59b8b8cb3f7e0d909ca80554373ab0c3861f9cf"
+    },
+    {
+      "path": "source/redsync/redis/goredis/v9/goredis.go",
+      "bytes": 2090,
+      "sha256": "ca2d340704e0c3d3389ae11e1329ec944f47604e35de2d28599262d30d314a9e"
+    },
+    {
+      "path": "source/redsync/redis/goredis/v9/goredis_test.go",
+      "bytes": 138,
+      "sha256": "1a931246c4229dd3b2096d8aa59b8b8cb3f7e0d909ca80554373ab0c3861f9cf"
+    },
+    {
+      "path": "source/redsync/redis/redigo/redigo.go",
+      "bytes": 2563,
+      "sha256": "0fc03d3e962e67065fb8036247c9fb979934fd974a8437d3d34b9c29dfa5af39"
+    },
+    {
+      "path": "source/redsync/redis/redigo/redigo_test.go",
+      "bytes": 137,
+      "sha256": "3e721362a43de91c099b1b431068e186c50bf173078720ed4fa38ec0bb1487c4"
+    },
+    {
+      "path": "source/redsync/redis/redis.go",
+      "bytes": 1367,
+      "sha256": "3409fd3a3f3dad292178129fd2824d04f06ae2a97dc7d55046cc566f013a2634"
+    },
+    {
+      "path": "source/redsync/redis/redis_test.go",
+      "bytes": 15,
+      "sha256": "d3227db795ee3bb68eeb434854d9d8194351a9bb6e7926cfd9300bbe34f64a4d"
+    },
+    {
+      "path": "source/redsync/redis/rueidis/rueidis.go",
+      "bytes": 2133,
+      "sha256": "5ce8473cf88bbb8cae64b304bdd544073979d3f93c03fd129852b74cbcb75b8b"
+    },
+    {
+      "path": "source/redsync/redis/rueidis/rueidis_test.go",
+      "bytes": 138,
+      "sha256": "ff1fbf8c12882aa137655ba19909c1e186f7ea811c37568fc369e060d7487c6e"
+    },
+    {
+      "path": "source/redsync/redis/valkeygo/valkeygo.go",
+      "bytes": 2112,
+      "sha256": "265ec64bdba59e11b5a176fb3306033d49c5eb7a32c8e782eec9482c6439b525"
+    },
+    {
+      "path": "source/redsync/redis/valkeygo/valkeygo_test.go",
+      "bytes": 139,
+      "sha256": "6fd7ec0b1254fe4dbde187afc2a00a249ca5ea8596193e325246f61f33870317"
+    },
+    {
+      "path": "source/redsync/redsync.go",
+      "bytes": 4640,
+      "sha256": "4c931c8bf3efa442960f55bf716929d31f4aa02a23eb9d8191b33c6595005fb5"
+    },
+    {
+      "path": "source/redsync/redsync_test.go",
+      "bytes": 4686,
+      "sha256": "a2ee8b223414e0554674557a22c8e621da6f857963725485be116d793d24a894"
+    },
+    {
+      "path": "source/redsync/scripts.go",
+      "bytes": 845,
+      "sha256": "f2c42ce839a8b36f6053b90c82326bbcf8def268d0d01b2e7e114a139db0e4ea"
+    },
+    {
+      "path": "source/redsync/scripts_test.go",
+      "bytes": 1262,
+      "sha256": "ee35d206a3ebb05e48e7b4980ffc25be081a14045b09a673b22a69bf67c8002e"
+    },
+    {
+      "path": "sourcey.config.ts",
+      "bytes": 1725,
+      "sha256": "fcc5d8c25bf2e6c000db0ee829769190deb0749ac43946f9841fe5b33fe0808b"
+    },
+    {
+      "path": "tests/package.test.mjs",
+      "bytes": 9612,
+      "sha256": "d70b005fea4540881bb06c8f0a2d7ab242dddce29a5864bfe27b582b603d64d2"
+    },
+    {
+      "path": "tests/validation-skill.test.mjs",
+      "bytes": 19406,
+      "sha256": "0ef38618c75f6402e46836bfd8e42434e3f09e0d138c6715d148a9c75ae062c5"
+    },
+    {
+      "path": "upstream-pr-rationale.md",
+      "bytes": 1732,
+      "sha256": "fe615c9b23842778c559d69472f8aa0f1608f7e7fcdaf660b9fe69f52b58d305"
+    },
+    {
+      "path": "upstream/README-sourcey-docs.patch",
+      "bytes": 202,
+      "sha256": "b56d2df8dcbdf766afc376d977c6d67a184f1d17462c122432555b85d665845d"
+    },
+    {
+      "path": "validation-skill/redsync-sourcey-validation/SKILL.md",
+      "bytes": 1036,
+      "sha256": "fe75b4b8368ae3f6f8999347401995ab541b0281c09e5f2a68bc56b7eca16d89"
+    },
+    {
+      "path": "validation-skill/redsync-sourcey-validation/X.yaml",
+      "bytes": 1955,
+      "sha256": "03447eef9efce443947ce721d7cdb4dbf3c9914e7ede53d884df82963abab031"
+    },
+    {
+      "path": "validation-skill/redsync-sourcey-validation/scripts/extract-root-receipt.mjs",
+      "bytes": 5947,
+      "sha256": "ce46f7c121aec7f4db2aa9578f5127469b1e2ced2e5c942654ae2404f450bdaf"
+    },
+    {
+      "path": "validation-skill/redsync-sourcey-validation/scripts/run.mjs",
+      "bytes": 23844,
+      "sha256": "fe1f9182698a7cd9054299b2f94b0bff523f9a11f5c88aded4474fea4358b40d"
+    }
+  ]
+}

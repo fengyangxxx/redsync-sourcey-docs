@@ -1,0 +1,52 @@
+[
+  {
+    "generated_page": "go-api/package-root.html",
+    "rendered_symbol": "Redsync",
+    "source_path": "redsync.go",
+    "source_line_pattern": "^type Redsync struct \\{",
+    "source_line": 17,
+    "source_url": "https://github.com/go-redsync/redsync/blob/79f6ba24a8bf41f35141de700d410a06bb27622f/redsync.go#L17",
+    "source_sha256": "4c931c8bf3efa442960f55bf716929d31f4aa02a23eb9d8191b33c6595005fb5",
+    "generated_page_sha256": "2f11689381b5127aacb2846a5b555799f2cffa11a2bdaa9bd394f0b4dba0f1f5"
+  },
+  {
+    "generated_page": "go-api/pkg-redis.html",
+    "rendered_symbol": "Pool",
+    "source_path": "redis/redis.go",
+    "source_line_pattern": "^type Pool interface \\{",
+    "source_line": 9,
+    "source_url": "https://github.com/go-redsync/redsync/blob/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/redis.go#L9",
+    "source_sha256": "3409fd3a3f3dad292178129fd2824d04f06ae2a97dc7d55046cc566f013a2634",
+    "generated_page_sha256": "dba116fd4a5c7c095949b87d255b37f6c6a83170c48b5b0170d26170b1a12694"
+  },
+  {
+    "generated_page": "go-api/pkg-redis-goredis-v9.html",
+    "rendered_symbol": "NewPool",
+    "source_path": "redis/goredis/v9/goredis.go",
+    "source_line_pattern": "^func NewPool\\(",
+    "source_line": 24,
+    "source_url": "https://github.com/go-redsync/redsync/blob/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/goredis/v9/goredis.go#L24",
+    "source_sha256": "ca2d340704e0c3d3389ae11e1329ec944f47604e35de2d28599262d30d314a9e",
+    "generated_page_sha256": "3d0c2dd3db498a6c31bfbfe02378f499346cd2bd46526c308593d29e53d34650"
+  },
+  {
+    "generated_page": "go-api/pkg-redis-redigo.html",
+    "rendered_symbol": "NewPool",
+    "source_path": "redis/redigo/redigo.go",
+    "source_line_pattern": "^func NewPool\\(",
+    "source_line": 33,
+    "source_url": "https://github.com/go-redsync/redsync/blob/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/redigo/redigo.go#L33",
+    "source_sha256": "0fc03d3e962e67065fb8036247c9fb979934fd974a8437d3d34b9c29dfa5af39",
+    "generated_page_sha256": "c9f8aa5c3e89f8b199e2cc8b84a1f631e6502fc1553df946189486af64b5ec00"
+  },
+  {
+    "generated_page": "go-api/pkg-redis-rueidis.html",
+    "rendered_symbol": "NewPool",
+    "source_path": "redis/rueidis/rueidis.go",
+    "source_line_pattern": "^func NewPool\\(",
+    "source_line": 26,
+    "source_url": "https://github.com/go-redsync/redsync/blob/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/rueidis/rueidis.go#L26",
+    "source_sha256": "5ce8473cf88bbb8cae64b304bdd544073979d3f93c03fd129852b74cbcb75b8b",
+    "generated_page_sha256": "ac69a16eb8b7c51f4408f038258c6d830b289596525a0c0009fde69d6a593f6c"
+  }
+]

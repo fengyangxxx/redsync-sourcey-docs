@@ -1,0 +1,165 @@
+Frantic #113 Redsync Sourcey local command transcript
+Captured: 2026-07-14 01:54:16 +08
+
+SOURCE PIN
+command: git -C work/preflight-frantic-113-redsync rev-parse HEAD
+exit: 0
+stdout: 79f6ba24a8bf41f35141de700d410a06bb27622f
+command: git -C work/preflight-frantic-113-redsync status --short
+exit: 0
+stdout: <empty>
+copied source identity check:
+  tracked files: 41
+  SHA-256 mismatches: 0
+  extra files excluding .source-pin.json: 0
+
+GOVERNED CLI VERSION
+command: npx -y @runxhq/cli@0.6.14 --version
+exit: 0
+stdout: runx-cli 0.6.14
+
+SOURCEY GODOC ADAPTER
+environment: GOCACHE=<OS temp>/redsync-sourcey-go-build
+environment: GOFLAGS=-buildvcs=false
+command: sourcey godoc --module ./source/redsync --packages ./... --out <OS temp>/frantic113-redsync-godoc.json
+invocation path: npm run snapshot -> node scripts/generate-godoc-snapshot.mjs -> node_modules/sourcey/dist/cli.js godoc
+exit: 0
+stdout:
+  Sourcey: wrote godoc snapshot for github.com/go-redsync/redsync/v4
+  Packages: 15
+parsed result: schema=1; module=github.com/go-redsync/redsync/v4; packages=15; diagnostics=0
+snapshot bytes: 29784
+
+SOURCEY STATIC BUILD
+command: sourcey build --output <OS temp>/frantic113-sourcey-final-20260714015412
+invocation path: npm run build -> node scripts/build-site.mjs -> node_modules/sourcey/dist/cli.js build
+exit: 0
+stdout:
+  Sourcey: building documentation site
+  Pages: 21
+  Sourcey files: 28 (filesystem count before compatibility redirect)
+  Time: 0.6s
+post-build navigation check:
+  Sourcey tab href: go-api/index.html
+  Sourcey landing file: go-api.html
+  generated compatibility file: go-api/index.html -> ../go-api.html
+  packaged files after compatibility fix: 29
+internal link check:
+  HTML files checked: 23
+  unresolved local href/src targets: 0
+
+INVENTORY
+command: npm run inventory
+exit: 0
+stdout: inventory packages=15 files=19 exported_symbols=110
+
+PAGE/SOURCE MAPPINGS
+command: npm run mappings
+exit: 0
+stdout: page-source mappings=5
+checks:
+  go-api/package-root.html -> Redsync -> redsync.go:17
+  go-api/pkg-redis.html -> Pool -> redis/redis.go:9
+  go-api/pkg-redis-goredis-v9.html -> NewPool -> redis/goredis/v9/goredis.go:24
+  go-api/pkg-redis-redigo.html -> NewPool -> redis/redigo/redigo.go:33
+  go-api/pkg-redis-rueidis.html -> NewPool -> redis/rueidis/rueidis.go:26
+
+UPSTREAM FULL GO TEST
+environment: GOFLAGS=-buildvcs=false
+command: go test -mod=readonly ./...
+exit: 1
+result: BLOCKED_ENVIRONMENT
+raw failure: panic: exec: "redis-server": executable file not found in %PATH%
+scope note: the other 14 packages passed or had no tests
+
+FOCUSED GO CHECKS
+command: go test -c -mod=readonly -o <OS temp>/frantic113-redsync.test.exe .
+exit: 0
+binary bytes: 13216768
+command: go test -mod=readonly ./redis/...
+exit: 0
+result: core Redis contract and all adapter packages passed or had no tests
+
+FINAL PACKAGE TESTS
+command: node --test --test-concurrency=1 tests/package.test.mjs tests/validation-skill.test.mjs
+exit: 0
+result: 20 passed; 0 failed; 0 skipped
+hash coverage: see evidence/sha256-manifest.json
+
+VALIDATION SKILL STATIC CHECKS
+command: F:\ProgramData\anaconda3\envs\xbxpy12\python.exe C:\Users\Administrator\.codex\skills\.system\skill-creator\scripts\quick_validate.py validation-skill\redsync-sourcey-validation
+exit: 0
+stdout: Skill is valid!
+command: npx -y @runxhq/cli@0.6.14 skill inspect validation-skill\redsync-sourcey-validation -j
+exit: 0
+result: status=ok; version=0.1.0; default runner present
+command: node --test --test-concurrency=1 tests\validation-skill.test.mjs
+exit: 0
+result: 4 passed; 0 failed; 0 skipped
+coverage:
+  complete live network input contract
+  manual-only pinned Linux workflow with no secrets or fixture mode
+  fixture logic returns FIXTURE_PASS and live_pass=false
+  broken PR rationale and delivery placeholders return nonzero FIXTURE_BLOCKED
+
+PINNED RUNX WINDOWS GOVERNED FIXTURE
+command: node tests\validation-skill.test.mjs --governed-run C:\Users\ADMINI~1\AppData\Local\Temp\frantic113-governed-fixture-20260714021639
+inner command: npx -y @runxhq/cli@0.6.14 skill .\validation-skill\redsync-sourcey-validation default <eight required -i values> -i validation_mode=fixture -i fixture_proxy_url=<local HTTP proxy> -j -R <output>\runx-state
+runner result: FIXTURE_PASS; live_pass=false; checks=13 passed, 0 blocked; HTTP checks=27; CLI output=runx-cli 0.6.14
+outer runx exit: 1
+raw failure: receipt store is unreadable: 参数错误。 (os error 87)
+artifact: C:\Users\ADMINI~1\AppData\Local\Temp\frantic113-governed-fixture-20260714021639\artifacts\evidence.json
+  bytes: 37816
+  SHA-256: 030064705b2193193c74df2e1326ebf77629894ed611019b0e849b473aa2ef47
+artifact: C:\Users\ADMINI~1\AppData\Local\Temp\frantic113-governed-fixture-20260714021639\artifacts\transcript.txt
+  bytes: 24029
+  SHA-256: 0fa94fa25f9c02dd3a5066314621e95431565d9279aa8aeb43efb3cf6b45a06d
+classification: BLOCKED_WINDOWS_RECEIPT_STORE; fixture artifacts are not final live evidence
+
+MANUAL LINUX GOVERNED WORKFLOW
+file: .github/workflows/validate-sourcey-adoption.yml
+trigger: workflow_dispatch only
+runner: ubuntu-latest
+CLI: pinned npx -y @runxhq/cli@0.6.14
+receipt identity: fresh ephemeral Ed25519 seed; issuer_type=ci; seed is neither printed nor uploaded
+root selection: parse runx raw JSON receipt_id; require embedded receipt.id match and exactly one semantically identical stored root receipt
+outputs: raw runx stdout/stderr, exit codes, root receipt id/ref/JSON, complete receipt tree listing/SHA-256, evidence.json, transcript.txt, runx verify stdout/stderr/exit
+hosted notary: NOT_IN_WORKFLOW; main agent uses existing login after artifact download
+state: NOT_DISPATCHED; requires publication-stage live inputs and main-agent action
+
+MAIN-AGENT REVALIDATION FIXES
+removed inputs: evidence_path, report_path
+immutable docs checked: sourcey.config.ts, godoc.json, dist/index.html, evidence/page-source-mappings.json
+final evidence/report sequencing: created only after live validation, root receipt verification, and hosted notary; later commit must reference the validated docs commit
+command: node --test --test-concurrency=1 tests\validation-skill.test.mjs
+exit: 0
+result: 7 passed; 0 failed; 0 skipped
+root receipt tests:
+  exact raw receipt_id + embedded receipt.id + one stored semantic match: PASS
+  duplicate stored root receipt: BLOCKED nonzero
+  missing stored root receipt: BLOCKED nonzero
+  malformed runx raw JSON: BLOCKED nonzero
+
+PUBLICATION QA PLACEHOLDER REPAIR
+starting commit: 60451219948997778055b123c727f16115610058
+starting tree: 0252731e837665681ff6ba8f55ae0776a73db6ae
+starting parent: <none; root commit>
+command: npm run build
+exit: 1
+raw blocker: EPERM while replacing dist/index.html under the shell sandbox
+command: SOURCEY_BUILD_OUTPUT=C:\Users\ADMINI~1\AppData\Local\Temp\frantic113-sourcey-placeholder-repair-20260714025122 npm run build
+exit: 0
+result: Sourcey pages=21; files=29; HTML=23; navigation compatibility redirect generated
+derived files refreshed:
+  dist/hosting-decision.html
+  dist/index.html
+  dist/introduction.html
+  dist/llms.txt
+  dist/llms-full.txt
+  dist/maintainer-gap-analysis.html
+  dist/reproduce.html
+  dist/search-index.json
+  dist/upstream-pr-rationale.html
+byte identity check: isolated final-wrapper rebuild must match committed dist 29/29; enforced by package test
+placeholder policy: unresolved final-value tokens allowed only in evidence/evidence.draft.json and report.draft.md
+fail-closed policy: validator/test sentinel is constructed at runtime and remains covered by fixture tests

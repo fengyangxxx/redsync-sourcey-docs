@@ -1,0 +1,8 @@
+{
+  "repository": "https://github.com/go-redsync/redsync",
+  "commit": "79f6ba24a8bf41f35141de700d410a06bb27622f",
+  "source_checkout": "work/preflight-frantic-113-redsync",
+  "source_checkout_clean": true,
+  "copied_after_claim": true,
+  "claim_id": "817adb29-a5d5-493d-8a1d-9f7cb6911b86"
+}

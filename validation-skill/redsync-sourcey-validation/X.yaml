@@ -1,0 +1,70 @@
+skill: redsync-sourcey-validation
+version: "0.1.0"
+
+catalog:
+  kind: skill
+  audience: public
+  visibility: public
+  role: canonical
+
+runners:
+  default:
+    default: true
+    type: cli-tool
+    command: node
+    timeout_seconds: 240
+    args:
+      - scripts/run.mjs
+    sandbox:
+      profile: network
+      cwd_policy: skill-directory
+      require_enforcement: false
+    inputs:
+      public_url:
+        type: string
+        required: true
+        description: Published Sourcey site root URL.
+      docs_repo_url:
+        type: string
+        required: true
+        description: Public GitHub repository containing the immutable docs package.
+      docs_commit:
+        type: string
+        required: true
+        description: Full immutable docs repository commit SHA.
+      target_repo_url:
+        type: string
+        required: true
+        description: Must be https://github.com/go-redsync/redsync.
+      target_commit:
+        type: string
+        required: true
+        description: Full pinned Redsync source commit SHA.
+      upstream_pr_url:
+        type: string
+        required: true
+        description: Open pull request against go-redsync/redsync.
+      upstream_pr_head_commit:
+        type: string
+        required: true
+        description: Exact expected PR head commit SHA.
+      mappings_url:
+        type: string
+        required: true
+        description: Immutable raw URL for the five page-to-source mappings JSON.
+      output_dir:
+        type: string
+        required: false
+        description: Directory for evidence.json and transcript.txt.
+      validation_mode:
+        type: string
+        required: false
+        description: live by default; fixture can only emit FIXTURE_PASS.
+      fixture_proxy_url:
+        type: string
+        required: false
+        description: Local HTTP proxy used only by fixture tests.
+    outputs:
+      validation_result: object
+      evidence_json: object
+      transcript: string

@@ -1,0 +1,804 @@
+{
+  "schema_version": "redsync-sourcey-inventory/v1",
+  "repository": "https://github.com/go-redsync/redsync",
+  "commit": "79f6ba24a8bf41f35141de700d410a06bb27622f",
+  "module": "github.com/go-redsync/redsync/v4",
+  "package_count": 15,
+  "non_test_go_file_count": 19,
+  "exported_symbol_count": 110,
+  "packages": [
+    {
+      "import_path": "github.com/go-redsync/redsync/v4",
+      "package_name": "redsync",
+      "files": [
+        "doc.go",
+        "error.go",
+        "mutex.go",
+        "redsync.go",
+        "scripts.go"
+      ],
+      "exported_symbols": [
+        {
+          "name": "Apply",
+          "kind": "func",
+          "source_path": "redsync.go",
+          "source_line": 63
+        },
+        {
+          "name": "DelayFunc",
+          "kind": "type",
+          "source_path": "mutex.go",
+          "source_line": 14
+        },
+        {
+          "name": "ErrExtendFailed",
+          "kind": "var",
+          "source_path": "error.go",
+          "source_line": 14
+        },
+        {
+          "name": "ErrFailed",
+          "kind": "var",
+          "source_path": "error.go",
+          "source_line": 10
+        },
+        {
+          "name": "ErrLockAlreadyExpired",
+          "kind": "var",
+          "source_path": "error.go",
+          "source_line": 17
+        },
+        {
+          "name": "ErrNodeTaken",
+          "kind": "type",
+          "source_path": "error.go",
+          "source_line": 30
+        },
+        {
+          "name": "Error",
+          "kind": "func",
+          "source_path": "error.go",
+          "source_line": 24
+        },
+        {
+          "name": "Error",
+          "kind": "func",
+          "source_path": "error.go",
+          "source_line": 34
+        },
+        {
+          "name": "Error",
+          "kind": "func",
+          "source_path": "error.go",
+          "source_line": 44
+        },
+        {
+          "name": "ErrTaken",
+          "kind": "type",
+          "source_path": "error.go",
+          "source_line": 20
+        },
+        {
+          "name": "Extend",
+          "kind": "func",
+          "source_path": "mutex.go",
+          "source_line": 153
+        },
+        {
+          "name": "ExtendContext",
+          "kind": "func",
+          "source_path": "mutex.go",
+          "source_line": 158
+        },
+        {
+          "name": "Lock",
+          "kind": "func",
+          "source_path": "mutex.go",
+          "source_line": 65
+        },
+        {
+          "name": "LockContext",
+          "kind": "func",
+          "source_path": "mutex.go",
+          "source_line": 70
+        },
+        {
+          "name": "Mutex",
+          "kind": "type",
+          "source_path": "mutex.go",
+          "source_line": 17
+        },
+        {
+          "name": "Name",
+          "kind": "func",
+          "source_path": "mutex.go",
+          "source_line": 40
+        },
+        {
+          "name": "New",
+          "kind": "func",
+          "source_path": "redsync.go",
+          "source_line": 22
+        },
+        {
+          "name": "NewMutex",
+          "kind": "func",
+          "source_path": "redsync.go",
+          "source_line": 29
+        },
+        {
+          "name": "Option",
+          "kind": "type",
+          "source_path": "redsync.go",
+          "source_line": 55
+        },
+        {
+          "name": "OptionFunc",
+          "kind": "type",
+          "source_path": "redsync.go",
+          "source_line": 60
+        },
+        {
+          "name": "RedisError",
+          "kind": "type",
+          "source_path": "error.go",
+          "source_line": 39
+        },
+        {
+          "name": "Redsync",
+          "kind": "type",
+          "source_path": "redsync.go",
+          "source_line": 17
+        },
+        {
+          "name": "TryLock",
+          "kind": "func",
+          "source_path": "mutex.go",
+          "source_line": 55
+        },
+        {
+          "name": "TryLockContext",
+          "kind": "func",
+          "source_path": "mutex.go",
+          "source_line": 60
+        },
+        {
+          "name": "Unlock",
+          "kind": "func",
+          "source_path": "mutex.go",
+          "source_line": 137
+        },
+        {
+          "name": "UnlockContext",
+          "kind": "func",
+          "source_path": "mutex.go",
+          "source_line": 142
+        },
+        {
+          "name": "Until",
+          "kind": "func",
+          "source_path": "mutex.go",
+          "source_line": 50
+        },
+        {
+          "name": "Unwrap",
+          "kind": "func",
+          "source_path": "error.go",
+          "source_line": 48
+        },
+        {
+          "name": "Valid",
+          "kind": "func",
+          "source_path": "mutex.go",
+          "source_line": 180
+        },
+        {
+          "name": "ValidContext",
+          "kind": "func",
+          "source_path": "mutex.go",
+          "source_line": 189
+        },
+        {
+          "name": "Value",
+          "kind": "func",
+          "source_path": "mutex.go",
+          "source_line": 45
+        },
+        {
+          "name": "WithDriftFactor",
+          "kind": "func",
+          "source_path": "redsync.go",
+          "source_line": 112
+        },
+        {
+          "name": "WithExpiry",
+          "kind": "func",
+          "source_path": "redsync.go",
+          "source_line": 69
+        },
+        {
+          "name": "WithFailFast",
+          "kind": "func",
+          "source_path": "redsync.go",
+          "source_line": 145
+        },
+        {
+          "name": "WithGenValueFunc",
+          "kind": "func",
+          "source_path": "redsync.go",
+          "source_line": 127
+        },
+        {
+          "name": "WithRetryDelay",
+          "kind": "func",
+          "source_path": "redsync.go",
+          "source_line": 85
+        },
+        {
+          "name": "WithRetryDelayFunc",
+          "kind": "func",
+          "source_path": "redsync.go",
+          "source_line": 104
+        },
+        {
+          "name": "WithSetNXOnExtend",
+          "kind": "func",
+          "source_path": "redsync.go",
+          "source_line": 97
+        },
+        {
+          "name": "WithShufflePools",
+          "kind": "func",
+          "source_path": "redsync.go",
+          "source_line": 152
+        },
+        {
+          "name": "WithTimeoutFactor",
+          "kind": "func",
+          "source_path": "redsync.go",
+          "source_line": 120
+        },
+        {
+          "name": "WithTries",
+          "kind": "func",
+          "source_path": "redsync.go",
+          "source_line": 77
+        },
+        {
+          "name": "WithValue",
+          "kind": "func",
+          "source_path": "redsync.go",
+          "source_line": 135
+        }
+      ]
+    },
+    {
+      "import_path": "github.com/go-redsync/redsync/v4/examples/goredis",
+      "package_name": "main",
+      "files": [
+        "examples/goredis/main.go"
+      ],
+      "exported_symbols": []
+    },
+    {
+      "import_path": "github.com/go-redsync/redsync/v4/examples/goredis/v7",
+      "package_name": "main",
+      "files": [
+        "examples/goredis/v7/main.go"
+      ],
+      "exported_symbols": []
+    },
+    {
+      "import_path": "github.com/go-redsync/redsync/v4/examples/goredis/v8",
+      "package_name": "main",
+      "files": [
+        "examples/goredis/v8/main.go"
+      ],
+      "exported_symbols": []
+    },
+    {
+      "import_path": "github.com/go-redsync/redsync/v4/examples/goredis/v9",
+      "package_name": "main",
+      "files": [
+        "examples/goredis/v9/main.go"
+      ],
+      "exported_symbols": []
+    },
+    {
+      "import_path": "github.com/go-redsync/redsync/v4/examples/redigo",
+      "package_name": "main",
+      "files": [
+        "examples/redigo/main.go"
+      ],
+      "exported_symbols": []
+    },
+    {
+      "import_path": "github.com/go-redsync/redsync/v4/examples/valkego",
+      "package_name": "main",
+      "files": [
+        "examples/valkego/main.go"
+      ],
+      "exported_symbols": []
+    },
+    {
+      "import_path": "github.com/go-redsync/redsync/v4/redis",
+      "package_name": "redis",
+      "files": [
+        "redis/redis.go"
+      ],
+      "exported_symbols": [
+        {
+          "name": "Conn",
+          "kind": "type",
+          "source_path": "redis/redis.go",
+          "source_line": 14
+        },
+        {
+          "name": "NewScript",
+          "kind": "func",
+          "source_path": "redis/redis.go",
+          "source_line": 38
+        },
+        {
+          "name": "Pool",
+          "kind": "type",
+          "source_path": "redis/redis.go",
+          "source_line": 9
+        },
+        {
+          "name": "Script",
+          "kind": "type",
+          "source_path": "redis/redis.go",
+          "source_line": 26
+        }
+      ]
+    },
+    {
+      "import_path": "github.com/go-redsync/redsync/v4/redis/goredis",
+      "package_name": "goredis",
+      "files": [
+        "redis/goredis/goredis.go"
+      ],
+      "exported_symbols": [
+        {
+          "name": "Close",
+          "kind": "func",
+          "source_path": "redis/goredis/goredis.go",
+          "source_line": 80
+        },
+        {
+          "name": "Eval",
+          "kind": "func",
+          "source_path": "redis/goredis/goredis.go",
+          "source_line": 53
+        },
+        {
+          "name": "Get",
+          "kind": "func",
+          "source_path": "redis/goredis/goredis.go",
+          "source_line": 16
+        },
+        {
+          "name": "Get",
+          "kind": "func",
+          "source_path": "redis/goredis/goredis.go",
+          "source_line": 33
+        },
+        {
+          "name": "NewPool",
+          "kind": "func",
+          "source_path": "redis/goredis/goredis.go",
+          "source_line": 25
+        },
+        {
+          "name": "PTTL",
+          "kind": "func",
+          "source_path": "redis/goredis/goredis.go",
+          "source_line": 48
+        },
+        {
+          "name": "ScriptLoad",
+          "kind": "func",
+          "source_path": "redis/goredis/goredis.go",
+          "source_line": 72
+        },
+        {
+          "name": "Set",
+          "kind": "func",
+          "source_path": "redis/goredis/goredis.go",
+          "source_line": 38
+        },
+        {
+          "name": "SetNX",
+          "kind": "func",
+          "source_path": "redis/goredis/goredis.go",
+          "source_line": 43
+        }
+      ]
+    },
+    {
+      "import_path": "github.com/go-redsync/redsync/v4/redis/goredis/v7",
+      "package_name": "goredis",
+      "files": [
+        "redis/goredis/v7/goredis.go"
+      ],
+      "exported_symbols": [
+        {
+          "name": "Close",
+          "kind": "func",
+          "source_path": "redis/goredis/v7/goredis.go",
+          "source_line": 82
+        },
+        {
+          "name": "Eval",
+          "kind": "func",
+          "source_path": "redis/goredis/v7/goredis.go",
+          "source_line": 56
+        },
+        {
+          "name": "Get",
+          "kind": "func",
+          "source_path": "redis/goredis/v7/goredis.go",
+          "source_line": 16
+        },
+        {
+          "name": "Get",
+          "kind": "func",
+          "source_path": "redis/goredis/v7/goredis.go",
+          "source_line": 38
+        },
+        {
+          "name": "NewPool",
+          "kind": "func",
+          "source_path": "redis/goredis/v7/goredis.go",
+          "source_line": 30
+        },
+        {
+          "name": "PTTL",
+          "kind": "func",
+          "source_path": "redis/goredis/v7/goredis.go",
+          "source_line": 52
+        },
+        {
+          "name": "ScriptLoad",
+          "kind": "func",
+          "source_path": "redis/goredis/v7/goredis.go",
+          "source_line": 74
+        },
+        {
+          "name": "Set",
+          "kind": "func",
+          "source_path": "redis/goredis/v7/goredis.go",
+          "source_line": 43
+        },
+        {
+          "name": "SetNX",
+          "kind": "func",
+          "source_path": "redis/goredis/v7/goredis.go",
+          "source_line": 48
+        }
+      ]
+    },
+    {
+      "import_path": "github.com/go-redsync/redsync/v4/redis/goredis/v8",
+      "package_name": "goredis",
+      "files": [
+        "redis/goredis/v8/goredis.go"
+      ],
+      "exported_symbols": [
+        {
+          "name": "Close",
+          "kind": "func",
+          "source_path": "redis/goredis/v8/goredis.go",
+          "source_line": 77
+        },
+        {
+          "name": "Eval",
+          "kind": "func",
+          "source_path": "redis/goredis/v8/goredis.go",
+          "source_line": 51
+        },
+        {
+          "name": "Get",
+          "kind": "func",
+          "source_path": "redis/goredis/v8/goredis.go",
+          "source_line": 16
+        },
+        {
+          "name": "Get",
+          "kind": "func",
+          "source_path": "redis/goredis/v8/goredis.go",
+          "source_line": 33
+        },
+        {
+          "name": "NewPool",
+          "kind": "func",
+          "source_path": "redis/goredis/v8/goredis.go",
+          "source_line": 24
+        },
+        {
+          "name": "PTTL",
+          "kind": "func",
+          "source_path": "redis/goredis/v8/goredis.go",
+          "source_line": 47
+        },
+        {
+          "name": "ScriptLoad",
+          "kind": "func",
+          "source_path": "redis/goredis/v8/goredis.go",
+          "source_line": 69
+        },
+        {
+          "name": "Set",
+          "kind": "func",
+          "source_path": "redis/goredis/v8/goredis.go",
+          "source_line": 38
+        },
+        {
+          "name": "SetNX",
+          "kind": "func",
+          "source_path": "redis/goredis/v8/goredis.go",
+          "source_line": 43
+        }
+      ]
+    },
+    {
+      "import_path": "github.com/go-redsync/redsync/v4/redis/goredis/v9",
+      "package_name": "goredis",
+      "files": [
+        "redis/goredis/v9/goredis.go"
+      ],
+      "exported_symbols": [
+        {
+          "name": "Close",
+          "kind": "func",
+          "source_path": "redis/goredis/v9/goredis.go",
+          "source_line": 77
+        },
+        {
+          "name": "Eval",
+          "kind": "func",
+          "source_path": "redis/goredis/v9/goredis.go",
+          "source_line": 51
+        },
+        {
+          "name": "Get",
+          "kind": "func",
+          "source_path": "redis/goredis/v9/goredis.go",
+          "source_line": 16
+        },
+        {
+          "name": "Get",
+          "kind": "func",
+          "source_path": "redis/goredis/v9/goredis.go",
+          "source_line": 33
+        },
+        {
+          "name": "NewPool",
+          "kind": "func",
+          "source_path": "redis/goredis/v9/goredis.go",
+          "source_line": 24
+        },
+        {
+          "name": "PTTL",
+          "kind": "func",
+          "source_path": "redis/goredis/v9/goredis.go",
+          "source_line": 47
+        },
+        {
+          "name": "ScriptLoad",
+          "kind": "func",
+          "source_path": "redis/goredis/v9/goredis.go",
+          "source_line": 69
+        },
+        {
+          "name": "Set",
+          "kind": "func",
+          "source_path": "redis/goredis/v9/goredis.go",
+          "source_line": 38
+        },
+        {
+          "name": "SetNX",
+          "kind": "func",
+          "source_path": "redis/goredis/v9/goredis.go",
+          "source_line": 43
+        }
+      ]
+    },
+    {
+      "import_path": "github.com/go-redsync/redsync/v4/redis/redigo",
+      "package_name": "redigo",
+      "files": [
+        "redis/redigo/redigo.go"
+      ],
+      "exported_symbols": [
+        {
+          "name": "Close",
+          "kind": "func",
+          "source_path": "redis/redigo/redigo.go",
+          "source_line": 77
+        },
+        {
+          "name": "Eval",
+          "kind": "func",
+          "source_path": "redis/redigo/redigo.go",
+          "source_line": 61
+        },
+        {
+          "name": "Get",
+          "kind": "func",
+          "source_path": "redis/redigo/redigo.go",
+          "source_line": 21
+        },
+        {
+          "name": "Get",
+          "kind": "func",
+          "source_path": "redis/redigo/redigo.go",
+          "source_line": 41
+        },
+        {
+          "name": "NewPool",
+          "kind": "func",
+          "source_path": "redis/redigo/redigo.go",
+          "source_line": 33
+        },
+        {
+          "name": "Pool",
+          "kind": "type",
+          "source_path": "redis/redigo/redigo.go",
+          "source_line": 12
+        },
+        {
+          "name": "PTTL",
+          "kind": "func",
+          "source_path": "redis/redigo/redigo.go",
+          "source_line": 56
+        },
+        {
+          "name": "ScriptLoad",
+          "kind": "func",
+          "source_path": "redis/redigo/redigo.go",
+          "source_line": 69
+        },
+        {
+          "name": "Set",
+          "kind": "func",
+          "source_path": "redis/redigo/redigo.go",
+          "source_line": 46
+        },
+        {
+          "name": "SetNX",
+          "kind": "func",
+          "source_path": "redis/redigo/redigo.go",
+          "source_line": 51
+        }
+      ]
+    },
+    {
+      "import_path": "github.com/go-redsync/redsync/v4/redis/rueidis",
+      "package_name": "rueidis",
+      "files": [
+        "redis/rueidis/rueidis.go"
+      ],
+      "exported_symbols": [
+        {
+          "name": "Close",
+          "kind": "func",
+          "source_path": "redis/rueidis/rueidis.go",
+          "source_line": 79
+        },
+        {
+          "name": "Eval",
+          "kind": "func",
+          "source_path": "redis/rueidis/rueidis.go",
+          "source_line": 53
+        },
+        {
+          "name": "Get",
+          "kind": "func",
+          "source_path": "redis/rueidis/rueidis.go",
+          "source_line": 18
+        },
+        {
+          "name": "Get",
+          "kind": "func",
+          "source_path": "redis/rueidis/rueidis.go",
+          "source_line": 35
+        },
+        {
+          "name": "NewPool",
+          "kind": "func",
+          "source_path": "redis/rueidis/rueidis.go",
+          "source_line": 26
+        },
+        {
+          "name": "PTTL",
+          "kind": "func",
+          "source_path": "redis/rueidis/rueidis.go",
+          "source_line": 49
+        },
+        {
+          "name": "ScriptLoad",
+          "kind": "func",
+          "source_path": "redis/rueidis/rueidis.go",
+          "source_line": 71
+        },
+        {
+          "name": "Set",
+          "kind": "func",
+          "source_path": "redis/rueidis/rueidis.go",
+          "source_line": 40
+        },
+        {
+          "name": "SetNX",
+          "kind": "func",
+          "source_path": "redis/rueidis/rueidis.go",
+          "source_line": 45
+        }
+      ]
+    },
+    {
+      "import_path": "github.com/go-redsync/redsync/v4/redis/valkeygo",
+      "package_name": "valkeygo",
+      "files": [
+        "redis/valkeygo/valkeygo.go"
+      ],
+      "exported_symbols": [
+        {
+          "name": "Close",
+          "kind": "func",
+          "source_path": "redis/valkeygo/valkeygo.go",
+          "source_line": 78
+        },
+        {
+          "name": "Eval",
+          "kind": "func",
+          "source_path": "redis/valkeygo/valkeygo.go",
+          "source_line": 52
+        },
+        {
+          "name": "Get",
+          "kind": "func",
+          "source_path": "redis/valkeygo/valkeygo.go",
+          "source_line": 17
+        },
+        {
+          "name": "Get",
+          "kind": "func",
+          "source_path": "redis/valkeygo/valkeygo.go",
+          "source_line": 34
+        },
+        {
+          "name": "NewPool",
+          "kind": "func",
+          "source_path": "redis/valkeygo/valkeygo.go",
+          "source_line": 25
+        },
+        {
+          "name": "PTTL",
+          "kind": "func",
+          "source_path": "redis/valkeygo/valkeygo.go",
+          "source_line": 48
+        },
+        {
+          "name": "ScriptLoad",
+          "kind": "func",
+          "source_path": "redis/valkeygo/valkeygo.go",
+          "source_line": 70
+        },
+        {
+          "name": "Set",
+          "kind": "func",
+          "source_path": "redis/valkeygo/valkeygo.go",
+          "source_line": 39
+        },
+        {
+          "name": "SetNX",
+          "kind": "func",
+          "source_path": "redis/valkeygo/valkeygo.go",
+          "source_line": 44
+        }
+      ]
+    }
+  ]
+}

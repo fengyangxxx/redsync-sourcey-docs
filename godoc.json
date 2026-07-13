@@ -1,0 +1,927 @@
+{
+  "schema_version": 1,
+  "source": "sourcey-godoc",
+  "module_path": "github.com/go-redsync/redsync/v4",
+  "generated_at": "2026-07-13T17:42:46Z",
+  "packages": [
+    {
+      "importPath": "github.com/go-redsync/redsync/v4",
+      "name": "redsync",
+      "synopsis": "Package redsync provides a Redis-based distributed mutual exclusion lock implementation as described in the post http://redis.io/topics/distlock.",
+      "doc": "Package redsync provides a Redis-based distributed mutual exclusion lock implementation as described in the post http://redis.io/topics/distlock.\n\nValues containing the types defined in this package should not be copied.",
+      "dir": ".",
+      "files": [
+        "doc.go",
+        "error.go",
+        "mutex.go",
+        "redsync.go",
+        "scripts.go"
+      ],
+      "consts": [],
+      "vars": [
+        {
+          "name": "ErrExtendFailed",
+          "doc": "ErrExtendFailed is the error resulting if Redsync fails to extend the\nlock.",
+          "declaration": "var ErrExtendFailed = errors.New(\"redsync: failed to extend lock\")",
+          "position": {
+            "file": "error.go",
+            "line": 14
+          }
+        },
+        {
+          "name": "ErrFailed",
+          "doc": "ErrFailed is the error resulting if Redsync fails to acquire the lock after\nexhausting all retries.",
+          "declaration": "var ErrFailed = errors.New(\"redsync: failed to acquire lock\")",
+          "position": {
+            "file": "error.go",
+            "line": 10
+          }
+        },
+        {
+          "name": "ErrLockAlreadyExpired",
+          "doc": "ErrLockAlreadyExpired is the error resulting if trying to unlock the lock which already expired.",
+          "declaration": "var ErrLockAlreadyExpired = errors.New(\"redsync: failed to unlock, lock was already expired\")",
+          "position": {
+            "file": "error.go",
+            "line": 17
+          }
+        }
+      ],
+      "funcs": [
+        {
+          "name": "New",
+          "doc": "New creates and returns a new Redsync instance from given Redis connection pools.",
+          "signature": "func New(pools ...redis.Pool) *Redsync",
+          "position": {
+            "file": "redsync.go",
+            "line": 22
+          },
+          "examples": []
+        },
+        {
+          "name": "WithDriftFactor",
+          "doc": "WithDriftFactor can be used to set the clock drift factor.\nThe default value is 0.01.",
+          "signature": "func WithDriftFactor(factor float64) Option",
+          "position": {
+            "file": "redsync.go",
+            "line": 112
+          },
+          "examples": []
+        },
+        {
+          "name": "WithExpiry",
+          "doc": "WithExpiry can be used to set the expiry of a mutex to the given value.\nThe default is 8s.",
+          "signature": "func WithExpiry(expiry time.Duration) Option",
+          "position": {
+            "file": "redsync.go",
+            "line": 69
+          },
+          "examples": []
+        },
+        {
+          "name": "WithFailFast",
+          "doc": "WithFailFast can be used to quickly acquire and release the lock.\nWhen some Redis servers are blocking, we do not need to wait for responses from all the Redis servers response.\nAs long as the quorum is met, we can assume the lock is acquired. The effect of this parameter is to achieve low\nlatency, avoid Redis blocking causing Lock/Unlock to not return for a long time.",
+          "signature": "func WithFailFast(b bool) Option",
+          "position": {
+            "file": "redsync.go",
+            "line": 145
+          },
+          "examples": []
+        },
+        {
+          "name": "WithGenValueFunc",
+          "doc": "WithGenValueFunc can be used to set the custom value generator.",
+          "signature": "func WithGenValueFunc(genValueFunc func() (string, error)) Option",
+          "position": {
+            "file": "redsync.go",
+            "line": 127
+          },
+          "examples": []
+        },
+        {
+          "name": "WithRetryDelay",
+          "doc": "WithRetryDelay can be used to set the amount of time to wait between retries.\nThe default value is rand(50ms, 250ms).",
+          "signature": "func WithRetryDelay(delay time.Duration) Option",
+          "position": {
+            "file": "redsync.go",
+            "line": 85
+          },
+          "examples": []
+        },
+        {
+          "name": "WithRetryDelayFunc",
+          "doc": "WithRetryDelayFunc can be used to override default delay behavior.",
+          "signature": "func WithRetryDelayFunc(delayFunc DelayFunc) Option",
+          "position": {
+            "file": "redsync.go",
+            "line": 104
+          },
+          "examples": []
+        },
+        {
+          "name": "WithSetNXOnExtend",
+          "doc": "WithSetNXOnExtend improves extending logic to extend the key if exist\nand if not, tries to set a new key in redis\nUseful if your redises restart often and you want to reduce the chances of losing the lock\nRead this MR for more info: https://github.com/go-redsync/redsync/pull/149",
+          "signature": "func WithSetNXOnExtend() Option",
+          "position": {
+            "file": "redsync.go",
+            "line": 97
+          },
+          "examples": []
+        },
+        {
+          "name": "WithShufflePools",
+          "doc": "WithShufflePools can be used to shuffle Redis pools to reduce centralized access in concurrent scenarios.",
+          "signature": "func WithShufflePools(b bool) Option",
+          "position": {
+            "file": "redsync.go",
+            "line": 152
+          },
+          "examples": []
+        },
+        {
+          "name": "WithTimeoutFactor",
+          "doc": "WithTimeoutFactor can be used to set the timeout factor.\nThe default value is 0.05.",
+          "signature": "func WithTimeoutFactor(factor float64) Option",
+          "position": {
+            "file": "redsync.go",
+            "line": 120
+          },
+          "examples": []
+        },
+        {
+          "name": "WithTries",
+          "doc": "WithTries can be used to set the number of times lock acquire is attempted.\nThe default value is 32.",
+          "signature": "func WithTries(tries int) Option",
+          "position": {
+            "file": "redsync.go",
+            "line": 77
+          },
+          "examples": []
+        },
+        {
+          "name": "WithValue",
+          "doc": "WithValue can be used to assign the random value without having to call lock.\nThis allows the ownership of a lock to be \"transferred\" and allows the lock to be unlocked from elsewhere.",
+          "signature": "func WithValue(v string) Option",
+          "position": {
+            "file": "redsync.go",
+            "line": 135
+          },
+          "examples": []
+        }
+      ],
+      "types": [
+        {
+          "name": "DelayFunc",
+          "doc": "A DelayFunc is used to decide the amount of time to wait between retries.",
+          "declaration": "type DelayFunc func(tries int) time.Duration",
+          "kind": "defined",
+          "position": {
+            "file": "mutex.go",
+            "line": 14
+          },
+          "fields": [],
+          "methods": [],
+          "examples": []
+        },
+        {
+          "name": "ErrNodeTaken",
+          "doc": "ErrNodeTaken is the error resulting if the lock is already taken in one of\nthe cluster's nodes",
+          "declaration": "type ErrNodeTaken struct {\n\tNode int\n}",
+          "kind": "struct",
+          "position": {
+            "file": "error.go",
+            "line": 30
+          },
+          "fields": [
+            {
+              "name": "Node",
+              "doc": "",
+              "type": "int"
+            }
+          ],
+          "methods": [
+            {
+              "name": "Error",
+              "doc": "",
+              "signature": "func  Error() string",
+              "position": {
+                "file": "error.go",
+                "line": 34
+              },
+              "examples": []
+            }
+          ],
+          "examples": []
+        },
+        {
+          "name": "ErrTaken",
+          "doc": "ErrTaken happens when the lock is already taken in a quorum on nodes.",
+          "declaration": "type ErrTaken struct {\n\tNodes []int\n}",
+          "kind": "struct",
+          "position": {
+            "file": "error.go",
+            "line": 20
+          },
+          "fields": [
+            {
+              "name": "Nodes",
+              "doc": "",
+              "type": "[]int"
+            }
+          ],
+          "methods": [
+            {
+              "name": "Error",
+              "doc": "",
+              "signature": "func  Error() string",
+              "position": {
+                "file": "error.go",
+                "line": 24
+              },
+              "examples": []
+            }
+          ],
+          "examples": []
+        },
+        {
+          "name": "Mutex",
+          "doc": "A Mutex is a distributed mutual exclusion lock.",
+          "declaration": "type Mutex struct {\n\t// contains filtered or unexported fields\n}",
+          "kind": "struct",
+          "position": {
+            "file": "mutex.go",
+            "line": 17
+          },
+          "fields": [],
+          "methods": [
+            {
+              "name": "Extend",
+              "doc": "Extend resets the mutex's expiry and returns the status of expiry extension.",
+              "signature": "func  Extend() (bool, error)",
+              "position": {
+                "file": "mutex.go",
+                "line": 153
+              },
+              "examples": []
+            },
+            {
+              "name": "ExtendContext",
+              "doc": "ExtendContext resets the mutex's expiry and returns the status of expiry extension.",
+              "signature": "func  ExtendContext(ctx context.Context) (bool, error)",
+              "position": {
+                "file": "mutex.go",
+                "line": 158
+              },
+              "examples": []
+            },
+            {
+              "name": "Lock",
+              "doc": "Lock locks m. In case it returns an error on failure, you may retry to acquire the lock by calling this method again.",
+              "signature": "func  Lock() error",
+              "position": {
+                "file": "mutex.go",
+                "line": 65
+              },
+              "examples": []
+            },
+            {
+              "name": "LockContext",
+              "doc": "LockContext locks m. In case it returns an error on failure, you may retry to acquire the lock by calling this method again.",
+              "signature": "func  LockContext(ctx context.Context) error",
+              "position": {
+                "file": "mutex.go",
+                "line": 70
+              },
+              "examples": []
+            },
+            {
+              "name": "Name",
+              "doc": "Name returns mutex name (i.e. the Redis key).",
+              "signature": "func  Name() string",
+              "position": {
+                "file": "mutex.go",
+                "line": 40
+              },
+              "examples": []
+            },
+            {
+              "name": "TryLock",
+              "doc": "TryLock only attempts to lock m once and returns immediately regardless of success or failure without retrying.",
+              "signature": "func  TryLock() error",
+              "position": {
+                "file": "mutex.go",
+                "line": 55
+              },
+              "examples": []
+            },
+            {
+              "name": "TryLockContext",
+              "doc": "TryLockContext only attempts to lock m once and returns immediately regardless of success or failure without retrying.",
+              "signature": "func  TryLockContext(ctx context.Context) error",
+              "position": {
+                "file": "mutex.go",
+                "line": 60
+              },
+              "examples": []
+            },
+            {
+              "name": "Unlock",
+              "doc": "Unlock unlocks m and returns the status of unlock.",
+              "signature": "func  Unlock() (bool, error)",
+              "position": {
+                "file": "mutex.go",
+                "line": 137
+              },
+              "examples": []
+            },
+            {
+              "name": "UnlockContext",
+              "doc": "UnlockContext unlocks m and returns the status of unlock.",
+              "signature": "func  UnlockContext(ctx context.Context) (bool, error)",
+              "position": {
+                "file": "mutex.go",
+                "line": 142
+              },
+              "examples": []
+            },
+            {
+              "name": "Until",
+              "doc": "Until returns the time of validity of acquired lock. The value will be zero value until a lock is acquired.",
+              "signature": "func  Until() time.Time",
+              "position": {
+                "file": "mutex.go",
+                "line": 50
+              },
+              "examples": []
+            },
+            {
+              "name": "Valid",
+              "doc": "Valid returns true if the lock acquired through m is still valid. It may\nalso return true erroneously if quorum is achieved during the call and at\nleast one node then takes long enough to respond for the lock to expire.\n\nDeprecated: Use Until instead. See https://github.com/go-redsync/redsync/issues/72.",
+              "signature": "func  Valid() (bool, error)",
+              "position": {
+                "file": "mutex.go",
+                "line": 180
+              },
+              "examples": []
+            },
+            {
+              "name": "ValidContext",
+              "doc": "ValidContext returns true if the lock acquired through m is still valid. It may\nalso return true erroneously if quorum is achieved during the call and at\nleast one node then takes long enough to respond for the lock to expire.\n\nDeprecated: Use Until instead. See https://github.com/go-redsync/redsync/issues/72.",
+              "signature": "func  ValidContext(ctx context.Context) (bool, error)",
+              "position": {
+                "file": "mutex.go",
+                "line": 189
+              },
+              "examples": []
+            },
+            {
+              "name": "Value",
+              "doc": "Value returns the current random value. The value will be empty until a lock is acquired (or WithValue option is used).",
+              "signature": "func  Value() string",
+              "position": {
+                "file": "mutex.go",
+                "line": 45
+              },
+              "examples": []
+            }
+          ],
+          "examples": []
+        },
+        {
+          "name": "Option",
+          "doc": "An Option configures a mutex.",
+          "declaration": "type Option interface {\n\tApply(*Mutex)\n}",
+          "kind": "interface",
+          "position": {
+            "file": "redsync.go",
+            "line": 55
+          },
+          "fields": [
+            {
+              "name": "Apply",
+              "doc": "",
+              "type": "func(*Mutex)"
+            }
+          ],
+          "methods": [],
+          "examples": []
+        },
+        {
+          "name": "OptionFunc",
+          "doc": "OptionFunc is a function that configures a mutex.",
+          "declaration": "type OptionFunc func(*Mutex)",
+          "kind": "defined",
+          "position": {
+            "file": "redsync.go",
+            "line": 60
+          },
+          "fields": [],
+          "methods": [
+            {
+              "name": "Apply",
+              "doc": "Apply calls f(mutex)",
+              "signature": "func  Apply(mutex *Mutex)",
+              "position": {
+                "file": "redsync.go",
+                "line": 63
+              },
+              "examples": []
+            }
+          ],
+          "examples": []
+        },
+        {
+          "name": "RedisError",
+          "doc": "A RedisError is an error communicating with one of the Redis nodes.",
+          "declaration": "type RedisError struct {\n\tNode int\n\tErr  error\n}",
+          "kind": "struct",
+          "position": {
+            "file": "error.go",
+            "line": 39
+          },
+          "fields": [
+            {
+              "name": "Node",
+              "doc": "",
+              "type": "int"
+            },
+            {
+              "name": "Err",
+              "doc": "",
+              "type": "error"
+            }
+          ],
+          "methods": [
+            {
+              "name": "Error",
+              "doc": "",
+              "signature": "func  Error) Error() string",
+              "position": {
+                "file": "error.go",
+                "line": 44
+              },
+              "examples": []
+            },
+            {
+              "name": "Unwrap",
+              "doc": "",
+              "signature": "func  Unwrap() error",
+              "position": {
+                "file": "error.go",
+                "line": 48
+              },
+              "examples": []
+            }
+          ],
+          "examples": []
+        },
+        {
+          "name": "Redsync",
+          "doc": "Redsync provides a simple method for creating distributed mutexes using multiple Redis connection pools.",
+          "declaration": "type Redsync struct {\n\t// contains filtered or unexported fields\n}",
+          "kind": "struct",
+          "position": {
+            "file": "redsync.go",
+            "line": 17
+          },
+          "fields": [],
+          "methods": [
+            {
+              "name": "NewMutex",
+              "doc": "NewMutex returns a new distributed mutex with given name.",
+              "signature": "func  NewMutex(name string, options ...Option) *Mutex",
+              "position": {
+                "file": "redsync.go",
+                "line": 29
+              },
+              "examples": []
+            }
+          ],
+          "examples": []
+        }
+      ],
+      "examples": []
+    },
+    {
+      "importPath": "github.com/go-redsync/redsync/v4/examples/goredis",
+      "name": "main",
+      "synopsis": "",
+      "doc": "",
+      "dir": "examples/goredis",
+      "files": [
+        "examples/goredis/main.go"
+      ],
+      "consts": [],
+      "vars": [],
+      "funcs": [],
+      "types": [],
+      "examples": []
+    },
+    {
+      "importPath": "github.com/go-redsync/redsync/v4/examples/goredis/v7",
+      "name": "main",
+      "synopsis": "",
+      "doc": "",
+      "dir": "examples/goredis/v7",
+      "files": [
+        "examples/goredis/v7/main.go"
+      ],
+      "consts": [],
+      "vars": [],
+      "funcs": [],
+      "types": [],
+      "examples": []
+    },
+    {
+      "importPath": "github.com/go-redsync/redsync/v4/examples/goredis/v8",
+      "name": "main",
+      "synopsis": "",
+      "doc": "",
+      "dir": "examples/goredis/v8",
+      "files": [
+        "examples/goredis/v8/main.go"
+      ],
+      "consts": [],
+      "vars": [],
+      "funcs": [],
+      "types": [],
+      "examples": []
+    },
+    {
+      "importPath": "github.com/go-redsync/redsync/v4/examples/goredis/v9",
+      "name": "main",
+      "synopsis": "",
+      "doc": "",
+      "dir": "examples/goredis/v9",
+      "files": [
+        "examples/goredis/v9/main.go"
+      ],
+      "consts": [],
+      "vars": [],
+      "funcs": [],
+      "types": [],
+      "examples": []
+    },
+    {
+      "importPath": "github.com/go-redsync/redsync/v4/examples/redigo",
+      "name": "main",
+      "synopsis": "",
+      "doc": "",
+      "dir": "examples/redigo",
+      "files": [
+        "examples/redigo/main.go"
+      ],
+      "consts": [],
+      "vars": [],
+      "funcs": [],
+      "types": [],
+      "examples": []
+    },
+    {
+      "importPath": "github.com/go-redsync/redsync/v4/examples/valkego",
+      "name": "main",
+      "synopsis": "",
+      "doc": "",
+      "dir": "examples/valkego",
+      "files": [
+        "examples/valkego/main.go"
+      ],
+      "consts": [],
+      "vars": [],
+      "funcs": [],
+      "types": [],
+      "examples": []
+    },
+    {
+      "importPath": "github.com/go-redsync/redsync/v4/redis",
+      "name": "redis",
+      "synopsis": "",
+      "doc": "",
+      "dir": "redis",
+      "files": [
+        "redis/redis.go"
+      ],
+      "consts": [],
+      "vars": [],
+      "funcs": [
+        {
+          "name": "NewScript",
+          "doc": "NewScript returns a new script object. If keyCount is greater than or equal\nto zero, then the count is automatically inserted in the EVAL command\nargument list. If keyCount is less than zero, then the application supplies\nthe count as the first value in the keysAndArgs argument to the Do, Send and\nSendHash methods.\nTaken from https://github.com/gomodule/redigo/blob/46992b0f02f74066bcdfd9b03e33bc03abd10dc7/redis/script.go#L32-L41",
+          "signature": "func NewScript(keyCount int, src, hash string) *Script",
+          "position": {
+            "file": "redis/redis.go",
+            "line": 38
+          },
+          "examples": []
+        }
+      ],
+      "types": [
+        {
+          "name": "Conn",
+          "doc": "Conn is a single Redis connection.",
+          "declaration": "type Conn interface {\n\tGet(name string) (string, error)\n\tSet(name string, value string) (bool, error)\n\tSetNX(name string, value string, expiry time.Duration) (bool, error)\n\tEval(script *Script, keysAndArgs ...any) (any, error)\n\tScriptLoad(script *Script) error\n\tPTTL(name string) (time.Duration, error)\n\tClose() error\n}",
+          "kind": "interface",
+          "position": {
+            "file": "redis/redis.go",
+            "line": 14
+          },
+          "fields": [
+            {
+              "name": "Get",
+              "doc": "",
+              "type": "func(name string) (string, error)"
+            },
+            {
+              "name": "Set",
+              "doc": "",
+              "type": "func(name string, value string) (bool, error)"
+            },
+            {
+              "name": "SetNX",
+              "doc": "",
+              "type": "func(name string, value string, expiry time.Duration) (bool, error)"
+            },
+            {
+              "name": "Eval",
+              "doc": "",
+              "type": "func(script *Script, keysAndArgs ...any) (any, error)"
+            },
+            {
+              "name": "ScriptLoad",
+              "doc": "",
+              "type": "func(script *Script) error"
+            },
+            {
+              "name": "PTTL",
+              "doc": "",
+              "type": "func(name string) (time.Duration, error)"
+            },
+            {
+              "name": "Close",
+              "doc": "",
+              "type": "func() error"
+            }
+          ],
+          "methods": [],
+          "examples": []
+        },
+        {
+          "name": "Pool",
+          "doc": "Pool maintains a pool of Redis connections.",
+          "declaration": "type Pool interface {\n\tGet(ctx context.Context) (Conn, error)\n}",
+          "kind": "interface",
+          "position": {
+            "file": "redis/redis.go",
+            "line": 9
+          },
+          "fields": [
+            {
+              "name": "Get",
+              "doc": "",
+              "type": "func(ctx context.Context) (Conn, error)"
+            }
+          ],
+          "methods": [],
+          "examples": []
+        },
+        {
+          "name": "Script",
+          "doc": "Script encapsulates the source, hash and key count for a Lua script.\nTaken from https://github.com/gomodule/redigo/blob/46992b0f02f74066bcdfd9b03e33bc03abd10dc7/redis/script.go#L24-L30",
+          "declaration": "type Script struct {\n\tKeyCount int\n\tSrc      string\n\tHash     string\n}",
+          "kind": "struct",
+          "position": {
+            "file": "redis/redis.go",
+            "line": 26
+          },
+          "fields": [
+            {
+              "name": "KeyCount",
+              "doc": "",
+              "type": "int"
+            },
+            {
+              "name": "Src",
+              "doc": "",
+              "type": "string"
+            },
+            {
+              "name": "Hash",
+              "doc": "",
+              "type": "string"
+            }
+          ],
+          "methods": [],
+          "examples": []
+        }
+      ],
+      "examples": []
+    },
+    {
+      "importPath": "github.com/go-redsync/redsync/v4/redis/goredis",
+      "name": "goredis",
+      "synopsis": "",
+      "doc": "",
+      "dir": "redis/goredis",
+      "files": [
+        "redis/goredis/goredis.go"
+      ],
+      "consts": [],
+      "vars": [],
+      "funcs": [
+        {
+          "name": "NewPool",
+          "doc": "NewPool returns a Goredis-based pool implementation.",
+          "signature": "func NewPool(delegate *redis.Client) redsyncredis.Pool",
+          "position": {
+            "file": "redis/goredis/goredis.go",
+            "line": 25
+          },
+          "examples": []
+        }
+      ],
+      "types": [],
+      "examples": []
+    },
+    {
+      "importPath": "github.com/go-redsync/redsync/v4/redis/goredis/v7",
+      "name": "goredis",
+      "synopsis": "",
+      "doc": "",
+      "dir": "redis/goredis/v7",
+      "files": [
+        "redis/goredis/v7/goredis.go"
+      ],
+      "consts": [],
+      "vars": [],
+      "funcs": [
+        {
+          "name": "NewPool",
+          "doc": "NewPool returns a Goredis-based pool implementation.",
+          "signature": "func NewPool(delegate redis.UniversalClient) redsyncredis.Pool",
+          "position": {
+            "file": "redis/goredis/v7/goredis.go",
+            "line": 30
+          },
+          "examples": []
+        }
+      ],
+      "types": [],
+      "examples": []
+    },
+    {
+      "importPath": "github.com/go-redsync/redsync/v4/redis/goredis/v8",
+      "name": "goredis",
+      "synopsis": "",
+      "doc": "",
+      "dir": "redis/goredis/v8",
+      "files": [
+        "redis/goredis/v8/goredis.go"
+      ],
+      "consts": [],
+      "vars": [],
+      "funcs": [
+        {
+          "name": "NewPool",
+          "doc": "NewPool returns a Goredis-based pool implementation.",
+          "signature": "func NewPool(delegate redis.UniversalClient) redsyncredis.Pool",
+          "position": {
+            "file": "redis/goredis/v8/goredis.go",
+            "line": 24
+          },
+          "examples": []
+        }
+      ],
+      "types": [],
+      "examples": []
+    },
+    {
+      "importPath": "github.com/go-redsync/redsync/v4/redis/goredis/v9",
+      "name": "goredis",
+      "synopsis": "",
+      "doc": "",
+      "dir": "redis/goredis/v9",
+      "files": [
+        "redis/goredis/v9/goredis.go"
+      ],
+      "consts": [],
+      "vars": [],
+      "funcs": [
+        {
+          "name": "NewPool",
+          "doc": "NewPool returns a Goredis-based pool implementation.",
+          "signature": "func NewPool(delegate redis.UniversalClient) redsyncredis.Pool",
+          "position": {
+            "file": "redis/goredis/v9/goredis.go",
+            "line": 24
+          },
+          "examples": []
+        }
+      ],
+      "types": [],
+      "examples": []
+    },
+    {
+      "importPath": "github.com/go-redsync/redsync/v4/redis/redigo",
+      "name": "redigo",
+      "synopsis": "",
+      "doc": "",
+      "dir": "redis/redigo",
+      "files": [
+        "redis/redigo/redigo.go"
+      ],
+      "consts": [],
+      "vars": [],
+      "funcs": [
+        {
+          "name": "NewPool",
+          "doc": "NewPool returns a Redigo-based pool implementation.",
+          "signature": "func NewPool(delegate Pool) redsyncredis.Pool",
+          "position": {
+            "file": "redis/redigo/redigo.go",
+            "line": 33
+          },
+          "examples": []
+        }
+      ],
+      "types": [
+        {
+          "name": "Pool",
+          "doc": "",
+          "declaration": "type Pool interface {\n\tGet() redis.Conn\n\tGetContext(ctx context.Context) (redis.Conn, error)\n}",
+          "kind": "interface",
+          "position": {
+            "file": "redis/redigo/redigo.go",
+            "line": 12
+          },
+          "fields": [
+            {
+              "name": "Get",
+              "doc": "",
+              "type": "func() redis.Conn"
+            },
+            {
+              "name": "GetContext",
+              "doc": "",
+              "type": "func(ctx context.Context) (redis.Conn, error)"
+            }
+          ],
+          "methods": [],
+          "examples": []
+        }
+      ],
+      "examples": []
+    },
+    {
+      "importPath": "github.com/go-redsync/redsync/v4/redis/rueidis",
+      "name": "rueidis",
+      "synopsis": "",
+      "doc": "",
+      "dir": "redis/rueidis",
+      "files": [
+        "redis/rueidis/rueidis.go"
+      ],
+      "consts": [],
+      "vars": [],
+      "funcs": [
+        {
+          "name": "NewPool",
+          "doc": "NewPool returns a rueidis-based pool implementation.",
+          "signature": "func NewPool(delegate rueidiscompat.Cmdable) redsyncredis.Pool",
+          "position": {
+            "file": "redis/rueidis/rueidis.go",
+            "line": 26
+          },
+          "examples": []
+        }
+      ],
+      "types": [],
+      "examples": []
+    },
+    {
+      "importPath": "github.com/go-redsync/redsync/v4/redis/valkeygo",
+      "name": "valkeygo",
+      "synopsis": "",
+      "doc": "",
+      "dir": "redis/valkeygo",
+      "files": [
+        "redis/valkeygo/valkeygo.go"
+      ],
+      "consts": [],
+      "vars": [],
+      "funcs": [
+        {
+          "name": "NewPool",
+          "doc": "NewPool returns a rueidis-based pool implementation.",
+          "signature": "func NewPool(delegate valkeycompat.Cmdable) redsyncredis.Pool",
+          "position": {
+            "file": "redis/valkeygo/valkeygo.go",
+            "line": 25
+          },
+          "examples": []
+        }
+      ],
+      "types": [],
+      "examples": []
+    }
+  ]
+}

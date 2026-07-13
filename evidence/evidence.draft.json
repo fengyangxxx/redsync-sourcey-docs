@@ -1,0 +1,134 @@
+{
+  "schema_version": "frantic-sourcey-adoption-evidence/v1",
+  "posting_id": "p-cb3858decc",
+  "claim_id": "817adb29-a5d5-493d-8a1d-9f7cb6911b86",
+  "target": {
+    "repository": "https://github.com/go-redsync/redsync",
+    "commit": "79f6ba24a8bf41f35141de700d410a06bb27622f",
+    "module": "github.com/go-redsync/redsync/v4"
+  },
+  "sourcey": {
+    "version": "3.6.3",
+    "adapter": "godoc",
+    "snapshot_command": "npm run snapshot",
+    "build_command": "npm run build",
+    "config": "sourcey.config.ts",
+    "snapshot": "godoc.json",
+    "snapshot_schema": 1,
+    "diagnostics_count": 0
+  },
+  "generated_docs": {
+    "page_count": 21,
+    "sourcey_output_file_count": 28,
+    "packaged_file_count": 29,
+    "navigation_compatibility_file_count": 1,
+    "api_package_page_count": 15,
+    "source_package_count": 15,
+    "non_test_go_file_count": 19,
+    "exported_symbol_count": 110
+  },
+  "local_checks": {
+    "go_full_test": {
+      "command": "go test -mod=readonly ./...",
+      "exit_code": 1,
+      "result": "BLOCKED_ENVIRONMENT",
+      "reason": "root TestMain requires redis-server, which is not installed on PATH; the other 14 packages passed or had no tests"
+    },
+    "root_compile": {
+      "command": "go test -c -mod=readonly .",
+      "exit_code": 0
+    },
+    "redis_adapter_tests": {
+      "command": "go test -mod=readonly ./redis/...",
+      "exit_code": 0
+    }
+  },
+  "public_url": "PLACEHOLDER_PUBLIC_URL",
+  "public_url_state": "PLACEHOLDER_PUBLIC_URL_STATE",
+  "upstream_pr": {
+    "url": "PLACEHOLDER_OPEN_PR_URL",
+    "state": "PLACEHOLDER_OPEN_PR_STATE",
+    "head_commit": "PLACEHOLDER_OPEN_PR_HEAD_COMMIT"
+  },
+  "receipt_ref": "PLACEHOLDER_GOVERNED_RECEIPT_REF",
+  "governed_receipt_url": "PLACEHOLDER_IMMUTABLE_RECEIPT_URL",
+  "immutable_refs": {
+    "evidence_json": "PLACEHOLDER_IMMUTABLE_EVIDENCE_URL",
+    "report": "PLACEHOLDER_IMMUTABLE_REPORT_URL",
+    "inventory": "PLACEHOLDER_IMMUTABLE_INVENTORY_URL",
+    "page_source_mappings": "PLACEHOLDER_IMMUTABLE_MAPPINGS_URL",
+    "command_transcript": "PLACEHOLDER_IMMUTABLE_COMMAND_TRANSCRIPT_URL"
+  },
+  "observations": [
+    "runx-cli 0.6.14",
+    "Target repository: https://github.com/go-redsync/redsync",
+    "Pinned target commit: 79f6ba24a8bf41f35141de700d410a06bb27622f",
+    "Sourcey command: sourcey godoc --module ./source/redsync --packages ./... --out godoc.json",
+    "Sourcey adapter: godoc, committed snapshot mode for host rebuilds",
+    "Sourcey snapshot result: schema=1, packages=15, diagnostics=0",
+    "Generated static site: 21 Sourcey pages, 28 Sourcey output files, plus one go-api/index.html navigation redirect",
+    "Generated API inventory: 15 packages, 19 non-test Go files, 110 exported symbols",
+    "Five exact generated-page to pinned-source mappings: evidence/page-source-mappings.json",
+    "Focused verification: root compile exit 0; redis adapter tests exit 0",
+    "Full go test limitation: root TestMain requires redis-server, unavailable on PATH; this is recorded as an environment blocker, not a pass",
+    "Hosting rationale: project-named, transferable Read the Docs project; not a personal preview host",
+    "Upstream PR: PLACEHOLDER_OPEN_PR_URL (PLACEHOLDER_OPEN_PR_STATE)",
+    "Governed receipt: PLACEHOLDER_GOVERNED_RECEIPT_REF"
+  ],
+  "evidence_items": [
+    {
+      "type": "source_pin",
+      "local_ref": "source/redsync/.source-pin.json"
+    },
+    {
+      "type": "sourcey_config",
+      "local_ref": "sourcey.config.ts"
+    },
+    {
+      "type": "godoc_snapshot",
+      "local_ref": "godoc.json"
+    },
+    {
+      "type": "api_inventory",
+      "local_ref": "evidence/inventory.json"
+    },
+    {
+      "type": "five_page_source_checks",
+      "local_ref": "evidence/page-source-mappings.json"
+    },
+    {
+      "type": "static_site_hashes",
+      "local_ref": "evidence/sha256-manifest.json"
+    },
+    {
+      "type": "raw_command_transcript",
+      "local_ref": "evidence/commands.local.txt"
+    },
+    {
+      "type": "public_host",
+      "external_ref": "PLACEHOLDER_PUBLIC_URL"
+    },
+    {
+      "type": "worker_authored_upstream_pr",
+      "external_ref": "PLACEHOLDER_OPEN_PR_URL"
+    },
+    {
+      "type": "governed_receipt",
+      "external_ref": "PLACEHOLDER_GOVERNED_RECEIPT_REF"
+    }
+  ],
+  "placeholders": [
+    "PLACEHOLDER_PUBLIC_URL",
+    "PLACEHOLDER_PUBLIC_URL_STATE",
+    "PLACEHOLDER_OPEN_PR_URL",
+    "PLACEHOLDER_OPEN_PR_STATE",
+    "PLACEHOLDER_OPEN_PR_HEAD_COMMIT",
+    "PLACEHOLDER_GOVERNED_RECEIPT_REF",
+    "PLACEHOLDER_IMMUTABLE_RECEIPT_URL",
+    "PLACEHOLDER_IMMUTABLE_EVIDENCE_URL",
+    "PLACEHOLDER_IMMUTABLE_REPORT_URL",
+    "PLACEHOLDER_IMMUTABLE_INVENTORY_URL",
+    "PLACEHOLDER_IMMUTABLE_MAPPINGS_URL",
+    "PLACEHOLDER_IMMUTABLE_COMMAND_TRANSCRIPT_URL"
+  ]
+}

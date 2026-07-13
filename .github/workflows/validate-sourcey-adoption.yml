@@ -1,0 +1,218 @@
+name: Validate Sourcey adoption
+
+on:
+  workflow_dispatch:
+    inputs:
+      public_url:
+        description: Published Sourcey documentation root URL
+        required: true
+        type: string
+      docs_repo_url:
+        description: Public documentation repository URL
+        required: true
+        type: string
+      docs_commit:
+        description: Immutable documentation commit SHA
+        required: true
+        type: string
+      target_repo_url:
+        description: Target repository URL
+        required: true
+        default: https://github.com/go-redsync/redsync
+        type: string
+      target_commit:
+        description: Pinned target repository commit SHA
+        required: true
+        default: 79f6ba24a8bf41f35141de700d410a06bb27622f
+        type: string
+      upstream_pr_url:
+        description: Public upstream pull request URL
+        required: true
+        type: string
+      upstream_pr_head_commit:
+        description: Expected upstream pull request head commit SHA
+        required: true
+        type: string
+      mappings_url:
+        description: Immutable raw URL for page-source-mappings.json
+        required: true
+        type: string
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Governed live validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      INPUT_PUBLIC_URL: ${{ inputs.public_url }}
+      INPUT_DOCS_REPO_URL: ${{ inputs.docs_repo_url }}
+      INPUT_DOCS_COMMIT: ${{ inputs.docs_commit }}
+      INPUT_TARGET_REPO_URL: ${{ inputs.target_repo_url }}
+      INPUT_TARGET_COMMIT: ${{ inputs.target_commit }}
+      INPUT_UPSTREAM_PR_URL: ${{ inputs.upstream_pr_url }}
+      INPUT_UPSTREAM_PR_HEAD_COMMIT: ${{ inputs.upstream_pr_head_commit }}
+      INPUT_MAPPINGS_URL: ${{ inputs.mappings_url }}
+      RUNX_RECEIPT_DIR: ${{ runner.temp }}/runx-receipts
+      VALIDATION_OUTPUT_DIR: ${{ runner.temp }}/sourcey-validation
+      SKILL_ARTIFACT_DIR: ${{ github.workspace }}/validation-skill/redsync-sourcey-validation/artifacts
+
+    steps:
+      - name: Check out the exact workflow revision
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5d # v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+
+      - name: Create ephemeral CI receipt identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNX_RECEIPT_DIR" "$VALIDATION_OUTPUT_DIR"
+          node <<'NODE'
+          const { appendFileSync } = require("node:fs");
+          const { createPrivateKey, createPublicKey, randomBytes } = require("node:crypto");
+
+          const seed = randomBytes(32);
+          const privateDer = Buffer.concat([
+            Buffer.from("302e020100300506032b657004220420", "hex"),
+            seed,
+          ]);
+          const privateKey = createPrivateKey({
+            key: privateDer,
+            format: "der",
+            type: "pkcs8",
+          });
+          const publicDer = createPublicKey(privateKey).export({
+            format: "der",
+            type: "spki",
+          });
+          const publicKey = publicDer.subarray(publicDer.length - 32);
+          const kid = `github-actions-ephemeral-${process.env.GITHUB_RUN_ID}`;
+          const lines = [
+            `RUNX_RECEIPT_SIGN_KID=${kid}`,
+            `RUNX_RECEIPT_SIGN_ED25519_SEED_BASE64=${seed.toString("base64")}`,
+            "RUNX_RECEIPT_SIGN_ISSUER_TYPE=ci",
+            `RUNX_RECEIPT_VERIFY_KID=${kid}`,
+            `RUNX_RECEIPT_VERIFY_ED25519_PUBLIC_KEY_BASE64=${publicKey.toString("base64")}`,
+          ];
+          appendFileSync(process.env.GITHUB_ENV, `${lines.join("\n")}\n`);
+          NODE
+
+      - name: Record exact pinned CLI version
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx -y @runxhq/cli@0.6.14 --version \
+            | tee "$VALIDATION_OUTPUT_DIR/runx-version.txt"
+          test "$(cat "$VALIDATION_OUTPUT_DIR/runx-version.txt")" = "runx-cli 0.6.14"
+
+      - name: Run governed live validation and verify its receipt
+        shell: bash
+        run: |
+          set -uo pipefail
+          validation_exit=0
+          artifact_copy_exit=0
+          receipt_resolution_exit=0
+          verify_exit=0
+
+          npx -y @runxhq/cli@0.6.14 skill \
+            ./validation-skill/redsync-sourcey-validation default \
+            -i "public_url=$INPUT_PUBLIC_URL" \
+            -i "docs_repo_url=$INPUT_DOCS_REPO_URL" \
+            -i "docs_commit=$INPUT_DOCS_COMMIT" \
+            -i "target_repo_url=$INPUT_TARGET_REPO_URL" \
+            -i "target_commit=$INPUT_TARGET_COMMIT" \
+            -i "upstream_pr_url=$INPUT_UPSTREAM_PR_URL" \
+            -i "upstream_pr_head_commit=$INPUT_UPSTREAM_PR_HEAD_COMMIT" \
+            -i "mappings_url=$INPUT_MAPPINGS_URL" \
+            -i "validation_mode=live" \
+            -i "output_dir=artifacts" \
+            -R "$RUNX_RECEIPT_DIR" \
+            -j \
+            >"$VALIDATION_OUTPUT_DIR/runx-raw-stdout.json" \
+            2>"$VALIDATION_OUTPUT_DIR/runx-raw-stderr.txt" \
+            || validation_exit=$?
+          printf '%s\n' "$validation_exit" >"$VALIDATION_OUTPUT_DIR/runx-exit-code.txt"
+
+          if [[ -f "$SKILL_ARTIFACT_DIR/evidence.json" ]]; then
+            cp "$SKILL_ARTIFACT_DIR/evidence.json" "$VALIDATION_OUTPUT_DIR/evidence.json" \
+              || artifact_copy_exit=$?
+          else
+            printf '%s\n' 'Runner evidence.json is missing.' \
+              >>"$VALIDATION_OUTPUT_DIR/artifact-copy-stderr.txt"
+            artifact_copy_exit=1
+          fi
+          if [[ -f "$SKILL_ARTIFACT_DIR/transcript.txt" ]]; then
+            cp "$SKILL_ARTIFACT_DIR/transcript.txt" "$VALIDATION_OUTPUT_DIR/transcript.txt" \
+              || artifact_copy_exit=$?
+          else
+            printf '%s\n' 'Runner transcript.txt is missing.' \
+              >>"$VALIDATION_OUTPUT_DIR/artifact-copy-stderr.txt"
+            artifact_copy_exit=1
+          fi
+          printf '%s\n' "$artifact_copy_exit" \
+            >"$VALIDATION_OUTPUT_DIR/artifact-copy-exit-code.txt"
+
+          node ./validation-skill/redsync-sourcey-validation/scripts/extract-root-receipt.mjs \
+            --run-json "$VALIDATION_OUTPUT_DIR/runx-raw-stdout.json" \
+            --receipt-dir "$RUNX_RECEIPT_DIR" \
+            --output-dir "$VALIDATION_OUTPUT_DIR" \
+            >"$VALIDATION_OUTPUT_DIR/root-receipt-resolution-stdout.json" \
+            2>"$VALIDATION_OUTPUT_DIR/root-receipt-resolution-stderr.txt" \
+            || receipt_resolution_exit=$?
+          printf '%s\n' "$receipt_resolution_exit" \
+            >"$VALIDATION_OUTPUT_DIR/root-receipt-resolution-exit-code.txt"
+
+          if [[ "$receipt_resolution_exit" -eq 0 ]]; then
+            npx -y @runxhq/cli@0.6.14 verify \
+              --receipt "$VALIDATION_OUTPUT_DIR/root-receipt.json" \
+              -j \
+              >"$VALIDATION_OUTPUT_DIR/runx-verify.json" \
+              2>"$VALIDATION_OUTPUT_DIR/runx-verify-stderr.txt" \
+              || verify_exit=$?
+          else
+            printf '%s\n' '{"status":"BLOCKED","reason":"root_receipt_resolution_failed"}' \
+              >"$VALIDATION_OUTPUT_DIR/runx-verify.json"
+            printf '%s\n' 'Exact root receipt could not be resolved; verification is blocked.' \
+              >"$VALIDATION_OUTPUT_DIR/runx-verify-stderr.txt"
+            verify_exit=1
+          fi
+          printf '%s\n' "$verify_exit" >"$VALIDATION_OUTPUT_DIR/runx-verify-exit-code.txt"
+
+          if [[ "$validation_exit" -ne 0 || "$artifact_copy_exit" -ne 0 || "$receipt_resolution_exit" -ne 0 || "$verify_exit" -ne 0 ]]; then
+            exit 1
+          fi
+
+      - name: Upload raw governed validation artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: sourcey-adoption-validation-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            ${{ runner.temp }}/sourcey-validation/runx-version.txt
+            ${{ runner.temp }}/sourcey-validation/runx-raw-stdout.json
+            ${{ runner.temp }}/sourcey-validation/runx-raw-stderr.txt
+            ${{ runner.temp }}/sourcey-validation/runx-exit-code.txt
+            ${{ runner.temp }}/sourcey-validation/artifact-copy-stderr.txt
+            ${{ runner.temp }}/sourcey-validation/artifact-copy-exit-code.txt
+            ${{ runner.temp }}/sourcey-validation/evidence.json
+            ${{ runner.temp }}/sourcey-validation/transcript.txt
+            ${{ runner.temp }}/sourcey-validation/root-receipt-id.txt
+            ${{ runner.temp }}/sourcey-validation/root-receipt-ref.txt
+            ${{ runner.temp }}/sourcey-validation/root-receipt-ref.json
+            ${{ runner.temp }}/sourcey-validation/root-receipt.json
+            ${{ runner.temp }}/sourcey-validation/receipt-tree.json
+            ${{ runner.temp }}/sourcey-validation/root-receipt-error.json
+            ${{ runner.temp }}/sourcey-validation/root-receipt-resolution-stdout.json
+            ${{ runner.temp }}/sourcey-validation/root-receipt-resolution-stderr.txt
+            ${{ runner.temp }}/sourcey-validation/root-receipt-resolution-exit-code.txt
+            ${{ runner.temp }}/sourcey-validation/runx-verify.json
+            ${{ runner.temp }}/sourcey-validation/runx-verify-stderr.txt
+            ${{ runner.temp }}/sourcey-validation/runx-verify-exit-code.txt
+            ${{ runner.temp }}/runx-receipts
