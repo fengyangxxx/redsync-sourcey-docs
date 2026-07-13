@@ -1,5 +1,5 @@
 skill: redsync-sourcey-validation
-version: "0.1.0"
+version: "0.1.1"
 
 catalog:
   kind: skill
@@ -23,7 +23,7 @@ runners:
       public_url:
         type: string
         required: true
-        description: Published Sourcey site root URL.
+        description: Published Read the Docs Sourcey root using /language/version/.
       docs_repo_url:
         type: string
         required: true
@@ -51,7 +51,7 @@ runners:
       mappings_url:
         type: string
         required: true
-        description: Immutable raw URL for the five page-to-source mappings JSON.
+        description: Immutable raw URL for five exact page-byte and pinned-source mappings.
       output_dir:
         type: string
         required: false

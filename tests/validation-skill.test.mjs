@@ -7,6 +7,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
+import {
+  canonicalizeReadTheDocsPage,
+  readTheDocsAddonFragment,
+} from "../validation-skill/redsync-sourcey-validation/scripts/rtd-canonicalizer.mjs";
 
 const root = new URL("../", import.meta.url);
 const skillRoot = new URL(
@@ -18,13 +22,14 @@ const receiptExtractorPath = new URL("scripts/extract-root-receipt.mjs", skillRo
 const targetCommit = "79f6ba24a8bf41f35141de700d410a06bb27622f";
 const docsCommit = "d".repeat(40);
 const prHeadCommit = "e".repeat(40);
-const publicUrl = "https://redsync-sourcey-docs.readthedocs.io/";
+const publicUrl = "https://redsync-sourcey-docs.readthedocs.io/en/latest/";
 const docsRepoUrl = "https://github.com/fengyangxxx/redsync-sourcey-docs";
 const targetRepoUrl = "https://github.com/go-redsync/redsync";
 const prUrl = "https://github.com/go-redsync/redsync/pull/999";
 const mappingsUrl =
   `https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/${docsCommit}/evidence/page-source-mappings.json`;
 const fixtureUnresolvedPublicUrl = ["PLACE", "HOLDER_PUBLIC_URL"].join("");
+const fixtureAllowedDraftToken = ["PLACE", "HOLDER_DRAFT_ONLY"].join("");
 
 async function text(url) {
   return readFile(url, "utf8");
@@ -50,8 +55,22 @@ function sourceyHtml(content) {
   return `<!doctype html><html><head><meta name="generator" content="Sourcey 3.6.3"><title>Redsync Sourcey API Documentation</title></head><body>${content}</body></html>`;
 }
 
-async function fixtureResponse(logicalUrl, { broken = false } = {}) {
+function rtdAddonFragment(pageUrl, rootUrl = publicUrl) {
+  return readTheDocsAddonFragment(pageUrl, rootUrl, "redsync-sourcey-docs").fragment;
+}
+
+function publicRtdPage(immutableHtml, pageUrl, rootUrl, injectionMode = "valid") {
+  if (injectionMode === "missing") return immutableHtml;
+  const fragment = rtdAddonFragment(pageUrl, rootUrl);
+  const count = injectionMode === "duplicate" ? 2 : 1;
+  let result = immutableHtml.replace("</head>", `${fragment.repeat(count)}</head>`);
+  if (injectionMode === "tampered") result = result.replace("<body>", "<body>arbitrary drift");
+  return result;
+}
+
+async function fixtureResponse(logicalUrl, options = {}) {
   const mappings = await fixtureMappings();
+  const fixturePublicUrl = options.publicUrl ?? publicUrl;
   const targetApi =
     `https://api.github.com/repos/go-redsync/redsync/commits/${targetCommit}`;
   const docsApi =
@@ -61,7 +80,14 @@ async function fixtureResponse(logicalUrl, { broken = false } = {}) {
     `https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/${docsCommit}/`;
 
   if (logicalUrl === targetApi) return { body: JSON.stringify({ sha: targetCommit }) };
-  if (logicalUrl === docsApi) return { body: JSON.stringify({ sha: docsCommit }) };
+  if (logicalUrl === docsApi) {
+    return {
+      body: JSON.stringify({
+        sha: docsCommit,
+        files: [{ filename: "evidence/evidence.draft.json", patch: `+${fixtureAllowedDraftToken}` }],
+      }),
+    };
+  }
   if (logicalUrl === prApi) {
     return {
       body: JSON.stringify({
@@ -69,9 +95,9 @@ async function fixtureResponse(logicalUrl, { broken = false } = {}) {
         state: "open",
         base: { ref: "master" },
         head: { sha: prHeadCommit },
-        body: broken
-          ? `Published docs: ${publicUrl}`
-          : `Published Sourcey generated API documentation: ${publicUrl}\nRedsync maintainers can adopt ownership and receive a project transfer.`,
+        body: options.brokenPr
+          ? `Published docs: ${fixturePublicUrl}`
+          : `Published Sourcey generated API documentation: ${fixturePublicUrl}\nRedsync maintainers can adopt ownership and receive a project transfer.`,
       }),
     };
   }
@@ -92,7 +118,7 @@ async function fixtureResponse(logicalUrl, { broken = false } = {}) {
   if (logicalUrl === `${rawBase}dist/index.html`) {
     return {
       body: sourceyHtml(
-        `Redsync github.com/go-redsync/redsync/v4 ${targetCommit} ${broken ? fixtureUnresolvedPublicUrl : ""}`,
+        `Redsync github.com/go-redsync/redsync/v4 ${targetCommit} ${options.placeholderImmutable ? fixtureUnresolvedPublicUrl : ""}`,
       ),
     };
   }
@@ -101,18 +127,31 @@ async function fixtureResponse(logicalUrl, { broken = false } = {}) {
   }
 
   if (
-    logicalUrl === publicUrl ||
-    logicalUrl === new URL("introduction.html", publicUrl).href ||
-    logicalUrl === new URL("go-api.html", publicUrl).href
+    logicalUrl === fixturePublicUrl ||
+    logicalUrl === new URL("introduction.html", fixturePublicUrl).href ||
+    logicalUrl === new URL("go-api.html", fixturePublicUrl).href
   ) {
-    return { body: sourceyHtml("Redsync github.com/go-redsync/redsync/v4") };
+    return {
+      body: sourceyHtml(
+        `Redsync github.com/go-redsync/redsync/v4 ${options.placeholderPublic ? fixtureUnresolvedPublicUrl : ""}`,
+      ),
+    };
   }
 
   for (const mapping of mappings) {
-    if (logicalUrl === new URL(mapping.generated_page, publicUrl).href) {
+    const immutablePage = sourceyHtml(
+      `${mapping.rendered_symbol} github.com/go-redsync/redsync/v4 ${mapping.source_path}`,
+    );
+    if (logicalUrl === `${rawBase}dist/${mapping.generated_page}`) {
+      return { body: immutablePage };
+    }
+    if (logicalUrl === new URL(mapping.generated_page, fixturePublicUrl).href) {
       return {
-        body: sourceyHtml(
-          `${mapping.rendered_symbol} github.com/go-redsync/redsync/v4 ${mapping.source_path}`,
+        body: publicRtdPage(
+          immutablePage,
+          logicalUrl,
+          fixturePublicUrl,
+          options.injectionMode,
         ),
       };
     }
@@ -122,7 +161,8 @@ async function fixtureResponse(logicalUrl, { broken = false } = {}) {
     const rawSource =
       `https://raw.githubusercontent.com/go-redsync/redsync/${targetCommit}/${mapping.source_path}`;
     if (logicalUrl === rawSource) {
-      const source = await text(new URL(`source/redsync/${mapping.source_path}`, root));
+      const source = (await text(new URL(`source/redsync/${mapping.source_path}`, root)))
+        .replaceAll("\r\n", "\n");
       return { body: source };
     }
   }
@@ -158,12 +198,13 @@ async function startProxy(options) {
 async function runFixture(options = {}) {
   const { server, proxyUrl } = await startProxy(options);
   const outputDir = await mkdtemp(join(tmpdir(), "redsync-validation-"));
+  const fixturePublicUrl = options.publicUrl ?? publicUrl;
   try {
     const child = spawn(process.execPath, [fileURLToPath(runnerPath)], {
       cwd: fileURLToPath(skillRoot),
       env: {
         ...process.env,
-        RUNX_INPUT_PUBLIC_URL: publicUrl,
+        RUNX_INPUT_PUBLIC_URL: fixturePublicUrl,
         RUNX_INPUT_DOCS_REPO_URL: docsRepoUrl,
         RUNX_INPUT_DOCS_COMMIT: docsCommit,
         RUNX_INPUT_TARGET_REPO_URL: targetRepoUrl,
@@ -392,6 +433,40 @@ test("Linux workflow is manual, live-only, pinned, and preserves raw evidence", 
   assert.doesNotMatch(workflow, /git\s+(?:push|commit)/);
 });
 
+test("bounded RTD addon matches the observed live package-root insertion exactly", async () => {
+  const pageUrl = new URL("go-api/package-root.html", publicUrl).href;
+  const { fragment, identity } = readTheDocsAddonFragment(
+    pageUrl,
+    publicUrl,
+    "redsync-sourcey-docs",
+  );
+  const expected =
+    '<script async type="text/javascript" src="/_/static/javascript/readthedocs-addons.js"></script>' +
+    '<meta name="readthedocs-project-slug" content="redsync-sourcey-docs" />' +
+    '<meta name="readthedocs-version-slug" content="latest" />' +
+    '<meta name="readthedocs-resolver-filename" content="/go-api/package-root.html" />' +
+    '<meta name="readthedocs-http-status" content="200" />';
+  assert.equal(fragment, expected);
+  assert.equal(Buffer.byteLength(fragment), 357);
+  assert.equal(identity.resolver_filename, "/go-api/package-root.html");
+
+  const immutable = await readFile(new URL("dist/go-api/package-root.html", root));
+  const publicBytes = Buffer.from(
+    immutable.toString("utf8").replace("</head>", `${fragment}</head>`),
+    "utf8",
+  );
+  const canonical = canonicalizeReadTheDocsPage(
+    publicBytes,
+    pageUrl,
+    publicUrl,
+    "redsync-sourcey-docs",
+  );
+  assert.equal(canonical.recognized, true);
+  assert.equal(canonical.removed_fragment_count, 1);
+  assert.equal(canonical.removed_fragment_bytes, 357);
+  assert.deepEqual(canonical.canonical_bytes, immutable);
+});
+
 test("fixture mode exercises every check without claiming a live pass", async () => {
   const result = await runFixture();
   assert.equal(result.exitCode, 0, result.stderr || result.stdout);
@@ -413,23 +488,33 @@ test("fixture mode exercises every check without claiming a live pass", async ()
   );
   assert.equal(evidence.status, "FIXTURE_PASS");
   assert.equal(evidence.live_pass, false);
-  assert.doesNotMatch(
-    JSON.stringify(evidence.http_checks),
-    /evidence\.draft\.json|report\.draft\.md/,
-  );
+  const docsCommitHttp = evidence.http_checks.find((item) => item.label === "docs_commit_api");
+  assert.match(docsCommitHttp.checked_text, /evidence\/evidence\.draft\.json/);
   const immutableDocs = evidence.checks.find((item) => item.id === "immutable_docs_files");
   assert.deepEqual(
     immutableDocs.observed.files.map((item) => item.path),
     ["sourcey.config.ts", "godoc.json", "dist/index.html", "evidence/page-source-mappings.json"],
   );
+  const apiPages = evidence.checks.find((item) => item.id === "five_api_pages");
+  assert.equal(apiPages.status, "PASS");
+  assert.ok(apiPages.observed.pages.every((page) => page.immutable_hash_matches_mapping));
+  assert.ok(apiPages.observed.pages.every((page) => page.canonicalized_public_matches_immutable));
+  assert.ok(apiPages.observed.pages.every((page) => page.rtd_addon.recognized));
+  assert.ok(apiPages.observed.pages.every((page) => page.rtd_addon.removed_fragment_count === 1));
+  assert.ok(apiPages.observed.pages.every((page) => page.rtd_addon.removed_fragment_bytes > 300));
+  assert.ok(apiPages.observed.pages.every((page) => /^[0-9a-f]{64}$/.test(page.rtd_addon.removed_fragment_sha256)));
+  const placeholderCheck = evidence.checks.find((item) => item.id === "no_delivery_placeholders");
+  assert.equal(placeholderCheck.status, "PASS");
+  assert.deepEqual(placeholderCheck.observed.placeholder_occurrences, []);
+  assert.ok(placeholderCheck.observed.excluded_response_classes.includes("github_commit_api_patch"));
   assert.match(transcript, /CLI_VERSION_OUTPUT runx-cli 0\.6\.14/);
   assert.match(transcript, /HTTP_STATUS 200/);
   assert.match(transcript, /CONTENT_SHA256 [0-9a-f]{64}/);
   assert.match(transcript, /PR_STATE open/);
 });
 
-test("raw PR or placeholder failures remain BLOCKED and exit nonzero", async () => {
-  const result = await runFixture({ broken: true });
+test("raw PR or immutable placeholder failures remain BLOCKED and exit nonzero", async () => {
+  const result = await runFixture({ brokenPr: true, placeholderImmutable: true });
   assert.notEqual(result.exitCode, 0);
   const output = JSON.parse(result.stdout);
 
@@ -445,6 +530,39 @@ test("raw PR or placeholder failures remain BLOCKED and exit nonzero", async () 
   );
   assert.match(transcript, /CHECK upstream_pr BLOCKED/);
   assert.match(transcript, /CHECK no_delivery_placeholders BLOCKED/);
+});
+
+test("RTD canonicalization blocks missing, duplicate, and tampered injections", async () => {
+  for (const injectionMode of ["missing", "duplicate", "tampered"]) {
+    const result = await runFixture({ injectionMode });
+    assert.notEqual(result.exitCode, 0, injectionMode);
+    const output = JSON.parse(result.stdout);
+    const pages = output.checks.find((item) => item.id === "five_api_pages");
+    assert.equal(pages.status, "BLOCKED", injectionMode);
+    if (injectionMode === "tampered") {
+      assert.ok(pages.observed.pages.every((page) => page.rtd_addon.recognized));
+      assert.ok(
+        pages.observed.pages.every((page) => !page.canonicalized_public_matches_immutable),
+      );
+    } else {
+      assert.ok(pages.observed.pages.every((page) => !page.rtd_addon.recognized));
+    }
+  }
+});
+
+test("placeholder scope ignores draft commit patches but blocks public, immutable, and input values", async () => {
+  for (const options of [
+    { placeholderPublic: true },
+    { placeholderImmutable: true },
+    { publicUrl: `${publicUrl}?audit=${fixtureUnresolvedPublicUrl}` },
+  ]) {
+    const result = await runFixture(options);
+    assert.notEqual(result.exitCode, 0, JSON.stringify(options));
+    const output = JSON.parse(result.stdout);
+    const placeholderCheck = output.checks.find((item) => item.id === "no_delivery_placeholders");
+    assert.equal(placeholderCheck.status, "BLOCKED", JSON.stringify(options));
+    assert.ok(placeholderCheck.observed.placeholder_occurrences.length >= 1);
+  }
 });
 
 test("root receipt extractor binds raw runx JSON to one exact stored root", async () => {

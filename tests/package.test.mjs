@@ -6,11 +6,26 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
+import { repositoryLfBytes } from "../scripts/repository-bytes.mjs";
 
 const root = new URL("../", import.meta.url);
 const pin = "79f6ba24a8bf41f35141de700d410a06bb27622f";
 const unresolved = (suffix) => ["PLACE", "HOLDER_", suffix].join("");
 const unresolvedPattern = new RegExp(["PLACE", "HOLDER_[A-Z0-9_]+"].join(""));
+const pinnedRawSourceHashes = new Map([
+  ["redsync.go", "763b22db61d2377cc070039ed7f1f9591ce4be765319288891596ffbdc2bf151"],
+  ["redis/redis.go", "3426e5543bfdd497221a8cc4d5a9a5ea86c993b2d4816f0e650d38ba696a7c9e"],
+  ["redis/goredis/v9/goredis.go", "ed479a6b9eb37cb77a768074e68f2852c680206ec9fb67a9eac777f54b80da3b"],
+  ["redis/redigo/redigo.go", "bbcea02ae4dc8c6214e92606973e839f6bf868aa48f020f63350c1f6ea39cc39"],
+  ["redis/rueidis/rueidis.go", "be591138e687282ef35cf179026b9f27e9ec9676fdcfa6cb027f1473eae70aec"],
+]);
+const pinnedGitBlobIds = new Map([
+  ["redsync.go", "bfec2c9361f283b8f2fab5db25e7e584a4daab96"],
+  ["redis/redis.go", "cbae6772aec654bf09b31e2c5aa88b6019563446"],
+  ["redis/goredis/v9/goredis.go", "8a29077d1e9a9075bb373a22bce20c2b44302ef7"],
+  ["redis/redigo/redigo.go", "127370be6926c23b242d818a8776562b2f70ba5c"],
+  ["redis/rueidis/rueidis.go", "ce9601a298b24a67217bc250aa460fc3825e5cd9"],
+]);
 
 async function text(path) {
   return readFile(new URL(path, root), "utf8");
@@ -34,6 +49,7 @@ test("build configuration is pinned to Redsync and governed runx 0.6.14", async 
   const packageJson = await json("package.json");
   const sourceyConfig = await text("sourcey.config.ts");
   const readTheDocs = await text(".readthedocs.yaml");
+  const gitAttributes = await text(".gitattributes");
 
   assert.equal(packageJson.devDependencies.sourcey, "3.6.3");
   assert.match(packageJson.scripts["verify:runx-version"], /@runxhq\/cli@0\.6\.14 --version/);
@@ -45,6 +61,7 @@ test("build configuration is pinned to Redsync and governed runx 0.6.14", async 
   assert.match(readTheDocs, /npm ci/);
   assert.match(readTheDocs, /npm run build/);
   assert.match(readTheDocs, /READTHEDOCS_OUTPUT/);
+  assert.match(gitAttributes, /^\* text=auto eol=lf$/m);
 });
 
 test("site build wrapper supports an isolated output directory", async () => {
@@ -87,6 +104,17 @@ test("evidence generators support isolated output files", async () => {
   assert.match(await text("scripts/generate-inventory.mjs"), /SOURCEY_INVENTORY_OUTPUT/);
   assert.match(await text("scripts/generate-mappings.mjs"), /SOURCEY_MAPPINGS_OUTPUT/);
   assert.match(await text("scripts/generate-hashes.mjs"), /SOURCEY_HASH_OUTPUT/);
+});
+
+test("repository source hashing is independent of checkout line endings", () => {
+  const lf = Buffer.from("package example\n\nfunc Exported() {}\n", "utf8");
+  const crlf = Buffer.from("package example\r\n\r\nfunc Exported() {}\r\n", "utf8");
+  assert.deepEqual(repositoryLfBytes(crlf, "fixture.go"), lf);
+  assert.deepEqual(repositoryLfBytes(lf, "fixture.go"), lf);
+  assert.throws(
+    () => repositoryLfBytes(Buffer.from("package example\rfunc Broken() {}\n"), "fixture.go"),
+    /unsupported bare CR/,
+  );
 });
 
 test("snapshot wrapper uses writable cache and disables VCS stamping", async () => {
@@ -145,12 +173,45 @@ test("five generated-page mappings resolve to pinned source and rendered symbols
     assert.ok(mapping.source_path.endsWith(".go"));
     assert.ok(mapping.source_line >= 1);
 
-    const source = await text(`source/redsync/${mapping.source_path}`);
-    const sourceLines = source.split(/\r?\n/);
+    const source = repositoryLfBytes(
+      await readFile(new URL(`source/redsync/${mapping.source_path}`, root)),
+      mapping.source_path,
+    );
+    const sourceLines = source.toString("utf8").split("\n");
     assert.match(sourceLines[mapping.source_line - 1], new RegExp(mapping.source_line_pattern));
+    const sourceHash = createHash("sha256").update(source).digest("hex");
+    assert.equal(sourceHash, mapping.source_sha256, mapping.source_path);
+    assert.equal(sourceHash, pinnedRawSourceHashes.get(mapping.source_path), mapping.source_path);
+    const gitBlobId = createHash("sha1")
+      .update(Buffer.from(`blob ${source.length}\0`, "utf8"))
+      .update(source)
+      .digest("hex");
+    assert.equal(gitBlobId, mapping.source_git_blob_sha1, mapping.source_path);
+    assert.equal(gitBlobId, pinnedGitBlobIds.get(mapping.source_path), mapping.source_path);
 
-    const page = await text(`dist/${mapping.generated_page}`);
-    assert.match(page, new RegExp(mapping.rendered_symbol));
+    const page = await readFile(new URL(`dist/${mapping.generated_page}`, root));
+    assert.match(page.toString("utf8"), new RegExp(mapping.rendered_symbol));
+    assert.equal(
+      createHash("sha256").update(page).digest("hex"),
+      mapping.generated_page_sha256,
+      mapping.generated_page,
+    );
+  }
+});
+
+test("mapping generator reproduces the committed canonical mapping bytes", async () => {
+  const outputDir = await mkdtemp(join(tmpdir(), "redsync-mapping-byte-check-"));
+  const output = join(outputDir, "page-source-mappings.json");
+  try {
+    const result = spawnSync(process.execPath, ["scripts/generate-mappings.mjs"], {
+      cwd: fileURLToPath(root),
+      encoding: "utf8",
+      env: { ...process.env, SOURCEY_MAPPINGS_OUTPUT: output },
+    });
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    assert.deepEqual(await readFile(output), await readFile(new URL("evidence/page-source-mappings.json", root)));
+  } finally {
+    await rm(outputDir, { recursive: true, force: true });
   }
 });
 

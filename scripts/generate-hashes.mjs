@@ -8,6 +8,7 @@ const output =
   process.env.SOURCEY_HASH_OUTPUT ?? join(root, "evidence", "sha256-manifest.json");
 const roots = [
   ".github/workflows",
+  ".gitattributes",
   ".gitignore",
   ".readthedocs.yaml",
   "README.md",

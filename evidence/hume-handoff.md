@@ -91,6 +91,34 @@ and report files:
 
 Any replacement of a placeholder or generated artifact changes the reviewed bytes. Regenerate the SHA-256 manifest and rerun final QA after all public and PR fields are fixed.
 
+## Workflow-dispatch repair
+
+- The repair tree is based directly on parentless publication root
+  `6fdcaf606f05115fd1ad07dde43c7d5b0186766b`; it does not include the older
+  local `de79dce0e6846010070dec9781c8a8cfddd4800e` history.
+- Mapping generation hashes `dist` as raw bytes and canonicalizes mapped Go
+  source to strict repository LF bytes. Tests bind all five source hashes to
+  the pinned GitHub raw values and all five page hashes to tracked `dist`.
+- Live page proof now fetches both immutable raw docs and public RTD pages. It
+  removes exactly one fully identified RTD addon immediately before
+  `</head>`, records its count/bytes/hash/identity, and requires the remaining
+  public bytes to equal the immutable raw page. Missing, duplicate, or
+  tampered injection fixtures are blocked.
+- Placeholder validation scans runtime inputs and explicit public/immutable
+  non-draft artifacts. GitHub commit metadata and patch bodies are excluded;
+  a fixture includes an allowed draft patch while separate public, immutable,
+  and input fixtures prove fail-closed behavior.
+- The workflow remains manual-only, live-only, secret-free, pinned to runx
+  0.6.14 and pinned actions, fail-closed on exact root extraction/verification,
+  and always uploads raw artifacts.
+- A separate read-only check against the currently served five RTD pages and
+  the local byte-exact `6fdcaf` files passed 5/5: HTTP 200, one recognized
+  addon per page, and canonical bytes equal immutable bytes. Addon sizes were
+  354-365 bytes. This check did not invoke runx or create a receipt.
+- A direct full live runner probe remained honestly BLOCKED when GitHub Raw
+  requests failed intermittently before the old public mappings loaded. That
+  diagnostic created no governed receipt and is not final evidence.
+
 ## Publication QA placeholder repair
 
 - Public `hosting-decision.md` and `upstream-pr-rationale.md` now describe the

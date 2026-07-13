@@ -163,3 +163,86 @@ derived files refreshed:
 byte identity check: isolated final-wrapper rebuild must match committed dist 29/29; enforced by package test
 placeholder policy: unresolved final-value tokens allowed only in evidence/evidence.draft.json and report.draft.md
 fail-closed policy: validator/test sentinel is constructed at runtime and remains covered by fixture tests
+
+WORKFLOW-DISPATCH REPAIR FROM PUBLICATION ROOT
+base commit: 6fdcaf606f05115fd1ad07dde43c7d5b0186766b
+base tree: ced52cbd3263304960aeaccce57429ff1e8778f0
+base parents: <none>
+isolation: local repository initialized from exact 6fdcaf archive and fetched commit object
+
+DEPENDENCY SETUP
+command: npm ci --ignore-scripts
+exit: 1
+raw blocker: npm cache stat failed with EPERM under C:\Users\Administrator\AppData\Local\npm-cache
+fallback: local node_modules junction to the unchanged package dependency tree in work\frantic113-redsync
+network publication/write: none
+
+CANONICAL PAGE/SOURCE MAPPINGS
+command: npm run mappings
+exit: 0
+result: 5 mappings
+page hashes:
+  go-api/package-root.html af75739a73f365c9421b3ffbe07df8beaab0d24ac879307aee293aeac3375a23
+  go-api/pkg-redis.html 6d8184491c7a18d2a8716c22c471afe067cacd3aa5a68c3322deaf30bb3eb3ee
+  go-api/pkg-redis-goredis-v9.html 8b0e81c14c6f5810bec0c9e9229d252e6d10032dde32d1c42371acf075e9d224
+  go-api/pkg-redis-redigo.html 397953e75e24cc7c713843f83b67538b41e4f879323e60f474d15c7f0e562772
+  go-api/pkg-redis-rueidis.html 2c000f02474f2222503db9433b9669195101f46f6af2a19527271fb0bbc50d86
+repository-LF source SHA-256 / pinned Git blob SHA-1:
+  redsync.go 763b22db61d2377cc070039ed7f1f9591ce4be765319288891596ffbdc2bf151 bfec2c9361f283b8f2fab5db25e7e584a4daab96
+  redis/redis.go 3426e5543bfdd497221a8cc4d5a9a5ea86c993b2d4816f0e650d38ba696a7c9e cbae6772aec654bf09b31e2c5aa88b6019563446
+  redis/goredis/v9/goredis.go ed479a6b9eb37cb77a768074e68f2852c680206ec9fb67a9eac777f54b80da3b 8a29077d1e9a9075bb373a22bce20c2b44302ef7
+  redis/redigo/redigo.go bbcea02ae4dc8c6214e92606973e839f6bf868aa48f020f63350c1f6ea39cc39 127370be6926c23b242d818a8776562b2f70ba5c
+  redis/rueidis/rueidis.go be591138e687282ef35cf179026b9f27e9ec9676fdcfa6cb027f1473eae70aec ce9601a298b24a67217bc250aa460fc3825e5cd9
+
+BOUNDED RTD CANONICALIZATION
+command: node inline read-only checker using rtd-canonicalizer.mjs and local 6fdcaf dist bytes
+exit: 0
+result: 5/5 public pages HTTP 200; recognized addon count 1; canonical bytes equal immutable bytes
+observed removed addon bytes / SHA-256:
+  go-api/package-root.html 357 63076bc613211dc2ee8d0ed46903b22e04ef58cc7bd22d904ba50fad81a0e2b6
+  go-api/pkg-redis.html 354 b43140bc8c4a3136582f36da61b03f02d6e5b2c7c27ab78f7c9130fd63ace615
+  go-api/pkg-redis-goredis-v9.html 365 0df812a4efee51bf36950c3a3f503aa231075700c3f72a24a954e67ffb6881fc
+  go-api/pkg-redis-redigo.html 361 a51c9a6ff4e908c64bcc90dbe5b39e9ff6c7fd8f732f72bccbcf05bb2c5b3264
+  go-api/pkg-redis-rueidis.html 362 5369710f77f8ea83a4acfdda41b3640b4770fb1190fc02aef186c52198ca73b6
+external writes: none
+
+READ-ONLY FULL LIVE RUNNER PROBE AGAINST OLD PUBLIC 6fdcaf MAPPINGS
+command: node validation-skill\redsync-sourcey-validation\scripts\run.mjs with the eight QA inputs
+exit: 1
+result: BLOCKED; GitHub Raw fetch failed intermittently before mappings loaded
+blocked: mappings_shape, immutable_docs_files, five_api_pages, five_pinned_sources
+placeholder check: PASS
+classification: diagnostic only; no runx invocation, receipt, workflow dispatch, or final evidence claim
+
+VALIDATOR TESTS
+command: node --test --test-concurrency=1 tests\validation-skill.test.mjs
+exit: 0
+result: 10 passed; 0 failed; 0 skipped
+coverage added:
+  exact observed 357-byte package-root RTD addon shape
+  valid single RTD injection canonicalizes byte-exactly
+  missing/duplicate/tampered RTD injection is BLOCKED nonzero
+  allowed draft patch in GitHub commit API does not block
+  placeholder in public/immutable/input surfaces is BLOCKED nonzero
+  exact pinned source SHA-256 and Git blob identity
+
+VALIDATION SKILL CHECKS
+command: F:\ProgramData\anaconda3\envs\xbxpy12\python.exe C:\Users\Administrator\.codex\skills\.system\skill-creator\scripts\quick_validate.py validation-skill\redsync-sourcey-validation
+exit: 0
+stdout: Skill is valid!
+command: npx -y @runxhq/cli@0.6.14 --version
+exit: 0
+stdout: runx-cli 0.6.14
+command: npx -y @runxhq/cli@0.6.14 skill inspect validation-skill\redsync-sourcey-validation -j
+exit: 0
+result: status=ok; version=0.1.1; default runner present
+
+FINAL REPAIR PACKAGE TESTS
+command: npm run hashes
+exit: 0
+result: sha256 manifest files=105
+command: npm test
+exit: 0
+result: 25 passed; 0 failed; 0 skipped
+included isolated Sourcey result: 29/29 committed dist files byte-identical
+line-ending guard: .gitattributes enforces repository LF checkout bytes

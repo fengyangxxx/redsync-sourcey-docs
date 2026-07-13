@@ -12,8 +12,12 @@ emit a live `PASS`.
 
 The runner checks the exact governed CLI version, the published Sourcey home
 and API pages, the immutable Sourcey config/godoc/dist/mappings files, five
-pinned source files, and the open upstream PR fields. Final evidence/report
-files are intentionally not inputs because they are created after this run and
-its receipt. The runner writes `evidence.json` and
+pinned source files, and the open upstream PR fields. Each mapped public API
+page must canonicalize to its byte-exact immutable raw page by removing exactly
+one recognized Read the Docs addon immediately before `</head>`; all removed
+fragment identity and hash fields are recorded. Placeholder checks cover only
+runtime inputs and explicit public/immutable non-draft artifacts, never commit
+API patch metadata. Final evidence/report files are intentionally not inputs
+because they are created after this run and its receipt. The runner writes `evidence.json` and
 `transcript.txt` under `output_dir`. Every check is `PASS` or `BLOCKED`.
 Failures exit nonzero and remain visible in both artifacts and stdout.

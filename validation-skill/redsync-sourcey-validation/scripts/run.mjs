@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { isAbsolute, resolve } from "node:path";
+import { canonicalizeReadTheDocsPage } from "./rtd-canonicalizer.mjs";
 
 const EXPECTED_TARGET_REPO = "https://github.com/go-redsync/redsync";
 const EXPECTED_MODULE = "github.com/go-redsync/redsync/v4";
@@ -15,6 +16,13 @@ function input(name, fallback = "") {
 
 function sha256(value) {
   return createHash("sha256").update(value).digest("hex");
+}
+
+function gitBlobSha1(value) {
+  return createHash("sha1")
+    .update(Buffer.from(`blob ${value.length}\0`, "utf8"))
+    .update(value)
+    .digest("hex");
 }
 
 function excerpt(value, limit = 240) {
@@ -83,6 +91,7 @@ async function main() {
   const checks = [];
   const httpChecks = [];
   const responseBodies = new Map();
+  const placeholderSurfaces = [];
   const transcript = [
     "Redsync Sourcey governed validation transcript",
     `CHECKED_AT ${checkedAt}`,
@@ -103,6 +112,10 @@ async function main() {
     return passed;
   }
 
+  function addPlaceholderSurface(label, url, body) {
+    placeholderSurfaces.push({ label, url, body: String(body) });
+  }
+
   async function fetchText(logicalUrl, label) {
     if (responseBodies.has(logicalUrl)) return responseBodies.get(logicalUrl);
     let fetchedUrl = logicalUrl;
@@ -114,6 +127,7 @@ async function main() {
 
     let record;
     let body = "";
+    let rawBytes = Buffer.alloc(0);
     try {
       const response = await fetch(fetchedUrl, {
         redirect: "follow",
@@ -124,6 +138,7 @@ async function main() {
         },
       });
       const bytes = Buffer.from(await response.arrayBuffer());
+      rawBytes = bytes;
       body = bytes.toString("utf8");
       record = {
         label,
@@ -150,7 +165,7 @@ async function main() {
     }
 
     httpChecks.push(record);
-    responseBodies.set(logicalUrl, { ...record, body });
+    responseBodies.set(logicalUrl, { ...record, body, raw_bytes: rawBytes });
     transcript.push(`HTTP_LABEL ${label}`);
     transcript.push(`HTTP_URL ${logicalUrl}`);
     if (inputs.validation_mode === "fixture") transcript.push(`FETCHED_AS ${fetchedUrl}`);
@@ -159,7 +174,7 @@ async function main() {
     transcript.push(`CONTENT_BYTES ${record.bytes}`);
     transcript.push(`CHECKED_TEXT ${JSON.stringify(record.checked_text)}`);
     if (record.error) transcript.push(`HTTP_ERROR ${JSON.stringify(record.error)}`);
-    return { ...record, body };
+    return { ...record, body, raw_bytes: rawBytes };
   }
 
   const required = [
@@ -280,6 +295,7 @@ async function main() {
 
     const expectedMappingsUrl = rawUrl(docsRepo, inputs.docs_commit, "evidence/page-source-mappings.json");
     const mappingResponse = await fetchText(inputs.mappings_url, "page_source_mappings");
+    addPlaceholderSurface("immutable_mappings", inputs.mappings_url, mappingResponse.body);
     try { mappings = JSON.parse(mappingResponse.body); } catch {}
     const mappingShape =
       inputs.mappings_url === expectedMappingsUrl &&
@@ -296,6 +312,7 @@ async function main() {
           typeof item.source_path === "string" &&
           item.source_path.endsWith(".go") &&
           Number.isInteger(item.source_line) &&
+          /^[0-9a-f]{40}$/.test(item.source_git_blob_sha1) &&
           /^[0-9a-f]{64}$/.test(item.source_sha256) &&
           /^[0-9a-f]{64}$/.test(item.generated_page_sha256),
       );
@@ -319,7 +336,10 @@ async function main() {
     ];
     const docsResponses = new Map();
     for (const path of docsPaths) {
-      docsResponses.set(path, await fetchText(rawUrl(docsRepo, inputs.docs_commit, path), `docs_file:${path}`));
+      const url = rawUrl(docsRepo, inputs.docs_commit, path);
+      const response = await fetchText(url, `docs_file:${path}`);
+      docsResponses.set(path, response);
+      addPlaceholderSurface(`immutable_docs:${path}`, url, response.body);
     }
     const configBody = docsResponses.get("sourcey.config.ts")?.body ?? "";
     const indexBody = docsResponses.get("dist/index.html")?.body ?? "";
@@ -359,6 +379,7 @@ async function main() {
     );
 
     const publicRoot = await fetchText(inputs.public_url, "public_url");
+    addPlaceholderSurface("public_root", inputs.public_url, publicRoot.body);
     const publicRootPass =
       publicRoot.http_status === 200 && /Sourcey/i.test(publicRoot.body) && /Redsync/i.test(publicRoot.body);
     addCheck(
@@ -373,6 +394,8 @@ async function main() {
     const apiHomeUrl = new URL("go-api.html", inputs.public_url).href;
     const introduction = await fetchText(introductionUrl, "sourcey_introduction");
     const apiHome = await fetchText(apiHomeUrl, "sourcey_api_home");
+    addPlaceholderSurface("public_introduction", introductionUrl, introduction.body);
+    addPlaceholderSurface("public_api_home", apiHomeUrl, apiHome.body);
     const sourceyHomePass = [introduction, apiHome].every(
       (response) => response.http_status === 200 && /Sourcey/i.test(response.body) && /Redsync/i.test(response.body),
     );
@@ -392,29 +415,80 @@ async function main() {
     const pageResults = [];
     for (const mapping of mappings) {
       const pageUrl = new URL(mapping.generated_page, inputs.public_url).href;
-      const page = await fetchText(pageUrl, `api_page:${mapping.generated_page}`);
+      const immutablePageUrl = rawUrl(
+        docsRepo,
+        inputs.docs_commit,
+        `dist/${mapping.generated_page}`,
+      );
+      const immutablePage = await fetchText(
+        immutablePageUrl,
+        `immutable_api_page:${mapping.generated_page}`,
+      );
+      const publicPage = await fetchText(pageUrl, `public_api_page:${mapping.generated_page}`);
+      addPlaceholderSurface(
+        `immutable_api_page:${mapping.generated_page}`,
+        immutablePageUrl,
+        immutablePage.body,
+      );
+      addPlaceholderSurface(
+        `public_api_page:${mapping.generated_page}`,
+        pageUrl,
+        publicPage.body,
+      );
+      const canonicalization = canonicalizeReadTheDocsPage(
+        publicPage.raw_bytes,
+        pageUrl,
+        inputs.public_url,
+        docsRepo.repo,
+      );
+      const canonicalizedSha256 = canonicalization.canonical_bytes
+        ? sha256(canonicalization.canonical_bytes)
+        : null;
+      const immutableHashMatches =
+        immutablePage.http_status === 200 &&
+        immutablePage.content_sha256 === mapping.generated_page_sha256;
+      const canonicalMatchesImmutable =
+        canonicalizedSha256 !== null &&
+        canonicalizedSha256 === immutablePage.content_sha256;
       pageResults.push({
         generated_page: mapping.generated_page,
-        url: pageUrl,
-        http_status: page.http_status,
-        content_sha256: page.content_sha256,
-        expected_sha256: mapping.generated_page_sha256,
+        public_url: pageUrl,
+        immutable_url: immutablePageUrl,
+        public_http_status: publicPage.http_status,
+        immutable_http_status: immutablePage.http_status,
+        public_raw_sha256: publicPage.content_sha256,
+        immutable_raw_sha256: immutablePage.content_sha256,
+        mapped_immutable_sha256: mapping.generated_page_sha256,
+        canonicalized_public_sha256: canonicalizedSha256,
+        immutable_hash_matches_mapping: immutableHashMatches,
+        canonicalized_public_matches_immutable: canonicalMatchesImmutable,
+        rtd_addon: {
+          recognized: canonicalization.recognized,
+          removed_fragment_count: canonicalization.removed_fragment_count,
+          removed_fragment_bytes: canonicalization.removed_fragment_bytes,
+          removed_fragment_sha256: canonicalization.removed_fragment_sha256,
+          removed_fragment_identity: canonicalization.removed_fragment_identity,
+          marker_counts: canonicalization.marker_counts,
+          error: canonicalization.error,
+        },
         rendered_symbol: mapping.rendered_symbol,
-        contains_sourcey: /Sourcey/i.test(page.body),
-        contains_symbol: page.body.includes(mapping.rendered_symbol),
+        public_contains_sourcey: /Sourcey/i.test(publicPage.body),
+        public_contains_symbol: publicPage.body.includes(mapping.rendered_symbol),
         pass:
-          page.http_status === 200 &&
-          /Sourcey/i.test(page.body) &&
-          page.body.includes(mapping.rendered_symbol) &&
-          page.content_sha256 === mapping.generated_page_sha256,
+          publicPage.http_status === 200 &&
+          /Sourcey/i.test(publicPage.body) &&
+          publicPage.body.includes(mapping.rendered_symbol) &&
+          immutableHashMatches &&
+          canonicalization.recognized &&
+          canonicalMatchesImmutable,
       });
     }
     addCheck(
       "five_api_pages",
-      "All five mapped API pages return HTTP 200, contain Sourcey and their symbol, and match mapped hashes.",
+      "Each immutable API page matches its mapped hash, and each HTTP 200 RTD page contains Sourcey plus its symbol and differs only by one recognized addon injected immediately before </head>.",
       pageResults.length === 5 && pageResults.every((item) => item.pass),
       { pages: pageResults },
-      pageResults.map((item) => item.url),
+      pageResults.flatMap((item) => [item.public_url, item.immutable_url]),
     );
 
     const sourceResults = [];
@@ -427,7 +501,9 @@ async function main() {
       const rawSourceUrl =
         `https://raw.githubusercontent.com/go-redsync/redsync/${inputs.target_commit}/${mapping.source_path}`;
       const rawSource = await fetchText(rawSourceUrl, `raw_source:${mapping.source_path}`);
+      addPlaceholderSurface(`pinned_source:${mapping.source_path}`, rawSourceUrl, rawSource.body);
       const sourceLines = rawSource.body.split(/\r?\n/);
+      const rawSourceGitBlobSha1 = gitBlobSha1(rawSource.raw_bytes);
       let lineMatches = false;
       try {
         lineMatches = new RegExp(mapping.source_line_pattern).test(sourceLines[mapping.source_line - 1] ?? "");
@@ -440,6 +516,8 @@ async function main() {
         source_url_pinned: sourceUrlPinned,
         content_sha256: rawSource.content_sha256,
         expected_sha256: mapping.source_sha256,
+        git_blob_sha1: rawSourceGitBlobSha1,
+        expected_git_blob_sha1: mapping.source_git_blob_sha1,
         checked_line: sourceLines[mapping.source_line - 1] ?? "",
         line_matches: lineMatches,
         pass:
@@ -447,6 +525,7 @@ async function main() {
           sourcePage.http_status === 200 &&
           rawSource.http_status === 200 &&
           rawSource.content_sha256 === mapping.source_sha256 &&
+          rawSourceGitBlobSha1 === mapping.source_git_blob_sha1 &&
           lineMatches,
       });
     }
@@ -477,6 +556,7 @@ async function main() {
     transcript.push(`PR_HEAD_SHA ${prFields.head_sha}`);
     transcript.push(`PR_BODY_SHA256 ${prFields.body_sha256}`);
     const prBody = String(pr.body ?? "");
+    addPlaceholderSurface("upstream_pr_body", inputs.upstream_pr_url, prBody);
     const prPass =
       prResponse.http_status === 200 &&
       pr.html_url === inputs.upstream_pr_url &&
@@ -496,9 +576,11 @@ async function main() {
     );
 
     const placeholders = [];
-    for (const [url, response] of responseBodies) {
-      const matches = [...new Set(response.body.match(UNRESOLVED_FINAL_RE) ?? [])];
-      if (matches.length) placeholders.push({ url, placeholders: matches });
+    for (const surface of placeholderSurfaces) {
+      const matches = [...new Set(surface.body.match(UNRESOLVED_FINAL_RE) ?? [])];
+      if (matches.length) {
+        placeholders.push({ label: surface.label, url: surface.url, placeholders: matches });
+      }
       UNRESOLVED_FINAL_RE.lastIndex = 0;
     }
     for (const [name, value] of Object.entries(inputs)) {
@@ -508,10 +590,14 @@ async function main() {
     }
     addCheck(
       "no_delivery_placeholders",
-      "Every fetched docs/site/mapping/source/PR response and runtime input contains no PLACEHOLDER_* token.",
+      "Runtime inputs and explicit public or immutable non-draft docs, site, mapping, pinned-source, and PR-body surfaces contain no unresolved final-value token; GitHub API metadata and patch bodies are excluded.",
       placeholders.length === 0,
-      { placeholder_occurrences: placeholders },
-      docsPaths.map((path) => rawUrl(docsRepo, inputs.docs_commit, path)),
+      {
+        scanned_surface_count: placeholderSurfaces.length,
+        excluded_response_classes: ["github_commit_api_metadata", "github_commit_api_patch", "github_ui_wrapper"],
+        placeholder_occurrences: placeholders,
+      },
+      placeholderSurfaces.map((surface) => surface.url),
     );
   } else {
     for (const id of [

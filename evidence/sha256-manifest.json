@@ -4,6 +4,11 @@
   "commit": "79f6ba24a8bf41f35141de700d410a06bb27622f",
   "files": [
     {
+      "path": ".gitattributes",
+      "bytes": 19,
+      "sha256": "d60f352d0db1404c70afb4bb8b2ca3fd1c610572aa40720e8a0b7baa7885418c"
+    },
+    {
       "path": ".github/workflows/validate-sourcey-adoption.yml",
       "bytes": 9480,
       "sha256": "c0675ac559d9a57f897979cfc3505dc79a1717cae77154e1e6733b39bd579923"
@@ -20,8 +25,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 4680,
-      "sha256": "ad1e973db848ee774e0008f188c64da1311c4f0186c11c69b7afee7c77771693"
+      "bytes": 5272,
+      "sha256": "ca2846964a3a35922ce31ba09834fd2b6b63f922e33425109ce5971435dbbda0"
     },
     {
       "path": "dist/go-api.html",
@@ -170,8 +175,8 @@
     },
     {
       "path": "evidence/commands.local.txt",
-      "bytes": 7496,
-      "sha256": "d483fd9430c2b7dddfa588c0032dc3a2d6ec2cb514263ca766152ceac982099b"
+      "bytes": 11876,
+      "sha256": "cdf027f38cb958210c58ffeac0a24be8fbc87377d044ec9593b318a4f94e92da"
     },
     {
       "path": "evidence/evidence.draft.json",
@@ -180,8 +185,8 @@
     },
     {
       "path": "evidence/hume-handoff.md",
-      "bytes": 7188,
-      "sha256": "0a25faea1237bf285b156687a912b3b9cbfca7197beab9867d944a83b1098d10"
+      "bytes": 8980,
+      "sha256": "9f41e03d793b7e3c200cbf3b7cca450c560ab3ea1e3077e4a6bbaee059e23193"
     },
     {
       "path": "evidence/inventory.json",
@@ -190,8 +195,8 @@
     },
     {
       "path": "evidence/page-source-mappings.json",
-      "bytes": 2627,
-      "sha256": "b0ea35724045bbd483e663a54bb2a6c6e99de529d2212ac699010895cc4cdb42"
+      "bytes": 2987,
+      "sha256": "401ef15db2d63e178a92c2961c721661a370903e13da172d043c293ccb6b7d40"
     },
     {
       "path": "godoc.json",
@@ -245,8 +250,8 @@
     },
     {
       "path": "scripts/generate-hashes.mjs",
-      "bytes": 2089,
-      "sha256": "97d39174b368554c41caefe30489730dfe5aa38ed74dfc9d5a427885f9992706"
+      "bytes": 2109,
+      "sha256": "b75840fe5ffa02e9bf2ee2beade5f64db565cdeb48325209fdab3bec4c0396b7"
     },
     {
       "path": "scripts/generate-inventory.mjs",
@@ -255,8 +260,13 @@
     },
     {
       "path": "scripts/generate-mappings.mjs",
-      "bytes": 2417,
-      "sha256": "893d3ebf4ec87c5fd489cc4f593af5f7887dcca4c59f4dffe058bd8c57e8f6ab"
+      "bytes": 3264,
+      "sha256": "e39c4ca4244badc69af7afb7a8acaa29889e84341b727f512b5d47b6f7d9b88d"
+    },
+    {
+      "path": "scripts/repository-bytes.mjs",
+      "bytes": 335,
+      "sha256": "daf69fad64afb5882963f54ddf3d7de0faed6740bac8272c1d1b15c30b3ac4d3"
     },
     {
       "path": "source/redsync/.github/dependabot.yml",
@@ -475,13 +485,13 @@
     },
     {
       "path": "tests/package.test.mjs",
-      "bytes": 9612,
-      "sha256": "d70b005fea4540881bb06c8f0a2d7ab242dddce29a5864bfe27b582b603d64d2"
+      "bytes": 12787,
+      "sha256": "34d1ac5be1d9e975c8a13a184db968b03d0b3afd7475881125a36809eb053fa2"
     },
     {
       "path": "tests/validation-skill.test.mjs",
-      "bytes": 19406,
-      "sha256": "0ef38618c75f6402e46836bfd8e42434e3f09e0d138c6715d148a9c75ae062c5"
+      "bytes": 25033,
+      "sha256": "46dddf4485d8bb31b5907cc7194f7890ed2df5017e53952e08d3a004d4089a1c"
     },
     {
       "path": "upstream-pr-rationale.md",
@@ -495,13 +505,13 @@
     },
     {
       "path": "validation-skill/redsync-sourcey-validation/SKILL.md",
-      "bytes": 1036,
-      "sha256": "fe75b4b8368ae3f6f8999347401995ab541b0281c09e5f2a68bc56b7eca16d89"
+      "bytes": 1393,
+      "sha256": "f6cb6623e07f9b88a18c11c3a274ddb7be3c54101735ca386ead1d7361014de5"
     },
     {
       "path": "validation-skill/redsync-sourcey-validation/X.yaml",
-      "bytes": 1955,
-      "sha256": "03447eef9efce443947ce721d7cdb4dbf3c9914e7ede53d884df82963abab031"
+      "bytes": 1995,
+      "sha256": "cc3110b1db06b7053cd40849921c52b64c7d58a0f1997ae56e59d464b59ac7c6"
     },
     {
       "path": "validation-skill/redsync-sourcey-validation/scripts/extract-root-receipt.mjs",
@@ -509,9 +519,14 @@
       "sha256": "ce46f7c121aec7f4db2aa9578f5127469b1e2ced2e5c942654ae2404f450bdaf"
     },
     {
+      "path": "validation-skill/redsync-sourcey-validation/scripts/rtd-canonicalizer.mjs",
+      "bytes": 4291,
+      "sha256": "4c7a4e8765be59fa4a994025af4b87f661d7231e1839582bf0f0dcbc7fa3326d"
+    },
+    {
       "path": "validation-skill/redsync-sourcey-validation/scripts/run.mjs",
-      "bytes": 23844,
-      "sha256": "fe1f9182698a7cd9054299b2f94b0bff523f9a11f5c88aded4474fea4358b40d"
+      "bytes": 27850,
+      "sha256": "53b250ee6b5bb8f3f87a95579f7fe6c802d18b1efe7b8de03c7232ec0a90db83"
     }
   ]
 }

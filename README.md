@@ -35,7 +35,8 @@ installation must not be used for governed evidence.
 - `godoc.json`: generated Sourcey Go API snapshot.
 - `dist/`: navigable static site.
 - `evidence/inventory.json`: package, file, and exported-symbol inventory.
-- `evidence/page-source-mappings.json`: five exact page-to-source checks.
+- `evidence/page-source-mappings.json`: five exact immutable-page and pinned
+  repository-LF source checks.
 - `evidence/evidence.draft.json`: local evidence draft with external fields
   explicitly left as placeholders.
 - `report.draft.md`: local delivery report draft.
@@ -69,13 +70,21 @@ npx -y @runxhq/cli@0.6.14 skill .\validation-skill\redsync-sourcey-validation de
 ```
 
 The runner checks the public documentation, immutable documentation commit,
-five API page/source mappings, pinned target source, and upstream PR fields. A
+five API page/source mappings, pinned target source, and upstream PR fields.
+For every mapped page it first hashes the immutable raw `dist` file, then
+requires the public Read the Docs response to reduce to those exact bytes after
+removing one recognized addon fragment immediately before `</head>`. The
+fragment's project, version, resolver path, status, byte count, and hash are
+recorded; missing, duplicate, unknown, or additional drift is blocked. A
 blocked check exits nonzero; `evidence.json` and `transcript.txt` retain every
 raw failure. It does not fetch a final evidence/report or require a receipt
 reference inside the validated docs commit: those artifacts can only be made
-after this validation creates its receipt. Placeholder scanning still covers
-all validated inputs and fetched docs, site, mapping, source, and PR responses.
-Fixture mode is test-only and always reports `live_pass: false`.
+after this validation creates its receipt. Placeholder scanning covers runtime
+inputs and explicit public or immutable non-draft docs, site, mapping, source,
+and PR-body surfaces. GitHub commit API metadata and patch bodies are not
+delivery surfaces and are excluded, so allowed draft patches cannot mask or
+create a final-artifact result. Fixture mode is test-only and always reports
+`live_pass: false`.
 
 The GitHub Actions workflow is intentionally limited to manual
 `workflow_dispatch`. It uses no repository secrets, creates a fresh signing
