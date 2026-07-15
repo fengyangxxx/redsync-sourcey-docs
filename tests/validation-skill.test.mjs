@@ -404,6 +404,14 @@ test("Linux workflow is manual, live-only, pinned, and preserves raw evidence", 
   assert.match(workflow, /^on:\s*\n\s+workflow_dispatch:/m);
   assert.doesNotMatch(workflow, /^\s+(?:push|pull_request|schedule):/m);
   assert.match(workflow, /runs-on:\s*ubuntu-latest/);
+  const jobEnv = workflow.match(/\n    env:\r?\n([\s\S]*?)\r?\n    steps:/)?.[1];
+  assert.ok(jobEnv, "job-level env block is missing");
+  assert.doesNotMatch(jobEnv, /\$\{\{\s*runner\./);
+  assert.match(workflow, /runx_receipt_dir="\$RUNNER_TEMP\/runx-receipts"/);
+  assert.match(workflow, /validation_output_dir="\$RUNNER_TEMP\/sourcey-validation"/);
+  assert.match(workflow, /RUNX_RECEIPT_DIR=%s\\n/);
+  assert.match(workflow, /VALIDATION_OUTPUT_DIR=%s\\n/);
+  assert.match(workflow, /\}\s*>>"\$GITHUB_ENV"/);
   assert.match(workflow, /npx -y @runxhq\/cli@0\.6\.14 --version/);
   assert.match(workflow, /npx -y @runxhq\/cli@0\.6\.14 skill/);
   assert.match(workflow, /validation_mode=live/);

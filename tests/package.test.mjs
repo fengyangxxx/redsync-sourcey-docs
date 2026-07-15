@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdtemp, readFile, readdir, rm } from "node:fs/promises";
+import { cp, mkdtemp, readFile, readdir, rm, symlink } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -100,6 +100,64 @@ test("isolated Sourcey rebuild is byte-identical to committed dist", async () =>
   }
 });
 
+test("documented preparation leaves the complete generated surface git-clean", { timeout: 120000 }, async () => {
+  const rootPath = fileURLToPath(root);
+  const temporaryRoot = await mkdtemp(join(tmpdir(), "redsync-sourcey-full-repro-"));
+  const repository = join(temporaryRoot, "repository");
+  const excluded = new Set([
+    join(rootPath, ".git"),
+    join(rootPath, "node_modules"),
+  ]);
+  const run = (command, args, options = {}) => spawnSync(command, args, {
+    cwd: repository,
+    encoding: "utf8",
+    ...options,
+  });
+  const expectSuccess = (result, label) => {
+    assert.equal(
+      result.status,
+      0,
+      `${label}\n${result.error ?? ""}\n${result.stdout ?? ""}\n${result.stderr ?? ""}`,
+    );
+  };
+
+  try {
+    await cp(rootPath, repository, {
+      recursive: true,
+      filter: (source) => !excluded.has(source),
+    });
+    await symlink(
+      join(rootPath, "node_modules"),
+      join(repository, "node_modules"),
+      process.platform === "win32" ? "junction" : "dir",
+    );
+
+    expectSuccess(run("git", ["init", "--quiet"]), "git init");
+    expectSuccess(run("git", ["config", "user.email", "repro@example.invalid"]), "git config email");
+    expectSuccess(run("git", ["config", "user.name", "Sourcey Repro Check"]), "git config name");
+    expectSuccess(run("git", ["add", "-A"]), "git add");
+    expectSuccess(run("git", ["commit", "--quiet", "-m", "repro baseline"]), "git commit");
+
+    const prepare = process.platform === "win32"
+      ? run(process.env.ComSpec ?? "cmd.exe", ["/d", "/s", "/c", "npm run prepare:docs"])
+      : run("npm", ["run", "prepare:docs"]);
+    expectSuccess(prepare, "npm run prepare:docs");
+    const generatedDiff = run("git", [
+      "diff",
+      "--exit-code",
+      "--",
+      "godoc.json",
+      "evidence/inventory.json",
+      "evidence/page-source-mappings.json",
+      "evidence/sha256-manifest.json",
+      "dist",
+    ]);
+    expectSuccess(generatedDiff, "generated artifact git diff");
+  } finally {
+    await rm(temporaryRoot, { recursive: true, force: true });
+  }
+});
+
 test("evidence generators support isolated output files", async () => {
   assert.match(await text("scripts/generate-inventory.mjs"), /SOURCEY_INVENTORY_OUTPUT/);
   assert.match(await text("scripts/generate-mappings.mjs"), /SOURCEY_MAPPINGS_OUTPUT/);
@@ -127,6 +185,9 @@ test("snapshot wrapper uses writable cache and disables VCS stamping", async () 
   assert.match(wrapper, /GOFLAGS/);
   assert.match(wrapper, /-buildvcs=false/);
   assert.match(wrapper, /SOURCEY_GODOC_OUTPUT/);
+  assert.match(wrapper, /source_commit_committed_at/);
+  assert.match(wrapper, /source_commit_committed_at_utc/);
+  assert.match(wrapper, /snapshot\.generated_at = normalizedGeneratedAt/);
 });
 
 test("godoc snapshot is the pinned Redsync module with no diagnostics", async () => {
@@ -136,6 +197,7 @@ test("godoc snapshot is the pinned Redsync module with no diagnostics", async ()
   assert.equal(snapshot.module_path, "github.com/go-redsync/redsync/v4");
   assert.equal(snapshot.packages.length, 15);
   assert.equal(snapshot.diagnostics?.length ?? 0, 0);
+  assert.equal(snapshot.generated_at, "2026-07-02T06:37:50Z");
 });
 
 test("source snapshot and inventory prove real package and symbol depth", async () => {
@@ -144,6 +206,8 @@ test("source snapshot and inventory prove real package and symbol depth", async 
 
   assert.equal(pinRecord.repository, "https://github.com/go-redsync/redsync");
   assert.equal(pinRecord.commit, pin);
+  assert.equal(pinRecord.source_commit_committed_at, "2026-07-02T12:37:50+06:00");
+  assert.equal(pinRecord.godoc_generated_at_policy, "source_commit_committed_at_utc");
   assert.equal(inventory.repository, pinRecord.repository);
   assert.equal(inventory.commit, pin);
   assert.ok(inventory.package_count >= 10, `package_count=${inventory.package_count}`);

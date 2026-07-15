@@ -12,6 +12,13 @@ locally. The snapshot wrapper sets `GOFLAGS=-buildvcs=false` because the copied
 source intentionally excludes `.git`; the exact source commit is recorded in
 `.source-pin.json` and every generated source URL.
 
+Sourcey emits the wall-clock build time in `godoc.json.generated_at`. The
+snapshot wrapper deterministically normalizes that field to the immutable
+source commit's real committer timestamp recorded in `.source-pin.json`,
+converted to UTC (`2026-07-02T06:37:50Z`). This is a source-provenance time
+basis, not a claim about when a rebuild ran; command transcripts record actual
+execution times separately.
+
 ## Reproduce
 
 ```powershell

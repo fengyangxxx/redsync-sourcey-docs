@@ -297,6 +297,41 @@ command: read-only GET https://redsync-sourcey-docs.readthedocs.io/en/latest/
 exit: 0
 result: HTTP 200; response bytes=22533; Pinned Source Coverage absent; response SHA-256=df2df1a8cb0d87a0a82ff2f323ea3b45e0bbd40468917119d9fd00fcc44c3b00
 interpretation: the live site still represents the prior revision and is not evidence for this candidate
+
+FRANTIC #33 WORKFLOW AND FULL-REPRODUCIBILITY REMEDIATION
+parent candidate: 13f8bef91ad80604a1db6140b0cdd28bc7675f19
+external writes: none
+
+read-only failed workflow evidence:
+  run 29277684138: event=push; conclusion=failure; jobs=0; head=6fdcaf606f05115fd1ad07dde43c7d5b0186766b
+  run 29284004204: event=push; conclusion=failure; jobs=0; head=3cc959e4dfaca912130c8d14ba45b73bfe222267
+cause: runner.temp was referenced in job-level env before a runner existed
+fix: derive receipt and validation directories from RUNNER_TEMP in the first bash step, append them to GITHUB_ENV, and create them immediately
+preserved: workflow_dispatch-only; no secrets; ephemeral signing; pinned runx 0.6.14; exact root receipt resolution; verify; fail-closed aggregate exit; always-upload artifacts
+
+workflow static checks:
+  actionlint: not installed locally
+  PyYAML 6.0.3 parse: exit 0; jobs=[validate]; steps=6
+  focused validation/workflow tests: 13 passed; 0 failed
+  regression: job-level env contains no runner context; RUNNER_TEMP and GITHUB_ENV initialization required
+
+isolated snapshot cause check:
+  committed generated_at before fix: 2026-07-15T00:30:22Z
+  fresh generated_at before fix: 2026-07-15T00:44:27Z
+  semantic equality after removing generated_at: true
+  committed SHA-256 before fix: 36bffa24d18ce074ebd2ac62c3415318c1e35eca9e315491cb19bcc4b3491daf
+  fresh SHA-256 before fix: 1626ca147dbe8e8952f9d983613c70d5a3f2505c0607dc8e6ed30256a6b4da74
+cause: Sourcey wall-clock generated_at changed; manifest then changed because it hashes godoc.json
+fix: after the real Sourcey adapter succeeds, normalize only generated_at to the pinned commit's real committer timestamp from .source-pin.json
+source commit time: 2026-07-02T12:37:50+06:00
+normalized UTC value: 2026-07-02T06:37:50Z
+meaning: immutable source-time provenance basis, not rebuild wall-clock time
+
+complete generation regression:
+  creates an isolated temporary Git repository from current package bytes
+  runs the documented npm run prepare:docs command
+  requires git diff --exit-code for godoc.json, inventory, mappings, manifest, and all dist files
+  result: 17 package tests passed; 0 failed
 line-ending fact: the exact source snapshot blobs remain CRLF; generate-mappings.mjs computes canonical repository-LF bytes and binds them to fixed upstream raw SHA-256 plus pinned Git blob SHA-1
 future text policy: .gitattributes is retained for future normalization intent only and does not prove the existing blobs or every checkout are LF
 

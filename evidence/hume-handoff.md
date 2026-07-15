@@ -61,3 +61,21 @@ change is independently verified.
 
 The current public site may still serve the pre-candidate revision. It is not
 valid evidence for this candidate until a fresh deployment is visible.
+
+## Superseding workflow and reproducibility repair
+
+Two prior push-associated workflow records failed before creating any job. The
+repair removes `runner.temp` from job-level `env`; the first bash step derives
+both temporary directories from `$RUNNER_TEMP`, writes them to `$GITHUB_ENV`,
+and creates them before later steps use them. Manual-only triggering, pinned
+actions and runx 0.6.14, ephemeral signing, exact root receipt extraction,
+verification, fail-closed exits, and always-upload behavior are unchanged.
+
+Sourcey's adapter emits a wall-clock `generated_at`, which made a fresh
+snapshot and its manifest record dirty despite identical API semantics. The
+wrapper now normalizes only that field to the immutable target commit's real
+committer timestamp from `.source-pin.json`, converted to UTC. Documentation
+states that this is the source-time provenance basis, not rebuild wall-clock
+time. A regression test copies the package into an isolated Git repository,
+runs the complete documented preparation command, and requires zero Git diff
+for the snapshot, inventory, mappings, manifest, and complete static site.

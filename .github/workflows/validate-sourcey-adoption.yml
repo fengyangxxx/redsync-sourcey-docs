@@ -54,8 +54,6 @@ jobs:
       INPUT_UPSTREAM_PR_URL: ${{ inputs.upstream_pr_url }}
       INPUT_UPSTREAM_PR_HEAD_COMMIT: ${{ inputs.upstream_pr_head_commit }}
       INPUT_MAPPINGS_URL: ${{ inputs.mappings_url }}
-      RUNX_RECEIPT_DIR: ${{ runner.temp }}/runx-receipts
-      VALIDATION_OUTPUT_DIR: ${{ runner.temp }}/sourcey-validation
       SKILL_ARTIFACT_DIR: ${{ github.workspace }}/validation-skill/redsync-sourcey-validation/artifacts
 
     steps:
@@ -71,7 +69,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$RUNX_RECEIPT_DIR" "$VALIDATION_OUTPUT_DIR"
+          runx_receipt_dir="$RUNNER_TEMP/runx-receipts"
+          validation_output_dir="$RUNNER_TEMP/sourcey-validation"
+          {
+            printf 'RUNX_RECEIPT_DIR=%s\n' "$runx_receipt_dir"
+            printf 'VALIDATION_OUTPUT_DIR=%s\n' "$validation_output_dir"
+          } >>"$GITHUB_ENV"
+          mkdir -p "$runx_receipt_dir" "$validation_output_dir"
           node <<'NODE'
           const { appendFileSync } = require("node:fs");
           const { createPrivateKey, createPublicKey, randomBytes } = require("node:crypto");

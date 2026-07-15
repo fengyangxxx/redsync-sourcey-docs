@@ -39,3 +39,9 @@ and `GOFLAGS=-buildvcs=false`; disabling VCS stamping avoids irrelevant errors
 from copied example packages while source identity remains pinned separately.
 `SOURCEY_GODOC_OUTPUT` can override the default `godoc.json` destination in a
 restricted build sandbox; it does not change the Sourcey adapter or source.
+
+Sourcey initially writes a wall-clock `generated_at` value. For reproducible
+snapshot bytes, the wrapper replaces only that field with the pinned source
+commit's real committer timestamp from `.source-pin.json`, normalized to UTC as
+`2026-07-02T06:37:50Z`. The value identifies the immutable source-time basis;
+it is not presented as the wall-clock time of a later rebuild.
