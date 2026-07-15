@@ -1,0 +1,43 @@
+# Pinned Source Coverage
+
+This documentation build is bound to the public Redsync source commit:
+
+```text
+79f6ba24a8bf41f35141de700d410a06bb27622f
+```
+
+The source is licensed under BSD-3-Clause. The committed inventory records 19
+non-test Go files and 110 exported declarations across 15 packages. These
+counts come from `evidence/inventory.json`; they are not estimates from rendered
+page text.
+
+## Package Surface
+
+The Go API tab includes the root lock implementation, the shared `redis`
+interfaces, adapters for go-redis v6 through v9, and the Redigo, Rueidis, and
+Valkey adapters. It also records the example packages present at the pinned
+commit. Package pages link to source at the same immutable commit.
+
+## Exact Mapping Checks
+
+Five representative pages are bound to exact generated HTML and source bytes
+in `evidence/page-source-mappings.json`. Each record contains:
+
+- the generated page SHA-256;
+- the rendered package or symbol;
+- the pinned source URL and declaration line;
+- the canonical repository-LF source SHA-256; and
+- the upstream Git blob SHA-1.
+
+The governed validator checks immutable repository bytes first. A public Read
+the Docs page passes only when it contains the expected Sourcey symbol and
+reduces byte-for-byte to the immutable page after removing exactly one known
+Read the Docs addon fragment. Unknown, duplicate, or additional changes remain
+blocked.
+
+## Publication State
+
+This page is a substantive part of the post-claim publication candidate. A
+previous Read the Docs deployment does not prove these bytes were published.
+The candidate commit must be deployed and checked at its immutable repository
+revision before any governed evidence or receipt can describe it as live.

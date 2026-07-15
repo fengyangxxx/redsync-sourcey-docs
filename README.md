@@ -34,6 +34,8 @@ installation must not be used for governed evidence.
 - `sourcey.config.ts`: Sourcey 3.6.3 `godoc()` configuration.
 - `godoc.json`: generated Sourcey Go API snapshot.
 - `dist/`: navigable static site.
+- `pinned-source-coverage.md`: public inventory and immutable byte-proof scope
+  for the post-claim publication candidate.
 - `evidence/inventory.json`: package, file, and exported-symbol inventory.
 - `evidence/page-source-mappings.json`: five exact immutable-page and pinned
   repository-LF source checks.
@@ -54,7 +56,9 @@ The root `.gitattributes` is a policy for future text normalization; it is not
 evidence that the existing snapshot blobs or every checkout are LF.
 
 This directory contains no publication receipt and makes no claim that the
-Read the Docs site or upstream PR already exists.
+current commit is deployed. The Read the Docs project and upstream PR #245
+exist, but the PR is open and unmerged; it is an optional link proposal, not
+proof of upstream adoption.
 
 ## Governed adoption validation
 

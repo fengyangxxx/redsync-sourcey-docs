@@ -1,8 +1,9 @@
 # Hosting Decision
 
-Read the Docs is the selected hosting service. The project slug and public URL
-are established during the publication phase; this source commit does not
-claim that an import or public deployment has already completed.
+Read the Docs is the selected hosting service at
+`https://redsync-sourcey-docs.readthedocs.io/en/latest/`. The project already
+serves an earlier revision, but this source commit does not claim that the
+post-claim candidate has been pushed, built, or deployed.
 
 Read the Docs provides a durable, project-named documentation service rather
 than a personal GitHub Pages site, tunnel, or deploy-preview URL. After the
@@ -15,10 +16,11 @@ from `godoc.json`, and copies `dist/` to `$READTHEDOCS_OUTPUT/html/`.
 
 Phase-aware status:
 
-- Static site: built and locally verified.
-- Initial publication: performed after this package is committed and imported.
-- Upstream adoption PR: opened only after the public site exists and can be
-  linked and reviewed by maintainers.
+- Static site: regenerated and locally verified for the candidate commit.
+- Candidate publication: pending an independently approved push and fresh Read
+  the Docs build; the earlier deployment is not candidate evidence.
+- Upstream PR: `https://github.com/go-redsync/redsync/pull/245` is open and
+  unmerged. It is an optional README link proposal, not adoption.
 - Governed live validation: run only after both the site and PR exist.
 - Immutable receipt, evidence, and report links: recorded in a later commit
   after validation and notary steps produce those artifacts.

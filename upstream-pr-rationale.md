@@ -1,8 +1,9 @@
 # Upstream Adoption Sequence and PR Rationale
 
-This page records the maintainer rationale and required phase ordering. It does
-not claim that an upstream PR or public documentation URL already exists in
-this commit.
+This page records the maintainer rationale and required phase ordering. The
+optional link proposal is
+`https://github.com/go-redsync/redsync/pull/245`. It is currently open and
+unmerged, so it is not proof that Redsync maintainers adopted this site.
 
 ## Suggested Title
 
@@ -24,16 +25,18 @@ Docs project and backing repository exist, Redsync maintainers can be invited
 so the project can own future rebuilds or move the static output to a
 project-controlled host.
 
-The PR is opened only after the initial public documentation deployment. Its
-body must link the then-current verified public site rather than predict a URL.
-Before opening the PR, the following package facts are checked:
+The PR was opened against an earlier public documentation deployment. A fresh
+post-claim docs commit and Read the Docs build must be independently verified;
+the PR must not be described as adoption unless maintainers merge it. The
+following package facts remain pinned:
 
 - Source commit: `79f6ba24a8bf41f35141de700d410a06bb27622f`
-- Sourcey-generated pages: `21` total, including `15` API package pages
+- Sourcey-generated pages: `22` total, including `15` API package pages
 - Five page-to-source checks: `evidence/page-source-mappings.json`
 
 No library code or runtime dependency changes are included.
 
-After the PR exists, governed live validation checks the public pages, pinned
+Governed live validation checks the freshly deployed public pages, pinned
 source mappings, and exact PR state/head. Receipt, notary, evidence, and report
-links are generated afterward and added in a later immutable commit.
+links are generated afterward and added in a later immutable commit. Until
+then, PR #245 remains only an optional link proposal.

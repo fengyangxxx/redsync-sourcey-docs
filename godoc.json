@@ -2,7 +2,7 @@
   "schema_version": 1,
   "source": "sourcey-godoc",
   "module_path": "github.com/go-redsync/redsync/v4",
-  "generated_at": "2026-07-13T17:42:46Z",
+  "generated_at": "2026-07-15T00:30:22Z",
   "packages": [
     {
       "importPath": "github.com/go-redsync/redsync/v4",

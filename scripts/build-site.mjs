@@ -22,6 +22,7 @@ if (result.status === 0) {
   const phaseAwareOutputs = [
     "index.html",
     "introduction.html",
+    "pinned-source-coverage.html",
     "reproduce.html",
     "hosting-decision.html",
     "maintainer-gap-analysis.html",

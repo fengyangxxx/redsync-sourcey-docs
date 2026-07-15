@@ -25,6 +25,7 @@ export default defineConfig({
               group: "Project",
               pages: [
                 "introduction",
+                "pinned-source-coverage",
                 "reproduce",
                 "hosting-decision",
                 "maintainer-gap-analysis",

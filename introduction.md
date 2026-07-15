@@ -14,6 +14,7 @@ adapters for go-redis, Redigo, Rueidis, and Valkey. Each package page links back
 to the exact pinned source rather than a moving branch.
 
 The generated site is intended for the project-named, transferable Read the
-Docs home `redsync-sourcey-docs.readthedocs.io`. Publication and the open
-upstream adoption PR are separate post-build steps and must be verified before
-any final delivery.
+Docs home `redsync-sourcey-docs.readthedocs.io`. A prior deployment does not
+prove this post-claim candidate is live. The candidate commit, its fresh Read
+the Docs build, and the still-open upstream link proposal must be verified as
+separate evidence surfaces before any final delivery.

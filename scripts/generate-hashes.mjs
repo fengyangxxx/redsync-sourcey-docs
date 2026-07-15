@@ -17,6 +17,7 @@ const roots = [
   "sourcey.config.ts",
   "godoc.json",
   "introduction.md",
+  "pinned-source-coverage.md",
   "reproduce.md",
   "hosting-decision.md",
   "maintainer-gap-analysis.md",

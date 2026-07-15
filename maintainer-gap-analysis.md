@@ -27,9 +27,25 @@ in a separate documentation repository and can be rebuilt with one command
 after releases. Upstream maintainers can be invited to the Read the Docs project
 and repository without coupling the library release process to Sourcey.
 
+## Remaining Maintainer Gaps
+
+1. The README still points at legacy `godoc.org` over HTTP, so users do not get
+   a project-specific package map from the repository home.
+2. Adapter choice is spread across package directories; there is no maintained
+   compatibility table that distinguishes current and versioned go-redis,
+   Redigo, Rueidis, and Valkey entry points.
+3. Lock correctness depends on timeout, retry, expiry, and extension choices,
+   but the API reference has no task-oriented guide connecting those options
+   to failure and recovery behavior.
+4. The generated snapshot is pinned rather than release-aware. Maintainers need
+   an explicit refresh policy or CI drift check when Redsync cuts a release or
+   changes an exported declaration.
+
 ## Adoption Recommendation
 
-Accept the README link as a low-risk documentation improvement, then decide
-whether to take ownership of the Read the Docs project. If maintainers do not
-want a separate host, the same committed static output can later move to a
-project-owned docs domain without changing the Sourcey source adapter.
+PR #245 is an optional README link proposal and is still open and unmerged; it
+must not be treated as adoption. Maintainers can evaluate the generated pages,
+then decide whether to merge the link and take ownership of the Read the Docs
+project. If they do not want a separate host, the same committed static output
+can later move to a project-owned docs domain without changing the Sourcey
+source adapter.

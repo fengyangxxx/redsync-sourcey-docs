@@ -89,7 +89,7 @@ test("isolated Sourcey rebuild is byte-identical to committed dist", async () =>
     const committedFiles = await collectFiles(committedRoot);
     const rebuiltFiles = await collectFiles(output);
     assert.deepEqual(rebuiltFiles, committedFiles);
-    assert.equal(rebuiltFiles.length, 29);
+    assert.equal(rebuiltFiles.length, 30);
     for (const path of rebuiltFiles) {
       const committed = await readFile(join(committedRoot, path));
       const rebuilt = await readFile(join(output, path));
@@ -222,6 +222,7 @@ test("static site is navigable and includes maintainer-facing pages", async () =
 
   for (const href of [
     "introduction.html",
+    "pinned-source-coverage.html",
     "reproduce.html",
     "hosting-decision.html",
     "maintainer-gap-analysis.html",
@@ -233,11 +234,23 @@ test("static site is navigable and includes maintainer-facing pages", async () =
   assert.match(apiRedirect, /\.\.\/go-api\.html/);
 });
 
+test("pinned source coverage reports the audited inventory and publication boundary", async () => {
+  const coverage = await text("pinned-source-coverage.md");
+  const generated = await text("dist/pinned-source-coverage.html");
+
+  for (const value of [pin, "19", "110", "15", "BSD-3-Clause"]) {
+    assert.ok(coverage.includes(value), `coverage source missing ${value}`);
+    assert.ok(generated.includes(value), `generated coverage missing ${value}`);
+  }
+  assert.match(coverage, /previous Read the Docs deployment does not prove these bytes/i);
+  assert.match(coverage, /must be deployed and checked/i);
+});
+
 test("generated maintainer rationale reflects finalized page counts", async () => {
   const page = await text("dist/upstream-pr-rationale.html");
 
   assert.ok(!page.includes(unresolved("GENERATED_PAGE_COUNT")));
-  assert.match(page, /Sourcey-generated pages:\s*<code>21<\/code> total/);
+  assert.match(page, /Sourcey-generated pages:\s*<code>22<\/code> total/);
   assert.match(page, /including\s*<code>15<\/code> API package pages/);
 });
 

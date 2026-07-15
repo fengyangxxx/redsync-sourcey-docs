@@ -245,6 +245,58 @@ command: npm test
 exit: 0
 result: 25 passed; 0 failed; 0 skipped
 included isolated Sourcey result: 29/29 committed dist files byte-identical
+
+FRANTIC #33 POST-CLAIM FALLBACK CANDIDATE
+active claim: f0ca226c-f865-4365-aa65-a57b9a027abb
+claimed_at: 2026-07-15T00:09:22.169Z
+delivery_deadline: 2026-07-15T05:09:22.169Z
+base commit: 3cc959e4dfaca912130c8d14ba45b73bfe222267
+local branch: docs/sourcey-snapshot-coverage
+external writes: none
+
+substantive change:
+  added pinned-source-coverage.md to Sourcey navigation
+  regenerated public Sourcey output and evidence hashes
+  clarified prior RTD deployment is not evidence for the candidate bytes
+  recorded PR #245 as open/unmerged optional link proposal, not adoption
+
+command: npm run prepare:docs
+exit: 0
+result:
+  sourcey godoc adapter packages=15 diagnostics=0
+  inventory packages=15 non-test-files=19 exported-symbols=110
+  Sourcey pages=22
+  packaged dist files=30, including navigation compatibility redirect
+  mappings=5
+  sha256 manifest files=108 before final transcript refresh
+
+command: npm test
+exit: 0
+result: 29 passed; 0 failed; 0 skipped
+included isolated Sourcey result: 30/30 committed dist files byte-identical
+live publication/RTD build/workflow/receipt/notary: not invoked
+
+FRANTIC #33 CANDIDATE TOOL AND READ-ONLY STATE CHECKS
+command: npx -y @runxhq/cli@0.6.14 --version
+exit: 0
+stdout: runx-cli 0.6.14
+command: npx -y @runxhq/cli@0.6.14 skill inspect validation-skill\redsync-sourcey-validation -j
+exit: 0
+result: status=ok; version=0.1.2; default runner present
+command: quick_validate.py validation-skill\redsync-sourcey-validation
+exit: 0
+stdout: Skill is valid!
+
+command: git ls-remote https://github.com/fengyangxxx/redsync-sourcey-docs.git refs/heads/main
+exit: 0
+result: remote main=3cc959e4dfaca912130c8d14ba45b73bfe222267
+command: gh api repos/go-redsync/redsync/pulls/245 (read only)
+exit: 0
+result: state=open; merged=false; base=master; head=f13cd302b903ae84fc21d914bbeb631a21bb9521; updated_at=2026-07-13T19:38:13Z
+command: read-only GET https://redsync-sourcey-docs.readthedocs.io/en/latest/
+exit: 0
+result: HTTP 200; response bytes=22533; Pinned Source Coverage absent; response SHA-256=df2df1a8cb0d87a0a82ff2f323ea3b45e0bbd40468917119d9fd00fcc44c3b00
+interpretation: the live site still represents the prior revision and is not evidence for this candidate
 line-ending fact: the exact source snapshot blobs remain CRLF; generate-mappings.mjs computes canonical repository-LF bytes and binds them to fixed upstream raw SHA-256 plus pinned Git blob SHA-1
 future text policy: .gitattributes is retained for future normalization intent only and does not prove the existing blobs or every checkout are LF
 
