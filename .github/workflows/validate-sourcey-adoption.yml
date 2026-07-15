@@ -65,10 +65,10 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Create ephemeral CI receipt identity
+      - name: Provision Linux bubblewrap sandbox
         shell: bash
         run: |
-          set -euo pipefail
+          set -uo pipefail
           runx_receipt_dir="$RUNNER_TEMP/runx-receipts"
           validation_output_dir="$RUNNER_TEMP/sourcey-validation"
           {
@@ -76,6 +76,53 @@ jobs:
             printf 'VALIDATION_OUTPUT_DIR=%s\n' "$validation_output_dir"
           } >>"$GITHUB_ENV"
           mkdir -p "$runx_receipt_dir" "$validation_output_dir"
+
+          install_exit=0
+          apt_update_exit=0
+          apt_install_exit=0
+          {
+            printf '%s\n' 'command=sudo apt-get update'
+            sudo apt-get update
+            apt_update_exit=$?
+            printf 'apt_update_exit_code=%s\n' "$apt_update_exit"
+            if [[ "$apt_update_exit" -eq 0 ]]; then
+              printf '%s\n' 'command=sudo apt-get install --yes --no-install-recommends bubblewrap'
+              sudo apt-get install --yes --no-install-recommends bubblewrap
+              apt_install_exit=$?
+              printf 'apt_install_exit_code=%s\n' "$apt_install_exit"
+              install_exit="$apt_install_exit"
+            else
+              printf '%s\n' 'apt_install_exit_code=SKIPPED'
+              install_exit="$apt_update_exit"
+            fi
+          } >"$validation_output_dir/bubblewrap-install.txt" 2>&1
+          printf '%s\n' "$install_exit" \
+            >"$validation_output_dir/bubblewrap-install-exit-code.txt"
+
+          version_exit=0
+          if [[ "$install_exit" -eq 0 ]]; then
+            {
+              bwrap_path="$(command -v bwrap)"
+              printf 'path=%s\n' "$bwrap_path"
+              "$bwrap_path" --version
+            } >"$validation_output_dir/bubblewrap-version.txt" 2>&1 \
+              || version_exit=$?
+          else
+            printf '%s\n' 'bubblewrap version check skipped because installation failed' \
+              >"$validation_output_dir/bubblewrap-version.txt"
+            version_exit=1
+          fi
+          printf '%s\n' "$version_exit" \
+            >"$validation_output_dir/bubblewrap-version-exit-code.txt"
+
+          if [[ "$install_exit" -ne 0 || "$version_exit" -ne 0 ]]; then
+            exit 1
+          fi
+
+      - name: Create ephemeral CI receipt identity
+        shell: bash
+        run: |
+          set -euo pipefail
           node <<'NODE'
           const { appendFileSync } = require("node:fs");
           const { createPrivateKey, createPublicKey, randomBytes } = require("node:crypto");
@@ -96,9 +143,11 @@ jobs:
           });
           const publicKey = publicDer.subarray(publicDer.length - 32);
           const kid = `github-actions-ephemeral-${process.env.GITHUB_RUN_ID}`;
+          const seedBase64 = seed.toString("base64");
+          process.stdout.write(`::add-mask::${seedBase64}\n`);
           const lines = [
             `RUNX_RECEIPT_SIGN_KID=${kid}`,
-            `RUNX_RECEIPT_SIGN_ED25519_SEED_BASE64=${seed.toString("base64")}`,
+            `RUNX_RECEIPT_SIGN_ED25519_SEED_BASE64=${seedBase64}`,
             "RUNX_RECEIPT_SIGN_ISSUER_TYPE=ci",
             `RUNX_RECEIPT_VERIFY_KID=${kid}`,
             `RUNX_RECEIPT_VERIFY_ED25519_PUBLIC_KEY_BASE64=${publicKey.toString("base64")}`,
@@ -199,6 +248,10 @@ jobs:
           if-no-files-found: error
           retention-days: 14
           path: |
+            ${{ runner.temp }}/sourcey-validation/bubblewrap-install.txt
+            ${{ runner.temp }}/sourcey-validation/bubblewrap-install-exit-code.txt
+            ${{ runner.temp }}/sourcey-validation/bubblewrap-version.txt
+            ${{ runner.temp }}/sourcey-validation/bubblewrap-version-exit-code.txt
             ${{ runner.temp }}/sourcey-validation/runx-version.txt
             ${{ runner.temp }}/sourcey-validation/runx-raw-stdout.json
             ${{ runner.temp }}/sourcey-validation/runx-raw-stderr.txt

@@ -458,6 +458,57 @@ test("Linux workflow is manual, live-only, pinned, and preserves raw evidence", 
   assert.doesNotMatch(workflow, /git\s+(?:push|commit)/);
 });
 
+test("Linux workflow provisions the required runx network sandbox and masks the private seed", async () => {
+  const workflow = await text(
+    new URL(".github/workflows/validate-sourcey-adoption.yml", root),
+  );
+
+  const provisionIndex = workflow.indexOf("name: Provision Linux bubblewrap sandbox");
+  const identityIndex = workflow.indexOf("name: Create ephemeral CI receipt identity");
+  const runxIndex = workflow.indexOf("npx -y @runxhq/cli@0.6.14 skill");
+  assert.ok(provisionIndex >= 0 && provisionIndex < identityIndex && identityIndex < runxIndex);
+  const provisionStep = workflow.slice(provisionIndex, identityIndex);
+  assert.match(provisionStep, /set -uo pipefail/);
+  assert.doesNotMatch(provisionStep, /set -e/);
+  const mkdirIndex = provisionStep.indexOf(
+    'mkdir -p "$runx_receipt_dir" "$validation_output_dir"',
+  );
+  const installIndex = provisionStep.indexOf("sudo apt-get update");
+  const installEvidenceIndex = provisionStep.indexOf("bubblewrap-install.txt");
+  const installExitIndex = provisionStep.indexOf("bubblewrap-install-exit-code.txt");
+  const versionEvidenceIndex = provisionStep.indexOf("bubblewrap-version.txt");
+  const versionExitIndex = provisionStep.indexOf("bubblewrap-version-exit-code.txt");
+  const failGateIndex = provisionStep.indexOf('if [[ "$install_exit" -ne 0');
+  assert.ok(mkdirIndex >= 0 && mkdirIndex < installIndex);
+  assert.ok(installIndex < installEvidenceIndex && installEvidenceIndex < failGateIndex);
+  assert.ok(installExitIndex < failGateIndex);
+  assert.ok(versionEvidenceIndex < failGateIndex && versionExitIndex < failGateIndex);
+  assert.match(provisionStep, /apt_update_exit_code=%s/);
+  assert.match(provisionStep, /apt_install_exit_code=%s/);
+  assert.match(provisionStep, /apt_install_exit_code=SKIPPED/);
+  assert.match(provisionStep, /install_exit="\$apt_update_exit"/);
+  assert.match(provisionStep, /install_exit="\$apt_install_exit"/);
+  assert.match(provisionStep, /sudo apt-get install --yes --no-install-recommends bubblewrap/);
+  assert.match(provisionStep, /command -v bwrap/);
+  assert.match(provisionStep, /"\$bwrap_path" --version/);
+  assert.doesNotMatch(workflow, /RUNX_SANDBOX_ALLOW_DECLARED_POLICY_ONLY/);
+
+  const maskIndex = workflow.indexOf("::add-mask::${seedBase64}");
+  const seedEnvIndex = workflow.indexOf("RUNX_RECEIPT_SIGN_ED25519_SEED_BASE64=${seedBase64}");
+  const appendIndex = workflow.indexOf("appendFileSync(process.env.GITHUB_ENV");
+  assert.ok(maskIndex >= 0 && maskIndex < seedEnvIndex && seedEnvIndex < appendIndex);
+
+  const uploadPaths = workflow.match(/\n\s+path:\s*\|([\s\S]*)$/)?.[1];
+  assert.ok(uploadPaths, "upload artifact path block is missing");
+  assert.doesNotMatch(uploadPaths, /seed|GITHUB_ENV|RUNX_RECEIPT_SIGN_ED25519/i);
+  for (const artifact of [
+    "bubblewrap-install.txt",
+    "bubblewrap-install-exit-code.txt",
+    "bubblewrap-version.txt",
+    "bubblewrap-version-exit-code.txt",
+  ]) assert.match(uploadPaths, new RegExp(artifact.replace(".", "\\.")), artifact);
+});
+
 test("bounded RTD addon matches the observed live package-root insertion exactly", async () => {
   const pageUrl = new URL("go-api/package-root.html", publicUrl).href;
   const { fragment, identity } = readTheDocsAddonFragment(

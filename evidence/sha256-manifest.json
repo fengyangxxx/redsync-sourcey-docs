@@ -10,8 +10,8 @@
     },
     {
       "path": ".github/workflows/validate-sourcey-adoption.yml",
-      "bytes": 9654,
-      "sha256": "d257133616d81ac5c0b6982ffa9ddd5e6b6f39f011dd4ab8ec6cc7f32f1a920f"
+      "bytes": 11907,
+      "sha256": "c3644e67cbda6608958d8c215e987899539932e62b54edcb131fe46fbc422276"
     },
     {
       "path": ".gitignore",
@@ -500,8 +500,8 @@
     },
     {
       "path": "tests/validation-skill.test.mjs",
-      "bytes": 29209,
-      "sha256": "25e62dc73e4c6f0c90777f0f64041a03c93aad804eb1dce32a499b237a68f39c"
+      "bytes": 32220,
+      "sha256": "4e7a02d27d12f12422de8c1d3808e108276928a7184b54e6f7ccd91700b8be21"
     },
     {
       "path": "upstream-pr-rationale.md",
