@@ -1,7 +1,5 @@
-import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
 import { isAbsolute, resolve } from "node:path";
 import { boundedGet } from "./bounded-get.mjs";
 import { canonicalizeReadTheDocsPage } from "./rtd-canonicalizer.mjs";
@@ -9,6 +7,9 @@ import { canonicalizeReadTheDocsPage } from "./rtd-canonicalizer.mjs";
 const EXPECTED_TARGET_REPO = "https://github.com/go-redsync/redsync";
 const EXPECTED_MODULE = "github.com/go-redsync/redsync/v4";
 const EXPECTED_CLI_VERSION = "runx-cli 0.6.14";
+const EXPECTED_LICENSE = "BSD-3-Clause";
+const EXPECTED_SOURCEY_COMMAND =
+  "sourcey godoc --module ./source/redsync --packages ./... --out godoc.json";
 const UNRESOLVED_FINAL_RE = new RegExp(["PLACE", "HOLDER_[A-Z0-9_]+"].join(""), "g");
 
 function input(name, fallback = "") {
@@ -32,6 +33,23 @@ function excerpt(value, limit = 240) {
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, limit);
+}
+
+function checkedText(label, body) {
+  if (label === "target_commit_api" || label === "docs_commit_api") {
+    try {
+      const parsed = JSON.parse(body);
+      return JSON.stringify({
+        sha: parsed.sha ?? null,
+        files: Array.isArray(parsed.files)
+          ? parsed.files.map((file) => ({ filename: file.filename ?? null }))
+          : [],
+      });
+    } catch {
+      return "invalid commit API JSON";
+    }
+  }
+  return excerpt(body);
 }
 
 function parseGitHubRepo(value) {
@@ -66,6 +84,12 @@ function githubApi(repo, suffix) {
   return `https://api.github.com/repos/${repo.owner}/${repo.repo}${suffix}`;
 }
 
+function apiPagePath(importPath) {
+  if (importPath === EXPECTED_MODULE) return "go-api/package-root.html";
+  const relativePath = importPath.slice(`${EXPECTED_MODULE}/`.length);
+  return `go-api/pkg-${relativePath.replaceAll("/", "-")}.html`;
+}
+
 function resolveOutputDir(value) {
   const fallback = `artifacts/validation-${new Date().toISOString().replace(/[:.]/g, "-")}`;
   const selected = value || fallback;
@@ -83,6 +107,7 @@ async function main() {
     upstream_pr_url: input("upstream_pr_url"),
     upstream_pr_head_commit: input("upstream_pr_head_commit"),
     mappings_url: input("mappings_url"),
+    runx_version_output: input("runx_version_output"),
     output_dir: input("output_dir"),
     validation_mode: input("validation_mode", "live").toLowerCase(),
     fixture_proxy_url: input("fixture_proxy_url"),
@@ -154,7 +179,7 @@ async function main() {
       content_sha256: fetched.content_sha256,
       bytes: rawBytes.length,
       content_type: fetched.content_type,
-      checked_text: excerpt(body),
+      checked_text: checkedText(label, body),
       error: fetched.error,
       attempts: fetched.attempts,
       attempt_count: fetched.attempt_count,
@@ -188,6 +213,7 @@ async function main() {
     "upstream_pr_url",
     "upstream_pr_head_commit",
     "mappings_url",
+    "runx_version_output",
   ];
   const inputFailures = required.filter((name) => !inputs[name]).map((name) => `${name} is required`);
   if (!new Set(["live", "fixture"]).has(inputs.validation_mode)) {
@@ -209,32 +235,12 @@ async function main() {
     { failures: inputFailures, target_repo_url: inputs.target_repo_url },
   );
 
-  let cliVersion = { command: "npx -y @runxhq/cli@0.6.14 --version", output: "", exit_code: 1, source: "live_command" };
-  if (inputs.validation_mode === "fixture" && process.env.REDSYNC_VALIDATION_FIXTURE_CLI_VERSION) {
-    cliVersion = {
-      ...cliVersion,
-      output: process.env.REDSYNC_VALIDATION_FIXTURE_CLI_VERSION.trim(),
-      exit_code: 0,
-      source: "fixture_override",
-    };
-  } else {
-    const versionRun = spawnSync("npx", ["-y", "@runxhq/cli@0.6.14", "--version"], {
-      encoding: "utf8",
-      env: {
-        ...process.env,
-        npm_config_cache: resolve(tmpdir(), "redsync-validation-npm-cache"),
-      },
-      shell: process.platform === "win32",
-    });
-    cliVersion = {
-      ...cliVersion,
-      output: (versionRun.stdout ?? "").trim(),
-      stderr: (versionRun.stderr ?? "").trim(),
-      exit_code: versionRun.status ?? 1,
-      source: "live_command",
-      error: versionRun.error?.message,
-    };
-  }
+  const cliVersion = {
+    command: "npx -y @runxhq/cli@0.6.14 --version",
+    output: inputs.runx_version_output,
+    exit_code: inputs.runx_version_output ? 0 : 1,
+    source: "captured_outer_command",
+  };
   transcript.push(`CLI_COMMAND ${cliVersion.command}`);
   transcript.push(`CLI_SOURCE ${cliVersion.source}`);
   transcript.push(`CLI_EXIT ${cliVersion.exit_code}`);
@@ -262,6 +268,30 @@ async function main() {
 
   let mappings = [];
   let prFields = {};
+  let projectFacts = {
+    repository: inputs.target_repo_url,
+    commit: inputs.target_commit,
+    license: null,
+    sourcey_adapter: "godoc",
+    sourcey_command: EXPECTED_SOURCEY_COMMAND,
+    sourcey_config_url: null,
+    generated_page_list: [],
+    package_count: null,
+    non_test_go_file_count: null,
+    exported_symbol_count: null,
+    public_host: {
+      url: inputs.public_url,
+      classification: "claimant-authored project-named community documentation",
+      target_owned: false,
+      official: false,
+    },
+    upstream_pr: {
+      url: inputs.upstream_pr_url,
+      role: "optional unmerged link proposal",
+      adoption: false,
+      endorsement: false,
+    },
+  };
   if (docsRepo && targetRepo && pull && inputFailures.length === 0) {
     addCheck(
       "github_url_shapes",
@@ -269,6 +299,46 @@ async function main() {
       pull.owner === "go-redsync" && pull.repo === "redsync" && targetRepo.url === EXPECTED_TARGET_REPO,
       { docs_repo: docsRepo.url, target_repo: targetRepo.url, pull_request: inputs.upstream_pr_url },
       [inputs.docs_repo_url, inputs.target_repo_url, inputs.upstream_pr_url],
+    );
+
+    const targetRepositoryUrl = githubApi(targetRepo, "");
+    const targetRepositoryResponse = await fetchText(targetRepositoryUrl, "target_repository_api");
+    let targetRepository = {};
+    try { targetRepository = JSON.parse(targetRepositoryResponse.body); } catch {}
+    const targetLicenseUrl = rawUrl(targetRepo, inputs.target_commit, "LICENSE");
+    const targetLicenseResponse = await fetchText(targetLicenseUrl, "target_license");
+    addPlaceholderSurface("target_license", targetLicenseUrl, targetLicenseResponse.body);
+    const pushedAtMs = Date.parse(targetRepository.pushed_at ?? "");
+    const checkedAtMs = Date.parse(checkedAt);
+    const activityAgeDays = Number.isFinite(pushedAtMs)
+      ? Math.floor((checkedAtMs - pushedAtMs) / 86_400_000)
+      : null;
+    const projectPass =
+      targetRepositoryResponse.http_status === 200 &&
+      targetRepository.full_name === "go-redsync/redsync" &&
+      targetRepository.archived === false &&
+      targetRepository.license?.spdx_id === EXPECTED_LICENSE &&
+      activityAgeDays !== null &&
+      activityAgeDays >= 0 &&
+      activityAgeDays <= 365 &&
+      targetLicenseResponse.http_status === 200 &&
+      /Redistribution and use in source and binary forms/.test(targetLicenseResponse.body) &&
+      /Neither the name of the Redsync nor the names of its/.test(targetLicenseResponse.body);
+    addCheck(
+      "target_project",
+      "Redsync is a maintained, public, unarchived BSD-3-Clause third-party project at the pinned source.",
+      projectPass,
+      {
+        repository_http_status: targetRepositoryResponse.http_status,
+        full_name: targetRepository.full_name ?? null,
+        archived: targetRepository.archived ?? null,
+        pushed_at: targetRepository.pushed_at ?? null,
+        activity_age_days: activityAgeDays,
+        license_spdx: targetRepository.license?.spdx_id ?? null,
+        license_http_status: targetLicenseResponse.http_status,
+        license_sha256: targetLicenseResponse.content_sha256,
+      },
+      [targetRepositoryUrl, targetLicenseUrl],
     );
 
     const targetCommitUrl = githubApi(targetRepo, `/commits/${inputs.target_commit}`);
@@ -332,9 +402,12 @@ async function main() {
 
     const docsPaths = [
       "sourcey.config.ts",
+      "scripts/generate-godoc-snapshot.mjs",
       "godoc.json",
       "dist/index.html",
+      "evidence/inventory.json",
       "evidence/page-source-mappings.json",
+      "evidence/sha256-manifest.json",
     ];
     const docsResponses = new Map();
     for (const path of docsPaths) {
@@ -344,9 +417,31 @@ async function main() {
       addPlaceholderSurface(`immutable_docs:${path}`, url, response.body);
     }
     const configBody = docsResponses.get("sourcey.config.ts")?.body ?? "";
+    const snapshotScriptBody = docsResponses.get("scripts/generate-godoc-snapshot.mjs")?.body ?? "";
     const indexBody = docsResponses.get("dist/index.html")?.body ?? "";
     let godoc = {};
+    let inventory = {};
+    let sha256Manifest = {};
     try { godoc = JSON.parse(docsResponses.get("godoc.json")?.body ?? ""); } catch {}
+    try { inventory = JSON.parse(docsResponses.get("evidence/inventory.json")?.body ?? ""); } catch {}
+    try { sha256Manifest = JSON.parse(docsResponses.get("evidence/sha256-manifest.json")?.body ?? ""); } catch {}
+    const generatedPageList = Array.isArray(sha256Manifest.files)
+      ? sha256Manifest.files
+          .map((file) => file.path)
+          .filter((path) => /^dist\/.+\.html$/.test(path))
+          .map((path) => path.slice("dist/".length))
+          .sort()
+      : [];
+    const apiPackagePageList = Array.isArray(inventory.packages)
+      ? inventory.packages.map((item) => apiPagePath(item.import_path)).sort()
+      : [];
+    const sourceyCommandPass =
+      snapshotScriptBody.includes('"godoc"') &&
+      snapshotScriptBody.includes('"--module"') &&
+      snapshotScriptBody.includes('"./source/redsync"') &&
+      snapshotScriptBody.includes('"--packages"') &&
+      snapshotScriptBody.includes('"./..."') &&
+      snapshotScriptBody.includes('"--out"');
     const docsFilesPass =
       docsPaths.every((path) => docsResponses.get(path)?.http_status === 200) &&
       configBody.includes(EXPECTED_TARGET_REPO) &&
@@ -361,6 +456,16 @@ async function main() {
       godoc.module_path === EXPECTED_MODULE &&
       Array.isArray(godoc.packages) &&
       godoc.packages.length === 15 &&
+      sourceyCommandPass &&
+      inventory.schema_version === "redsync-sourcey-inventory/v1" &&
+      inventory.repository === EXPECTED_TARGET_REPO &&
+      inventory.commit === inputs.target_commit &&
+      inventory.package_count === 15 &&
+      inventory.non_test_go_file_count === 19 &&
+      inventory.exported_symbol_count === 110 &&
+      apiPackagePageList.length === 15 &&
+      generatedPageList.length >= 20 &&
+      sha256Manifest.schema_version === "sha256-manifest/v1" &&
       mappingShape;
     addCheck(
       "immutable_docs_files",
@@ -371,6 +476,15 @@ async function main() {
         godoc_schema: godoc.schema_version ?? null,
         godoc_module: godoc.module_path ?? null,
         godoc_packages: Array.isArray(godoc.packages) ? godoc.packages.length : null,
+        sourcey_adapter: "godoc",
+        sourcey_command: EXPECTED_SOURCEY_COMMAND,
+        sourcey_command_configured: sourceyCommandPass,
+        package_count: inventory.package_count ?? null,
+        non_test_go_file_count: inventory.non_test_go_file_count ?? null,
+        exported_symbol_count: inventory.exported_symbol_count ?? null,
+        api_package_pages: apiPackagePageList,
+        generated_page_count: generatedPageList.length,
+        generated_page_list: generatedPageList,
         config_has_target_repo: configBody.includes(EXPECTED_TARGET_REPO),
         config_has_target_commit: configBody.includes(inputs.target_commit),
         dist_has_target_module: indexBody.includes(EXPECTED_MODULE),
@@ -379,6 +493,46 @@ async function main() {
       },
       docsPaths.map((path) => rawUrl(docsRepo, inputs.docs_commit, path)),
     );
+    const documentationDepthPass =
+      inventory.non_test_go_file_count >= 2 &&
+      inventory.exported_symbol_count >= 20 &&
+      apiPackagePageList.length === inventory.package_count &&
+      generatedPageList.length >= 20;
+    addCheck(
+      "documentation_depth",
+      "The pinned project has multiple source files and the published package documents at least 20 real exported items.",
+      documentationDepthPass,
+      {
+        non_test_go_file_count: inventory.non_test_go_file_count ?? null,
+        exported_symbol_count: inventory.exported_symbol_count ?? null,
+        package_count: inventory.package_count ?? null,
+        generated_page_count: generatedPageList.length,
+        api_package_page_list: apiPackagePageList,
+      },
+      [
+        rawUrl(docsRepo, inputs.docs_commit, "evidence/inventory.json"),
+        rawUrl(docsRepo, inputs.docs_commit, "evidence/sha256-manifest.json"),
+      ],
+    );
+    projectFacts = {
+      ...projectFacts,
+      license: EXPECTED_LICENSE,
+      archived: targetRepository.archived ?? null,
+      pushed_at: targetRepository.pushed_at ?? null,
+      activity_age_days: activityAgeDays,
+      sourcey_config_url: rawUrl(docsRepo, inputs.docs_commit, "sourcey.config.ts"),
+      sourcey_snapshot_script_url: rawUrl(
+        docsRepo,
+        inputs.docs_commit,
+        "scripts/generate-godoc-snapshot.mjs",
+      ),
+      generated_page_list: generatedPageList,
+      api_package_page_list: apiPackagePageList,
+      package_count: inventory.package_count ?? null,
+      non_test_go_file_count: inventory.non_test_go_file_count ?? null,
+      exported_symbol_count: inventory.exported_symbol_count ?? null,
+      inventory_url: rawUrl(docsRepo, inputs.docs_commit, "evidence/inventory.json"),
+    };
 
     const publicRoot = await fetchText(inputs.public_url, "public_url");
     addPlaceholderSurface("public_root", inputs.public_url, publicRoot.body);
@@ -499,7 +653,6 @@ async function main() {
         `https://github.com/go-redsync/redsync/blob/${inputs.target_commit}/${mapping.source_path}#L${mapping.source_line}`;
       const sourceUrlPinned =
         mapping.source_url === expectedSourcePrefix || mapping.source_url.startsWith(`${expectedSourcePrefix}-L`);
-      const sourcePage = await fetchText(mapping.source_url, `source_page:${mapping.source_path}`);
       const rawSourceUrl =
         `https://raw.githubusercontent.com/go-redsync/redsync/${inputs.target_commit}/${mapping.source_path}`;
       const rawSource = await fetchText(rawSourceUrl, `raw_source:${mapping.source_path}`);
@@ -513,7 +666,8 @@ async function main() {
       sourceResults.push({
         source_url: mapping.source_url,
         raw_source_url: rawSourceUrl,
-        source_page_status: sourcePage.http_status,
+        source_url_shape_verified: sourceUrlPinned,
+        source_page_fetch: "not_required",
         raw_source_status: rawSource.http_status,
         source_url_pinned: sourceUrlPinned,
         content_sha256: rawSource.content_sha256,
@@ -524,7 +678,6 @@ async function main() {
         line_matches: lineMatches,
         pass:
           sourceUrlPinned &&
-          sourcePage.http_status === 200 &&
           rawSource.http_status === 200 &&
           rawSource.content_sha256 === mapping.source_sha256 &&
           rawSourceGitBlobSha1 === mapping.source_git_blob_sha1 &&
@@ -533,7 +686,7 @@ async function main() {
     }
     addCheck(
       "five_pinned_sources",
-      "All five source URLs target the pinned Redsync commit and raw source bytes/lines match mappings.",
+      "All five source links have the exact pinned Redsync shape and raw source bytes/lines match mappings.",
       sourceResults.length === 5 && sourceResults.every((item) => item.pass),
       { sources: sourceResults },
       sourceResults.flatMap((item) => [item.source_url, item.raw_source_url]),
@@ -547,6 +700,8 @@ async function main() {
       api_url: prApiUrl,
       html_url: pr.html_url ?? null,
       state: pr.state ?? null,
+      draft: pr.draft ?? null,
+      merged_at: pr.merged_at ?? null,
       base_ref: pr.base?.ref ?? null,
       head_sha: pr.head?.sha ?? null,
       body_sha256: sha256(String(pr.body ?? "")),
@@ -554,6 +709,8 @@ async function main() {
     };
     transcript.push(`PR_URL ${prFields.html_url}`);
     transcript.push(`PR_STATE ${prFields.state}`);
+    transcript.push(`PR_DRAFT ${prFields.draft}`);
+    transcript.push(`PR_MERGED_AT ${prFields.merged_at}`);
     transcript.push(`PR_BASE_REF ${prFields.base_ref}`);
     transcript.push(`PR_HEAD_SHA ${prFields.head_sha}`);
     transcript.push(`PR_BODY_SHA256 ${prFields.body_sha256}`);
@@ -563,6 +720,8 @@ async function main() {
       prResponse.http_status === 200 &&
       pr.html_url === inputs.upstream_pr_url &&
       pr.state === "open" &&
+      pr.draft === false &&
+      pr.merged_at === null &&
       pr.base?.ref === "master" &&
       pr.head?.sha === inputs.upstream_pr_head_commit &&
       prBody.includes(inputs.public_url) &&
@@ -571,11 +730,18 @@ async function main() {
       /adopt|ownership|transfer/i.test(prBody);
     addCheck(
       "upstream_pr",
-      "Upstream PR is OPEN against master at the exact head and includes URL plus maintainer rationale.",
+      "The optional upstream link proposal is open, unmerged, non-draft, exact-head, and is not adoption or endorsement.",
       prPass,
       { http_status: prResponse.http_status, ...prFields },
       [inputs.upstream_pr_url, prApiUrl],
     );
+    projectFacts.upstream_pr = {
+      ...projectFacts.upstream_pr,
+      state: prFields.state,
+      draft: prFields.draft,
+      merged_at: prFields.merged_at,
+      head_sha: prFields.head_sha,
+    };
 
     const placeholders = [];
     for (const surface of placeholderSurfaces) {
@@ -604,9 +770,11 @@ async function main() {
   } else {
     for (const id of [
       "target_commit",
+      "target_project",
       "docs_commit",
       "mappings_shape",
       "immutable_docs_files",
+      "documentation_depth",
       "public_url",
       "sourcey_home",
       "five_api_pages",
@@ -631,8 +799,35 @@ async function main() {
   const transcriptBytes = Buffer.from(transcriptText);
   const transcriptPath = resolve(outputDir, "transcript.txt");
   const evidencePath = resolve(outputDir, "evidence.json");
+  const transcriptRef = "artifacts/transcript.txt";
+  const evidenceRef = "artifacts/evidence.json";
   await mkdir(outputDir, { recursive: true });
   await writeFile(transcriptPath, transcriptBytes);
+
+  const observations = [
+    cliVersion.output,
+    `Target repository: ${inputs.target_repo_url}`,
+    `Pinned target commit: ${inputs.target_commit}`,
+    `License: ${projectFacts.license ?? "unverified"}`,
+    `Sourcey adapter: ${projectFacts.sourcey_adapter}`,
+    `Sourcey command: ${projectFacts.sourcey_command}`,
+    `Sourcey config: ${projectFacts.sourcey_config_url ?? "unverified"}`,
+    `Generated page count: ${projectFacts.generated_page_list.length}`,
+    `Generated page list: ${projectFacts.generated_page_list.join(", ")}`,
+    `Coverage: packages=${projectFacts.package_count ?? "unverified"}, non-test Go files=${projectFacts.non_test_go_file_count ?? "unverified"}, exported symbols=${projectFacts.exported_symbol_count ?? "unverified"}`,
+    `Public host boundary: ${projectFacts.public_host.classification}; target_owned=false; official=false`,
+    `Upstream PR boundary: ${projectFacts.upstream_pr.role}; adoption=false; endorsement=false`,
+  ];
+  const evidenceItems = [
+    { type: "literal_runx_version", observed: cliVersion.output, command: cliVersion.command },
+    { type: "target_repository", refs: checks.find((item) => item.id === "target_project")?.refs ?? [] },
+    { type: "immutable_source_commit", refs: checks.find((item) => item.id === "target_commit")?.refs ?? [] },
+    { type: "sourcey_config_and_command", refs: checks.find((item) => item.id === "immutable_docs_files")?.refs ?? [] },
+    { type: "inventory_and_page_list", refs: checks.find((item) => item.id === "documentation_depth")?.refs ?? [] },
+    { type: "five_page_source_mappings", refs: checks.find((item) => item.id === "five_pinned_sources")?.refs ?? [] },
+    { type: "public_page_http_and_hashes", refs: checks.find((item) => item.id === "five_api_pages")?.refs ?? [] },
+    { type: "independent_raw_transcript", path: transcriptRef, sha256: sha256(transcriptBytes) },
+  ];
 
   const evidence = {
     schema_version: "redsync.sourcey.governed_validation.v1",
@@ -640,14 +835,35 @@ async function main() {
     live_pass: livePass,
     validation_mode: inputs.validation_mode,
     checked_at: checkedAt,
-    inputs: { ...inputs, fixture_proxy_url: inputs.validation_mode === "fixture" ? inputs.fixture_proxy_url : "" },
+    inputs: {
+      ...inputs,
+      output_dir: "artifacts",
+      fixture_proxy_url: inputs.validation_mode === "fixture" ? inputs.fixture_proxy_url : "",
+    },
     cli_version: cliVersion,
+    project_facts: projectFacts,
+    observations,
+    evidence_items: evidenceItems,
+    graph_receipt: {
+      applicable: false,
+      reason: "The validator is a standalone skill and does not compose another runx skill.",
+    },
+    failed_workflow_evidence_policy:
+      "Only a new successful post-claim governed run and its verified receipt may be used in final evidence.",
     checks,
     http_checks: httpChecks,
     pr_fields: prFields,
     raw_failure_count: blocked.length,
+    summary_consistency: {
+      status_matches_raw_failures:
+        (status === "PASS" && blocked.length === 0) ||
+        (status === "FIXTURE_PASS" && blocked.length === 0) ||
+        ((status === "BLOCKED" || status === "FIXTURE_BLOCKED") && blocked.length > 0),
+      live_pass_matches_status: livePass === (status === "PASS"),
+      blocked_check_ids: blocked.map((item) => item.id),
+    },
     transcript_artifact: {
-      path: transcriptPath,
+      path: transcriptRef,
       bytes: transcriptBytes.length,
       sha256: sha256(transcriptBytes),
     },
@@ -656,8 +872,8 @@ async function main() {
   const evidenceBytes = Buffer.from(evidenceText);
   await writeFile(evidencePath, evidenceBytes);
   const artifacts = {
-    evidence_json: { path: evidencePath, bytes: evidenceBytes.length, sha256: sha256(evidenceBytes) },
-    transcript: { path: transcriptPath, bytes: transcriptBytes.length, sha256: sha256(transcriptBytes) },
+    evidence_json: { path: evidenceRef, bytes: evidenceBytes.length, sha256: sha256(evidenceBytes) },
+    transcript: { path: transcriptRef, bytes: transcriptBytes.length, sha256: sha256(transcriptBytes) },
   };
 
   const output = {

@@ -9,7 +9,7 @@
 - [Reproduce the Documentation](/reproduce.html): Requirements:
 - [Hosting Decision](/hosting-decision.html): Read the Docs is the selected hosting service at `https://redsync-sourcey-docs.readthedocs.io/en/latest/`. The project already serves an earlier revision, but this source commit does not claim that the post-claim candidate has been pushed, built, or deployed.
 - [Maintainer-Facing Documentation Gap Analysis](/maintainer-gap-analysis.html): Redsync exposes a compact root API and several Redis client adapters, but users must discover those surfaces by moving between the README, pkg.go.dev, and individual source directories. The README Documentation section still links to the legacy `godoc.org` URL over HTTP. It does not provide a project-specific, navigable package map or make adapter compatibility easy to compare.
-- [Upstream Adoption Sequence and PR Rationale](/upstream-pr-rationale.html): This page records the maintainer rationale and required phase ordering. The optional link proposal is `https://github.com/go-redsync/redsync/pull/245`. It is currently open and unmerged, so it is not proof that Redsync maintainers adopted this site.
+- [Optional Upstream Proposal Sequence and PR Rationale](/upstream-pr-rationale.html): This page records the maintainer rationale and required phase ordering. The optional link proposal is `https://github.com/go-redsync/redsync/pull/245`. It is currently open and unmerged, so it is not proof that Redsync maintainers adopted this site.
 
 ## Go API
 

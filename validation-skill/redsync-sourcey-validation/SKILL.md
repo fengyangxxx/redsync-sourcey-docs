@@ -1,18 +1,20 @@
 ---
 name: redsync-sourcey-validation
-description: Run governed machine validation for a published go-redsync/redsync Sourcey documentation adoption package, including immutable docs, five page/source mappings, and the upstream pull request.
+description: Validate a claimant-authored go-redsync/redsync Sourcey community documentation publication, immutable source coverage, and an optional unmerged upstream link proposal.
 ---
 
 # Redsync Sourcey validation
 
-Run the deterministic network runner with all eight required immutable inputs.
+Run the deterministic network runner with all nine required immutable inputs.
 Use `live` mode for delivery evidence. Use `fixture` only for local parser and
 HTTP logic tests; fixture mode always records `live_pass=false` and can never
 emit a live `PASS`.
 
-The runner checks the exact governed CLI version, the published Sourcey home
+The runner checks the literal outer `runx --version` output, the published Sourcey home
 and API pages, the immutable Sourcey config/godoc/dist/mappings files, five
-pinned source files, and the open upstream PR fields. Each mapped public API
+pinned source files, and the open upstream PR fields. The PR is checked only as
+an optional proposal and is never treated as adoption, endorsement, or maintainer
+acceptance. Each mapped public API
 page must canonicalize to its byte-exact immutable raw page by removing exactly
 one recognized Read the Docs addon immediately before `</head>`; all removed
 fragment identity and hash fields are recorded. Placeholder checks cover only

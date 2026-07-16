@@ -29,12 +29,15 @@ and repository without coupling the library release process to Sourcey.
 
 ## Remaining Maintainer Gaps
 
-1. The README still points at legacy `godoc.org` over HTTP, so users do not get
-   a project-specific package map from the repository home.
-2. Adapter choice is spread across package directories; there is no maintained
+1. The pinned README lines 20-22 still point at legacy `godoc.org` over HTTP, so
+   users do not get a project-specific package map from the repository home.
+2. Adapter choice is spread from `redis/redis.go` into the `redis/goredis`,
+   `redis/redigo`, `redis/rueidis`, and `redis/valkeygo` directories; there is no maintained
    compatibility table that distinguishes current and versioned go-redis,
    Redigo, Rueidis, and Valkey entry points.
-3. Lock correctness depends on timeout, retry, expiry, and extension choices,
+3. Lock correctness depends on the options in `redsync.go` lines 67-155 and the
+   lifecycle methods in `mutex.go` lines 55-196, including timeout, retry,
+   expiry, extension, unlock, and validity choices,
    but the API reference has no task-oriented guide connecting those options
    to failure and recovery behavior.
 4. The generated snapshot is pinned rather than release-aware. Maintainers need

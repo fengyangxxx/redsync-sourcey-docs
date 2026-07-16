@@ -1,5 +1,5 @@
 skill: redsync-sourcey-validation
-version: "0.1.2"
+version: "0.2.0"
 
 catalog:
   kind: skill
@@ -52,6 +52,10 @@ runners:
         type: string
         required: true
         description: Immutable raw URL for five exact page-byte and pinned-source mappings.
+      runx_version_output:
+        type: string
+        required: true
+        description: Literal output captured from the pinned outer runx --version command.
       output_dir:
         type: string
         required: false

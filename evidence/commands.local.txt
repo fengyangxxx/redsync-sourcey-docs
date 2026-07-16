@@ -1,374 +1,42 @@
-Frantic #113 Redsync Sourcey local command transcript
-Captured: 2026-07-14 01:54:16 +08
+Frantic #33 local command record
 
-SOURCE PIN
-command: git -C work/preflight-frantic-113-redsync rev-parse HEAD
-exit: 0
-stdout: 79f6ba24a8bf41f35141de700d410a06bb27622f
-command: git -C work/preflight-frantic-113-redsync status --short
-exit: 0
-stdout: <empty>
-copied source identity check:
-  tracked files: 41
-  SHA-256 mismatches: 0
-  extra files excluding .source-pin.json: 0
+Scope: deterministic local implementation and read-only public validation.
+ClaimId: 4ec19597-79e9-499b-a932-d91fc0150881
+ClaimedAt: 2026-07-16T19:14:58.021Z
+FuseExpiresAt: 2026-07-17T00:14:58.021Z
+DeliverDeadlineAt: 2026-07-17T00:14:58.021Z
+External writes: none.
+Candidate parent: 2a572fee31bb273b3c16333c3a869798e8c5227f
 
-GOVERNED CLI VERSION
-command: npx -y @runxhq/cli@0.6.14 --version
-exit: 0
-stdout: runx-cli 0.6.14
-
-SOURCEY GODOC ADAPTER
-environment: GOCACHE=<OS temp>/redsync-sourcey-go-build
-environment: GOFLAGS=-buildvcs=false
-command: sourcey godoc --module ./source/redsync --packages ./... --out <OS temp>/frantic113-redsync-godoc.json
-invocation path: npm run snapshot -> node scripts/generate-godoc-snapshot.mjs -> node_modules/sourcey/dist/cli.js godoc
-exit: 0
-stdout:
-  Sourcey: wrote godoc snapshot for github.com/go-redsync/redsync/v4
-  Packages: 15
-parsed result: schema=1; module=github.com/go-redsync/redsync/v4; packages=15; diagnostics=0
-snapshot bytes: 29784
-
-SOURCEY STATIC BUILD
-command: sourcey build --output <OS temp>/frantic113-sourcey-final-20260714015412
-invocation path: npm run build -> node scripts/build-site.mjs -> node_modules/sourcey/dist/cli.js build
-exit: 0
-stdout:
-  Sourcey: building documentation site
-  Pages: 21
-  Sourcey files: 28 (filesystem count before compatibility redirect)
-  Time: 0.6s
-post-build navigation check:
-  Sourcey tab href: go-api/index.html
-  Sourcey landing file: go-api.html
-  generated compatibility file: go-api/index.html -> ../go-api.html
-  packaged files after compatibility fix: 29
-internal link check:
-  HTML files checked: 23
-  unresolved local href/src targets: 0
-
-INVENTORY
-command: npm run inventory
-exit: 0
-stdout: inventory packages=15 files=19 exported_symbols=110
-
-PAGE/SOURCE MAPPINGS
-command: npm run mappings
-exit: 0
-stdout: page-source mappings=5
-checks:
-  go-api/package-root.html -> Redsync -> redsync.go:17
-  go-api/pkg-redis.html -> Pool -> redis/redis.go:9
-  go-api/pkg-redis-goredis-v9.html -> NewPool -> redis/goredis/v9/goredis.go:24
-  go-api/pkg-redis-redigo.html -> NewPool -> redis/redigo/redigo.go:33
-  go-api/pkg-redis-rueidis.html -> NewPool -> redis/rueidis/rueidis.go:26
-
-UPSTREAM FULL GO TEST
-environment: GOFLAGS=-buildvcs=false
-command: go test -mod=readonly ./...
-exit: 1
-result: BLOCKED_ENVIRONMENT
-raw failure: panic: exec: "redis-server": executable file not found in %PATH%
-scope note: the other 14 packages passed or had no tests
-
-FOCUSED GO CHECKS
-command: go test -c -mod=readonly -o <OS temp>/frantic113-redsync.test.exe .
-exit: 0
-binary bytes: 13216768
-command: go test -mod=readonly ./redis/...
-exit: 0
-result: core Redis contract and all adapter packages passed or had no tests
-
-FINAL PACKAGE TESTS
-command: node --test --test-concurrency=1 tests/package.test.mjs tests/validation-skill.test.mjs
-exit: 0
-result: 20 passed; 0 failed; 0 skipped
-hash coverage: see evidence/sha256-manifest.json
-
-VALIDATION SKILL STATIC CHECKS
-command: F:\ProgramData\anaconda3\envs\xbxpy12\python.exe C:\Users\Administrator\.codex\skills\.system\skill-creator\scripts\quick_validate.py validation-skill\redsync-sourcey-validation
-exit: 0
-stdout: Skill is valid!
-command: npx -y @runxhq/cli@0.6.14 skill inspect validation-skill\redsync-sourcey-validation -j
-exit: 0
-result: status=ok; version=0.1.0; default runner present
-command: node --test --test-concurrency=1 tests\validation-skill.test.mjs
-exit: 0
-result: 4 passed; 0 failed; 0 skipped
-coverage:
-  complete live network input contract
-  manual-only pinned Linux workflow with no secrets or fixture mode
-  fixture logic returns FIXTURE_PASS and live_pass=false
-  broken PR rationale and delivery placeholders return nonzero FIXTURE_BLOCKED
-
-PINNED RUNX WINDOWS GOVERNED FIXTURE
-command: node tests\validation-skill.test.mjs --governed-run C:\Users\ADMINI~1\AppData\Local\Temp\frantic113-governed-fixture-20260714021639
-inner command: npx -y @runxhq/cli@0.6.14 skill .\validation-skill\redsync-sourcey-validation default <eight required -i values> -i validation_mode=fixture -i fixture_proxy_url=<local HTTP proxy> -j -R <output>\runx-state
-runner result: FIXTURE_PASS; live_pass=false; checks=13 passed, 0 blocked; HTTP checks=27; CLI output=runx-cli 0.6.14
-outer runx exit: 1
-raw failure: receipt store is unreadable: 参数错误。 (os error 87)
-artifact: C:\Users\ADMINI~1\AppData\Local\Temp\frantic113-governed-fixture-20260714021639\artifacts\evidence.json
-  bytes: 37816
-  SHA-256: 030064705b2193193c74df2e1326ebf77629894ed611019b0e849b473aa2ef47
-artifact: C:\Users\ADMINI~1\AppData\Local\Temp\frantic113-governed-fixture-20260714021639\artifacts\transcript.txt
-  bytes: 24029
-  SHA-256: 0fa94fa25f9c02dd3a5066314621e95431565d9279aa8aeb43efb3cf6b45a06d
-classification: BLOCKED_WINDOWS_RECEIPT_STORE; fixture artifacts are not final live evidence
-
-MANUAL LINUX GOVERNED WORKFLOW
-file: .github/workflows/validate-sourcey-adoption.yml
-trigger: workflow_dispatch only
-runner: ubuntu-latest
-CLI: pinned npx -y @runxhq/cli@0.6.14
-receipt identity: fresh ephemeral Ed25519 seed; issuer_type=ci; seed is neither printed nor uploaded
-root selection: parse runx raw JSON receipt_id; require embedded receipt.id match and exactly one semantically identical stored root receipt
-outputs: raw runx stdout/stderr, exit codes, root receipt id/ref/JSON, complete receipt tree listing/SHA-256, evidence.json, transcript.txt, runx verify stdout/stderr/exit
-hosted notary: NOT_IN_WORKFLOW; main agent uses existing login after artifact download
-state: NOT_DISPATCHED; requires publication-stage live inputs and main-agent action
-
-MAIN-AGENT REVALIDATION FIXES
-removed inputs: evidence_path, report_path
-immutable docs checked: sourcey.config.ts, godoc.json, dist/index.html, evidence/page-source-mappings.json
-final evidence/report sequencing: created only after live validation, root receipt verification, and hosted notary; later commit must reference the validated docs commit
-command: node --test --test-concurrency=1 tests\validation-skill.test.mjs
-exit: 0
-result: 7 passed; 0 failed; 0 skipped
-root receipt tests:
-  exact raw receipt_id + embedded receipt.id + one stored semantic match: PASS
-  duplicate stored root receipt: BLOCKED nonzero
-  missing stored root receipt: BLOCKED nonzero
-  malformed runx raw JSON: BLOCKED nonzero
-
-PUBLICATION QA PLACEHOLDER REPAIR
-starting commit: 60451219948997778055b123c727f16115610058
-starting tree: 0252731e837665681ff6ba8f55ae0776a73db6ae
-starting parent: <none; root commit>
-command: npm run build
-exit: 1
-raw blocker: EPERM while replacing dist/index.html under the shell sandbox
-command: SOURCEY_BUILD_OUTPUT=C:\Users\ADMINI~1\AppData\Local\Temp\frantic113-sourcey-placeholder-repair-20260714025122 npm run build
-exit: 0
-result: Sourcey pages=21; files=29; HTML=23; navigation compatibility redirect generated
-derived files refreshed:
-  dist/hosting-decision.html
-  dist/index.html
-  dist/introduction.html
-  dist/llms.txt
-  dist/llms-full.txt
-  dist/maintainer-gap-analysis.html
-  dist/reproduce.html
-  dist/search-index.json
-  dist/upstream-pr-rationale.html
-byte identity check: isolated final-wrapper rebuild must match committed dist 29/29; enforced by package test
-placeholder policy: unresolved final-value tokens allowed only in evidence/evidence.draft.json and report.draft.md
-fail-closed policy: validator/test sentinel is constructed at runtime and remains covered by fixture tests
-
-WORKFLOW-DISPATCH REPAIR FROM PUBLICATION ROOT
-base commit: 6fdcaf606f05115fd1ad07dde43c7d5b0186766b
-base tree: ced52cbd3263304960aeaccce57429ff1e8778f0
-base parents: <none>
-isolation: local repository initialized from exact 6fdcaf archive and fetched commit object
-
-DEPENDENCY SETUP
-command: npm ci --ignore-scripts
-exit: 1
-raw blocker: npm cache stat failed with EPERM under C:\Users\Administrator\AppData\Local\npm-cache
-fallback: local node_modules junction to the unchanged package dependency tree in work\frantic113-redsync
-network publication/write: none
-
-CANONICAL PAGE/SOURCE MAPPINGS
-command: npm run mappings
-exit: 0
-result: 5 mappings
-page hashes:
-  go-api/package-root.html af75739a73f365c9421b3ffbe07df8beaab0d24ac879307aee293aeac3375a23
-  go-api/pkg-redis.html 6d8184491c7a18d2a8716c22c471afe067cacd3aa5a68c3322deaf30bb3eb3ee
-  go-api/pkg-redis-goredis-v9.html 8b0e81c14c6f5810bec0c9e9229d252e6d10032dde32d1c42371acf075e9d224
-  go-api/pkg-redis-redigo.html 397953e75e24cc7c713843f83b67538b41e4f879323e60f474d15c7f0e562772
-  go-api/pkg-redis-rueidis.html 2c000f02474f2222503db9433b9669195101f46f6af2a19527271fb0bbc50d86
-repository-LF source SHA-256 / pinned Git blob SHA-1:
-  redsync.go 763b22db61d2377cc070039ed7f1f9591ce4be765319288891596ffbdc2bf151 bfec2c9361f283b8f2fab5db25e7e584a4daab96
-  redis/redis.go 3426e5543bfdd497221a8cc4d5a9a5ea86c993b2d4816f0e650d38ba696a7c9e cbae6772aec654bf09b31e2c5aa88b6019563446
-  redis/goredis/v9/goredis.go ed479a6b9eb37cb77a768074e68f2852c680206ec9fb67a9eac777f54b80da3b 8a29077d1e9a9075bb373a22bce20c2b44302ef7
-  redis/redigo/redigo.go bbcea02ae4dc8c6214e92606973e839f6bf868aa48f020f63350c1f6ea39cc39 127370be6926c23b242d818a8776562b2f70ba5c
-  redis/rueidis/rueidis.go be591138e687282ef35cf179026b9f27e9ec9676fdcfa6cb027f1473eae70aec ce9601a298b24a67217bc250aa460fc3825e5cd9
-
-BOUNDED RTD CANONICALIZATION
-command: node inline read-only checker using rtd-canonicalizer.mjs and local 6fdcaf dist bytes
-exit: 0
-result: 5/5 public pages HTTP 200; recognized addon count 1; canonical bytes equal immutable bytes
-observed removed addon bytes / SHA-256:
-  go-api/package-root.html 357 63076bc613211dc2ee8d0ed46903b22e04ef58cc7bd22d904ba50fad81a0e2b6
-  go-api/pkg-redis.html 354 b43140bc8c4a3136582f36da61b03f02d6e5b2c7c27ab78f7c9130fd63ace615
-  go-api/pkg-redis-goredis-v9.html 365 0df812a4efee51bf36950c3a3f503aa231075700c3f72a24a954e67ffb6881fc
-  go-api/pkg-redis-redigo.html 361 a51c9a6ff4e908c64bcc90dbe5b39e9ff6c7fd8f732f72bccbcf05bb2c5b3264
-  go-api/pkg-redis-rueidis.html 362 5369710f77f8ea83a4acfdda41b3640b4770fb1190fc02aef186c52198ca73b6
-external writes: none
-
-READ-ONLY FULL LIVE RUNNER PROBE AGAINST OLD PUBLIC 6fdcaf MAPPINGS
-command: node validation-skill\redsync-sourcey-validation\scripts\run.mjs with the eight QA inputs
-exit: 1
-result: BLOCKED; GitHub Raw fetch failed intermittently before mappings loaded
-blocked: mappings_shape, immutable_docs_files, five_api_pages, five_pinned_sources
-placeholder check: PASS
-classification: diagnostic only; no runx invocation, receipt, workflow dispatch, or final evidence claim
-
-VALIDATOR TESTS
-command: node --test --test-concurrency=1 tests\validation-skill.test.mjs
-exit: 0
-result: 10 passed; 0 failed; 0 skipped
-coverage added:
-  exact observed 357-byte package-root RTD addon shape
-  valid single RTD injection canonicalizes byte-exactly
-  missing/duplicate/tampered RTD injection is BLOCKED nonzero
-  allowed draft patch in GitHub commit API does not block
-  placeholder in public/immutable/input surfaces is BLOCKED nonzero
-  exact pinned source SHA-256 and Git blob identity
-
-VALIDATION SKILL CHECKS
-command: F:\ProgramData\anaconda3\envs\xbxpy12\python.exe C:\Users\Administrator\.codex\skills\.system\skill-creator\scripts\quick_validate.py validation-skill\redsync-sourcey-validation
-exit: 0
-stdout: Skill is valid!
-command: npx -y @runxhq/cli@0.6.14 --version
-exit: 0
-stdout: runx-cli 0.6.14
-command: npx -y @runxhq/cli@0.6.14 skill inspect validation-skill\redsync-sourcey-validation -j
-exit: 0
-result: status=ok; version=0.1.1; default runner present
-
-FINAL REPAIR PACKAGE TESTS
-command: npm run hashes
-exit: 0
-result: sha256 manifest files=105
-command: npm test
-exit: 0
-result: 25 passed; 0 failed; 0 skipped
-included isolated Sourcey result: 29/29 committed dist files byte-identical
-
-FRANTIC #33 POST-CLAIM FALLBACK CANDIDATE
-active claim: f0ca226c-f865-4365-aa65-a57b9a027abb
-claimed_at: 2026-07-15T00:09:22.169Z
-delivery_deadline: 2026-07-15T05:09:22.169Z
-base commit: 3cc959e4dfaca912130c8d14ba45b73bfe222267
-local branch: docs/sourcey-snapshot-coverage
-external writes: none
-
-substantive change:
-  added pinned-source-coverage.md to Sourcey navigation
-  regenerated public Sourcey output and evidence hashes
-  clarified prior RTD deployment is not evidence for the candidate bytes
-  recorded PR #245 as open/unmerged optional link proposal, not adoption
-
+SOURCE AND DOCUMENTATION GENERATION
 command: npm run prepare:docs
-exit: 0
-result:
-  sourcey godoc adapter packages=15 diagnostics=0
-  inventory packages=15 non-test-files=19 exported-symbols=110
-  Sourcey pages=22
-  packaged dist files=30, including navigation compatibility redirect
-  mappings=5
-  sha256 manifest files=108 before final transcript refresh
+expected checks: Sourcey godoc snapshot, inventory, static build, mappings, and SHA-256 manifest
+fixed target: go-redsync/redsync@79f6ba24a8bf41f35141de700d410a06bb27622f
+expected depth: packages=15; non-test Go files=19; exported symbols=110; mappings=5
 
+DIRECT LIVE VALIDATION
+command: node validation-skill/redsync-sourcey-validation/scripts/run.mjs
+logical output: evidence/local-live-validation
+inputs: public ReadTheDocs URL, public docs repository, immutable docs commit,
+  pinned target repository/commit, optional open PR URL/head, immutable mappings
+  URL, literal runx-cli 0.6.14 output, validation_mode=live
+required result: PASS; live_pass=true; no blocked/raw failures; logical artifact refs only
+
+LOCAL TESTS AND EVIDENCE CHECKS
 command: npm test
-exit: 0
-result: 29 passed; 0 failed; 0 skipped
-included isolated Sourcey result: 30/30 committed dist files byte-identical
-live publication/RTD build/workflow/receipt/notary: not invoked
+required result: all package, privacy, validator, raw-run-status, receipt-status,
+  deterministic colon-path archive, and reconstruction tests pass
+command: npm run verify:local-live
+required result: PASS with exact evidence/stdout/transcript/version hash identity
+command: npm run verify:runx-version
+required stdout: runx-cli 0.6.14
+command: <preferred-python> <skill-validator>/quick_validate.py validation-skill/redsync-sourcey-validation
+required result: Skill is valid!
+command: npx -y @runxhq/cli@0.6.14 skill inspect validation-skill/redsync-sourcey-validation -j
+required result: status=ok; version=0.2.0; default runner present
 
-FRANTIC #33 CANDIDATE TOOL AND READ-ONLY STATE CHECKS
-command: npx -y @runxhq/cli@0.6.14 --version
-exit: 0
-stdout: runx-cli 0.6.14
-command: npx -y @runxhq/cli@0.6.14 skill inspect validation-skill\redsync-sourcey-validation -j
-exit: 0
-result: status=ok; version=0.1.2; default runner present
-command: quick_validate.py validation-skill\redsync-sourcey-validation
-exit: 0
-stdout: Skill is valid!
-
-command: git ls-remote https://github.com/fengyangxxx/redsync-sourcey-docs.git refs/heads/main
-exit: 0
-result: remote main=3cc959e4dfaca912130c8d14ba45b73bfe222267
-command: gh api repos/go-redsync/redsync/pulls/245 (read only)
-exit: 0
-result: state=open; merged=false; base=master; head=f13cd302b903ae84fc21d914bbeb631a21bb9521; updated_at=2026-07-13T19:38:13Z
-command: read-only GET https://redsync-sourcey-docs.readthedocs.io/en/latest/
-exit: 0
-result: HTTP 200; response bytes=22533; Pinned Source Coverage absent; response SHA-256=df2df1a8cb0d87a0a82ff2f323ea3b45e0bbd40468917119d9fd00fcc44c3b00
-interpretation: the live site still represents the prior revision and is not evidence for this candidate
-
-FRANTIC #33 WORKFLOW AND FULL-REPRODUCIBILITY REMEDIATION
-parent candidate: 13f8bef91ad80604a1db6140b0cdd28bc7675f19
-external writes: none
-
-read-only failed workflow evidence:
-  run 29277684138: event=push; conclusion=failure; jobs=0; head=6fdcaf606f05115fd1ad07dde43c7d5b0186766b
-  run 29284004204: event=push; conclusion=failure; jobs=0; head=3cc959e4dfaca912130c8d14ba45b73bfe222267
-cause: runner.temp was referenced in job-level env before a runner existed
-fix: derive receipt and validation directories from RUNNER_TEMP in the first bash step, append them to GITHUB_ENV, and create them immediately
-preserved: workflow_dispatch-only; no secrets; ephemeral signing; pinned runx 0.6.14; exact root receipt resolution; verify; fail-closed aggregate exit; always-upload artifacts
-
-workflow static checks:
-  actionlint: not installed locally
-  PyYAML 6.0.3 parse: exit 0; jobs=[validate]; steps=6
-  focused validation/workflow tests: 13 passed; 0 failed
-  regression: job-level env contains no runner context; RUNNER_TEMP and GITHUB_ENV initialization required
-
-isolated snapshot cause check:
-  committed generated_at before fix: 2026-07-15T00:30:22Z
-  fresh generated_at before fix: 2026-07-15T00:44:27Z
-  semantic equality after removing generated_at: true
-  committed SHA-256 before fix: 36bffa24d18ce074ebd2ac62c3415318c1e35eca9e315491cb19bcc4b3491daf
-  fresh SHA-256 before fix: 1626ca147dbe8e8952f9d983613c70d5a3f2505c0607dc8e6ed30256a6b4da74
-cause: Sourcey wall-clock generated_at changed; manifest then changed because it hashes godoc.json
-fix: after the real Sourcey adapter succeeds, normalize only generated_at to the pinned commit's real committer timestamp from .source-pin.json
-source commit time: 2026-07-02T12:37:50+06:00
-normalized UTC value: 2026-07-02T06:37:50Z
-meaning: immutable source-time provenance basis, not rebuild wall-clock time
-
-complete generation regression:
-  creates an isolated temporary Git repository from current package bytes
-  runs the documented npm run prepare:docs command
-  requires git diff --exit-code for godoc.json, inventory, mappings, manifest, and all dist files
-  result: 17 package tests passed; 0 failed
-line-ending fact: the exact source snapshot blobs remain CRLF; generate-mappings.mjs computes canonical repository-LF bytes and binds them to fixed upstream raw SHA-256 plus pinned Git blob SHA-1
-future text policy: .gitattributes is retained for future normalization intent only and does not prove the existing blobs or every checkout are LF
-
-SECOND REPAIR: AUDITABLE BOUNDED PUBLIC GET
-base commit: 66d2f49c233a132ffc15bc673e3605237e92e447
-scope: local implementation and public read-only validation only
-external writes: none
-retry policy:
-  maximum attempts: 4
-  per-attempt timeout: 15000ms with AbortController
-  deterministic backoff: 150ms, 300ms, 600ms
-  retryable: network exceptions, HTTP 429, HTTP 5xx
-  not retryable: all other HTTP 4xx
-  exhausted result: BLOCKED nonzero; no URL/hash/evidence fallback
-  evidence: URL plus every attempt status/error/hash/elapsed time, final count, exhaustion, outcome
-
-command: node --test --test-concurrency=1 tests\validation-skill.test.mjs
-exit: 0
-result: 13 passed; 0 failed; 0 skipped
-retry fixtures:
-  ordinary success: attempt_count=1; unchanged FIXTURE_PASS
-  503,503,200: attempt_count=3; FIXTURE_PASS with all attempts retained
-  503,503,503,503: retry_exhausted=true; FIXTURE_BLOCKED nonzero
-  404: attempt_count=1; immediate FIXTURE_BLOCKED nonzero
-
-PUBLIC READ-ONLY CHECK THROUGH bounded-get.mjs
-targets: five current RTD pages plus five raw.githubusercontent.com pinned source files
-exit: 0
-RTD result: 5/5 HTTP 200; each attempt_count=1; each exact addon count=1; all canonical SHA-256 values equal mappings
-raw source result: 5/5 HTTP 200; each attempt_count=1; all SHA-256 and Git blob SHA-1 values equal mappings
-receipt/workflow/notary: not invoked
-
-FINAL SECOND-REPAIR PACKAGE TESTS
-command: npm run hashes
-exit: 0
-result: sha256 manifest files=106
-command: npm test
-exit: 0
-result: 28 passed; 0 failed; 0 skipped
-included isolated Sourcey result: 29/29 committed dist files byte-identical
+BOUNDARIES
+No push, publication, workflow dispatch, PR mutation, additional claim action,
+or Frantic delivery is part of this record. Test counts are intentionally not
+hard-coded; the exact runner output and immutable commit are authoritative.
+Fresh Dirac QA is required.

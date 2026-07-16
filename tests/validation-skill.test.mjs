@@ -11,6 +11,12 @@ import {
   canonicalizeReadTheDocsPage,
   readTheDocsAddonFragment,
 } from "../validation-skill/redsync-sourcey-validation/scripts/rtd-canonicalizer.mjs";
+import {
+  createReceiptTreeArchive,
+  extractReceiptTree,
+  packReceiptTree,
+  reconstructReceiptTreeArchive,
+} from "../validation-skill/redsync-sourcey-validation/scripts/receipt-tree-archive.mjs";
 
 const root = new URL("../", import.meta.url);
 const skillRoot = new URL(
@@ -73,17 +79,38 @@ async function fixtureResponse(logicalUrl, options = {}) {
   const fixturePublicUrl = options.publicUrl ?? publicUrl;
   const targetApi =
     `https://api.github.com/repos/go-redsync/redsync/commits/${targetCommit}`;
+  const targetRepositoryApi = "https://api.github.com/repos/go-redsync/redsync";
+  const targetLicense =
+    `https://raw.githubusercontent.com/go-redsync/redsync/${targetCommit}/LICENSE`;
   const docsApi =
     `https://api.github.com/repos/fengyangxxx/redsync-sourcey-docs/commits/${docsCommit}`;
   const prApi = "https://api.github.com/repos/go-redsync/redsync/pulls/999";
   const rawBase =
     `https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/${docsCommit}/`;
 
+  if (logicalUrl === targetRepositoryApi) {
+    return {
+      body: JSON.stringify({
+        full_name: "go-redsync/redsync",
+        archived: false,
+        pushed_at: new Date(Date.now() - 86_400_000).toISOString(),
+        license: { spdx_id: "BSD-3-Clause" },
+      }),
+    };
+  }
+  if (logicalUrl === targetLicense) {
+    return {
+      body:
+        "Redistribution and use in source and binary forms are permitted.\n" +
+        "Neither the name of the Redsync nor the names of its contributors may be used.\n",
+    };
+  }
   if (logicalUrl === targetApi) return { body: JSON.stringify({ sha: targetCommit }) };
   if (logicalUrl === docsApi) {
     return {
       body: JSON.stringify({
         sha: docsCommit,
+        commit: { author: { name: "Fixture Author", email: "private@example.test" } },
         files: [{ filename: "evidence/evidence.draft.json", patch: `+${fixtureAllowedDraftToken}` }],
       }),
     };
@@ -93,6 +120,8 @@ async function fixtureResponse(logicalUrl, options = {}) {
       body: JSON.stringify({
         html_url: prUrl,
         state: "open",
+        draft: false,
+        merged_at: null,
         base: { ref: "master" },
         head: { sha: prHeadCommit },
         body: options.brokenPr
@@ -105,6 +134,12 @@ async function fixtureResponse(logicalUrl, options = {}) {
   if (logicalUrl === mappingsUrl) return { body: JSON.stringify(mappings) };
   if (logicalUrl === `${rawBase}sourcey.config.ts`) {
     return { body: `${targetRepoUrl}\n${targetCommit}\nSourcey 3.6.3 godoc` };
+  }
+  if (logicalUrl === `${rawBase}scripts/generate-godoc-snapshot.mjs`) {
+    return {
+      body:
+        'const args = ["godoc", "--module", "./source/redsync", "--packages", "./...", "--out", "godoc.json"];',
+    };
   }
   if (logicalUrl === `${rawBase}godoc.json`) {
     return {
@@ -124,6 +159,48 @@ async function fixtureResponse(logicalUrl, options = {}) {
   }
   if (logicalUrl === `${rawBase}evidence/page-source-mappings.json`) {
     return { body: JSON.stringify(mappings) };
+  }
+  if (logicalUrl === `${rawBase}evidence/inventory.json`) {
+    const packages = [
+      "",
+      "examples/goredis",
+      "examples/goredis/v7",
+      "examples/goredis/v8",
+      "examples/goredis/v9",
+      "examples/redigo",
+      "examples/valkego",
+      "redis",
+      "redis/goredis",
+      "redis/goredis/v7",
+      "redis/goredis/v8",
+      "redis/goredis/v9",
+      "redis/redigo",
+      "redis/rueidis",
+      "redis/valkeygo",
+    ];
+    return {
+      body: JSON.stringify({
+        schema_version: "redsync-sourcey-inventory/v1",
+        repository: targetRepoUrl,
+        commit: targetCommit,
+        package_count: 15,
+        non_test_go_file_count: 19,
+        exported_symbol_count: 110,
+        packages: packages.map((path) => ({
+          import_path: path ? `github.com/go-redsync/redsync/v4/${path}` : "github.com/go-redsync/redsync/v4",
+        })),
+      }),
+    };
+  }
+  if (logicalUrl === `${rawBase}evidence/sha256-manifest.json`) {
+    return {
+      body: JSON.stringify({
+        schema_version: "sha256-manifest/v1",
+        files: Array.from({ length: 22 }, (_, index) => ({
+          path: `dist/page-${String(index + 1).padStart(2, "0")}.html`,
+        })),
+      }),
+    };
   }
 
   if (
@@ -222,10 +299,10 @@ async function runFixture(options = {}) {
         RUNX_INPUT_UPSTREAM_PR_URL: prUrl,
         RUNX_INPUT_UPSTREAM_PR_HEAD_COMMIT: prHeadCommit,
         RUNX_INPUT_MAPPINGS_URL: mappingsUrl,
+        RUNX_INPUT_RUNX_VERSION_OUTPUT: "runx-cli 0.6.14",
         RUNX_INPUT_OUTPUT_DIR: outputDir,
         RUNX_INPUT_VALIDATION_MODE: "fixture",
         RUNX_INPUT_FIXTURE_PROXY_URL: proxyUrl,
-        REDSYNC_VALIDATION_FIXTURE_CLI_VERSION: "runx-cli 0.6.14",
       },
       stdio: ["ignore", "pipe", "pipe"],
     });
@@ -257,7 +334,13 @@ async function runProcess(executable, args, options = {}) {
   return { exitCode, stdout, stderr };
 }
 
-async function runReceiptExtractor({ duplicateRoot = false, omitRoot = false, invalidRaw = false } = {}) {
+async function runReceiptExtractor({
+  duplicateRoot = false,
+  omitRoot = false,
+  invalidRaw = false,
+  runStatus = "sealed",
+  failedChild = false,
+} = {}) {
   const directory = await mkdtemp(join(tmpdir(), "redsync-root-receipt-"));
   const receiptDir = join(directory, "receipts");
   const outputDir = join(directory, "output");
@@ -265,12 +348,26 @@ async function runReceiptExtractor({ duplicateRoot = false, omitRoot = false, in
 
   const rootId = `sha256:${"a".repeat(64)}`;
   const childId = `sha256:${"b".repeat(64)}`;
-  const rootReceipt = { schema: "runx.receipt.v1", id: rootId, lineage: { children: [childId] } };
-  const childReceipt = { schema: "runx.receipt.v1", id: childId, lineage: { children: [] } };
+  const rootReceipt = {
+    schema: "runx.receipt.v1",
+    id: rootId,
+    status: "sealed",
+    execution: { exit_code: 0 },
+    lineage: { children: [childId] },
+  };
+  const childReceipt = {
+    schema: "runx.receipt.v1",
+    id: childId,
+    status: failedChild ? "failure" : "sealed",
+    execution: { exit_code: failedChild ? 1 : 0 },
+    lineage: { children: [] },
+  };
   const rootBytes = `${JSON.stringify(rootReceipt)}\n`;
+  const rootName = process.platform === "win32" ? "root.json" : `${rootId}.json`;
+  const childName = process.platform === "win32" ? "child.json" : `${childId}.json`;
   const runJson = {
     schema: "runx.skill_run.v1",
-    status: "sealed",
+    status: runStatus,
     receipt_id: rootId,
     receipt: rootReceipt,
   };
@@ -280,8 +377,8 @@ async function runReceiptExtractor({ duplicateRoot = false, omitRoot = false, in
     invalidRaw ? "not-json\n" : `${JSON.stringify(runJson)}\n`,
   );
   await writeFile(join(receiptDir, "index.json"), `${JSON.stringify({ entries: [] })}\n`);
-  await writeFile(join(receiptDir, "children", "child.json"), `${JSON.stringify(childReceipt)}\n`);
-  if (!omitRoot) await writeFile(join(receiptDir, "root.json"), rootBytes);
+  await writeFile(join(receiptDir, "children", childName), `${JSON.stringify(childReceipt)}\n`);
+  if (!omitRoot) await writeFile(join(receiptDir, rootName), rootBytes);
   if (duplicateRoot) await writeFile(join(receiptDir, "duplicate-root.json"), rootBytes);
 
   const result = await runProcess(process.execPath, [
@@ -290,7 +387,15 @@ async function runReceiptExtractor({ duplicateRoot = false, omitRoot = false, in
     "--receipt-dir", receiptDir,
     "--output-dir", outputDir,
   ]);
-  return { ...result, directory, outputDir, rootId, rootBytes };
+  return {
+    ...result,
+    directory,
+    receiptDir,
+    outputDir,
+    rootId,
+    rootBytes,
+    receiptPaths: ["index.json", `children/${childName}`, rootName].sort(),
+  };
 }
 
 async function runGovernedFixture(outputDir) {
@@ -312,6 +417,7 @@ async function runGovernedFixture(outputDir) {
     "-i", `upstream_pr_url=${prUrl}`,
     "-i", `upstream_pr_head_commit=${prHeadCommit}`,
     "-i", `mappings_url=${mappingsUrl}`,
+    "-i", "runx_version_output=runx-cli 0.6.14",
     "-i", `output_dir=${join(outputDir, "artifacts")}`,
     "-i", "validation_mode=fixture",
     "-i", `fixture_proxy_url=${proxyUrl}`,
@@ -325,7 +431,6 @@ async function runGovernedFixture(outputDir) {
       env: {
         ...process.env,
         npm_config_cache: join(tmpdir(), "frantic113-validation-npm-cache"),
-        REDSYNC_VALIDATION_FIXTURE_CLI_VERSION: "runx-cli 0.6.14",
         RUNX_RECEIPT_SIGN_KID: "frantic113-public-fixture",
         RUNX_RECEIPT_SIGN_ED25519_SEED_BASE64: fixtureSigningSeed,
         RUNX_RECEIPT_SIGN_ISSUER_TYPE: "hosted",
@@ -374,6 +479,7 @@ test("validation skill declares the complete governed network contract", async (
     "upstream_pr_url",
     "upstream_pr_head_commit",
     "mappings_url",
+    "runx_version_output",
   ]) {
     assert.match(xYaml, new RegExp(`\\n      ${input}:`), input);
   }
@@ -414,6 +520,7 @@ test("Linux workflow is manual, live-only, pinned, and preserves raw evidence", 
   assert.match(workflow, /\}\s*>>"\$GITHUB_ENV"/);
   assert.match(workflow, /npx -y @runxhq\/cli@0\.6\.14 --version/);
   assert.match(workflow, /npx -y @runxhq\/cli@0\.6\.14 skill/);
+  assert.match(workflow, /runx_version_output=\$\(cat/);
   assert.match(workflow, /validation_mode=live/);
   assert.doesNotMatch(workflow, /validation_mode=fixture|fixture_proxy_url/);
   assert.match(workflow, /output_dir=artifacts/);
@@ -452,10 +559,65 @@ test("Linux workflow is manual, live-only, pinned, and preserves raw evidence", 
     "root-receipt.json",
     "receipt-tree.json",
     "runx-verify.json",
+    "runx-receipts.archive.json",
+    "receipt-archive-reconstruction.json",
   ]) {
     assert.match(workflow, new RegExp(artifact.replace(".", "\\.")), artifact);
   }
   assert.doesNotMatch(workflow, /git\s+(?:push|commit)/);
+  assert.doesNotMatch(workflow, /\$\{\{ runner\.temp \}\}\/runx-receipts\s*$/m);
+  assert.match(workflow, /name:\s*sourcey-community-publication-\$\{\{ github\.run_id \}\}/);
+});
+
+test("Linux workflow provisions the required runx network sandbox and masks the private seed", async () => {
+  const workflow = await text(
+    new URL(".github/workflows/validate-sourcey-adoption.yml", root),
+  );
+
+  const provisionIndex = workflow.indexOf("name: Provision Linux bubblewrap sandbox");
+  const identityIndex = workflow.indexOf("name: Create ephemeral CI receipt identity");
+  const runxIndex = workflow.indexOf("npx -y @runxhq/cli@0.6.14 skill");
+  assert.ok(provisionIndex >= 0 && provisionIndex < identityIndex && identityIndex < runxIndex);
+  const provisionStep = workflow.slice(provisionIndex, identityIndex);
+  assert.match(provisionStep, /set -uo pipefail/);
+  assert.doesNotMatch(provisionStep, /set -e/);
+  const mkdirIndex = provisionStep.indexOf(
+    'mkdir -p "$runx_receipt_dir" "$validation_output_dir"',
+  );
+  const installIndex = provisionStep.indexOf("sudo apt-get update");
+  const installEvidenceIndex = provisionStep.indexOf("bubblewrap-install.txt");
+  const installExitIndex = provisionStep.indexOf("bubblewrap-install-exit-code.txt");
+  const versionEvidenceIndex = provisionStep.indexOf("bubblewrap-version.txt");
+  const versionExitIndex = provisionStep.indexOf("bubblewrap-version-exit-code.txt");
+  const failGateIndex = provisionStep.indexOf('if [[ "$install_exit" -ne 0');
+  assert.ok(mkdirIndex >= 0 && mkdirIndex < installIndex);
+  assert.ok(installIndex < installEvidenceIndex && installEvidenceIndex < failGateIndex);
+  assert.ok(installExitIndex < failGateIndex);
+  assert.ok(versionEvidenceIndex < failGateIndex && versionExitIndex < failGateIndex);
+  assert.match(provisionStep, /apt_update_exit_code=%s/);
+  assert.match(provisionStep, /apt_install_exit_code=%s/);
+  assert.match(provisionStep, /apt_install_exit_code=SKIPPED/);
+  assert.match(provisionStep, /install_exit="\$apt_update_exit"/);
+  assert.match(provisionStep, /install_exit="\$apt_install_exit"/);
+  assert.match(provisionStep, /sudo apt-get install --yes --no-install-recommends bubblewrap/);
+  assert.match(provisionStep, /command -v bwrap/);
+  assert.match(provisionStep, /"\$bwrap_path" --version/);
+  assert.doesNotMatch(workflow, /RUNX_SANDBOX_ALLOW_DECLARED_POLICY_ONLY/);
+
+  const maskIndex = workflow.indexOf("::add-mask::${seedBase64}");
+  const seedEnvIndex = workflow.indexOf("RUNX_RECEIPT_SIGN_ED25519_SEED_BASE64=${seedBase64}");
+  const appendIndex = workflow.indexOf("appendFileSync(process.env.GITHUB_ENV");
+  assert.ok(maskIndex >= 0 && maskIndex < seedEnvIndex && seedEnvIndex < appendIndex);
+
+  const uploadPaths = workflow.match(/\n\s+path:\s*\|([\s\S]*)$/)?.[1];
+  assert.ok(uploadPaths, "upload artifact path block is missing");
+  assert.doesNotMatch(uploadPaths, /seed|GITHUB_ENV|RUNX_RECEIPT_SIGN_ED25519/i);
+  for (const artifact of [
+    "bubblewrap-install.txt",
+    "bubblewrap-install-exit-code.txt",
+    "bubblewrap-version.txt",
+    "bubblewrap-version-exit-code.txt",
+  ]) assert.match(uploadPaths, new RegExp(artifact.replace(".", "\\.")), artifact);
 });
 
 test("bounded RTD addon matches the observed live package-root insertion exactly", async () => {
@@ -507,6 +669,24 @@ test("fixture mode exercises every check without claiming a live pass", async ()
   assert.ok(output.http_checks.every((item) => item.attempts.length === 1));
   assert.ok(output.http_checks.every((item) => item.retry_exhausted === false));
   assert.equal(output.cli_version.output, "runx-cli 0.6.14");
+  assert.equal(output.cli_version.source, "captured_outer_command");
+  assert.equal(output.project_facts.license, "BSD-3-Clause");
+  assert.equal(output.project_facts.sourcey_adapter, "godoc");
+  assert.equal(
+    output.project_facts.sourcey_command,
+    "sourcey godoc --module ./source/redsync --packages ./... --out godoc.json",
+  );
+  assert.equal(output.project_facts.package_count, 15);
+  assert.equal(output.project_facts.non_test_go_file_count, 19);
+  assert.equal(output.project_facts.exported_symbol_count, 110);
+  assert.ok(output.project_facts.generated_page_list.length >= 20);
+  assert.equal(output.project_facts.upstream_pr.adoption, false);
+  assert.equal(output.project_facts.upstream_pr.endorsement, false);
+  assert.ok(output.observations.length >= 6);
+  assert.equal(output.observations[0], "runx-cli 0.6.14");
+  assert.ok(output.evidence_items.some((item) => item.type === "independent_raw_transcript"));
+  assert.equal(output.summary_consistency.status_matches_raw_failures, true);
+  assert.equal(output.summary_consistency.live_pass_matches_status, true);
 
   const evidence = JSON.parse(
     await text(new URL(`file:///${join(result.outputDir, "evidence.json").replaceAll("\\", "/")}`)),
@@ -518,10 +698,21 @@ test("fixture mode exercises every check without claiming a live pass", async ()
   assert.equal(evidence.live_pass, false);
   const docsCommitHttp = evidence.http_checks.find((item) => item.label === "docs_commit_api");
   assert.match(docsCommitHttp.checked_text, /evidence\/evidence\.draft\.json/);
+  assert.doesNotMatch(docsCommitHttp.checked_text, /private@example\.test/);
+  assert.equal(evidence.inputs.output_dir, "artifacts");
+  assert.equal(evidence.transcript_artifact.path, "artifacts/transcript.txt");
   const immutableDocs = evidence.checks.find((item) => item.id === "immutable_docs_files");
   assert.deepEqual(
     immutableDocs.observed.files.map((item) => item.path),
-    ["sourcey.config.ts", "godoc.json", "dist/index.html", "evidence/page-source-mappings.json"],
+    [
+      "sourcey.config.ts",
+      "scripts/generate-godoc-snapshot.mjs",
+      "godoc.json",
+      "dist/index.html",
+      "evidence/inventory.json",
+      "evidence/page-source-mappings.json",
+      "evidence/sha256-manifest.json",
+    ],
   );
   const apiPages = evidence.checks.find((item) => item.id === "five_api_pages");
   assert.equal(apiPages.status, "PASS");
@@ -539,6 +730,8 @@ test("fixture mode exercises every check without claiming a live pass", async ()
   assert.match(transcript, /HTTP_STATUS 200/);
   assert.match(transcript, /CONTENT_SHA256 [0-9a-f]{64}/);
   assert.match(transcript, /PR_STATE open/);
+  assert.match(transcript, /PR_DRAFT false/);
+  assert.match(transcript, /PR_MERGED_AT null/);
 });
 
 test("bounded HTTP retry records two transient failures before a clean PASS", async () => {
@@ -654,6 +847,156 @@ test("root receipt extractor binds raw runx JSON to one exact stored root", asyn
   assert.match(tree.tree_sha256, /^[0-9a-f]{64}$/);
   assert.ok(tree.files.every((item) => /^[0-9a-f]{64}$/.test(item.sha256)));
   assert.equal(tree.files.filter((item) => item.receipt_id === result.rootId).length, 1);
+  assert.equal(tree.receipt_status_audit.overall_status, "PASS");
+  assert.equal(tree.receipt_status_audit.parseable_json_count, 3);
+  assert.equal(tree.receipt_status_audit.failed_json_count, 0);
+  assert.ok(tree.receipt_status_audit.files.every((item) => item.status === "PASS"));
+});
+
+test("filename-safe receipt archive reconstructs every original path and byte", async () => {
+  const result = await runReceiptExtractor();
+  assert.equal(result.exitCode, 0, result.stderr);
+  const archivePath = join(result.directory, "runx-receipts.archive.json");
+  const secondArchivePath = join(result.directory, "runx-receipts-second.archive.json");
+  const reconstructedDir = join(result.directory, "reconstructed");
+  const receiptTreePath = join(result.outputDir, "receipt-tree.json");
+
+  const packed = await packReceiptTree({
+    receiptDir: result.receiptDir,
+    receiptTreePath,
+    archivePath,
+  });
+  assert.equal(packed.status, "PASS");
+  assert.equal(packed.file_count, 3);
+  assert.match(packed.archive_sha256, /^[0-9a-f]{64}$/);
+  assert.equal(packed.root_receipt_id, result.rootId);
+
+  const secondPacked = await packReceiptTree({
+    receiptDir: result.receiptDir,
+    receiptTreePath,
+    archivePath: secondArchivePath,
+  });
+  assert.equal(secondPacked.archive_sha256, packed.archive_sha256);
+  assert.deepEqual(await readFile(secondArchivePath), await readFile(archivePath));
+
+  const archive = JSON.parse(await readFile(archivePath, "utf8"));
+  assert.equal(archive.schema, "redsync.receipt_tree_archive.v1");
+  assert.equal(archive.root_receipt_id, result.rootId);
+  assert.deepEqual(archive.files.map((file) => file.path).sort(), result.receiptPaths);
+  assert.ok(archive.files.every((file) => !file.path.includes("\\")));
+  assert.ok(archive.files.every((file) => Buffer.from(file.content_base64, "base64").length === file.bytes));
+  if (process.platform !== "win32") {
+    assert.ok(archive.files.some((file) => file.path.includes("sha256:")));
+  }
+
+  const extracted = await extractReceiptTree({
+    archivePath,
+    outputDir: reconstructedDir,
+    receiptTreePath,
+  });
+  assert.equal(extracted.status, "PASS");
+  assert.equal(extracted.reconstructed_file_count, 3);
+  assert.equal(extracted.archive_sha256, packed.archive_sha256);
+  assert.equal(extracted.root_receipt_id, result.rootId);
+  assert.equal(extracted.receipt_tree_sha256, packed.receipt_tree_sha256);
+  for (const path of result.receiptPaths) {
+    const original = await readFile(join(result.receiptDir, ...path.split("/")));
+    const reconstructed = await readFile(join(reconstructedDir, ...path.split("/")));
+    assert.deepEqual(reconstructed, original, path);
+  }
+});
+
+test("logical colon receipt path survives tree archive reconstruction byte-for-byte", () => {
+  const rootId = `sha256:${"c".repeat(64)}`;
+  const path = `${rootId}.json`;
+  const content = Buffer.from(`${JSON.stringify({
+    schema: "runx.receipt.v1",
+    id: rootId,
+    status: "sealed",
+    execution: { exit_code: 0 },
+  })}\n`);
+  const statusAudit = {
+    status: "PASS",
+    status_signals: [{ path: "$.status", value: "sealed" }],
+    exit_code_signals: [{ path: "$.execution.exit_code", value: 0 }],
+    boolean_signals: [],
+    failure_signals: [],
+  };
+  const records = [{
+    path,
+    bytes: content.length,
+    sha256: createHash("sha256").update(content).digest("hex"),
+    json_parse: "parsed",
+    schema: "runx.receipt.v1",
+    receipt_id: rootId,
+    status_audit: statusAudit,
+  }];
+  const receiptTree = {
+    schema: "redsync.receipt_tree.v1",
+    root_receipt_id: rootId,
+    root_receipt_ref: rootId,
+    root_receipt_path: path,
+    file_count: 1,
+    tree_sha256: createHash("sha256").update(JSON.stringify(records)).digest("hex"),
+    receipt_status_audit: {
+      schema: "redsync.receipt_status_audit.v1",
+      overall_status: "PASS",
+      parseable_json_count: 1,
+      failed_json_count: 0,
+      files: [{ path, ...statusAudit }],
+    },
+    files: records,
+  };
+
+  const first = createReceiptTreeArchive({
+    receiptTree,
+    files: [{ path, content }],
+  });
+  const second = createReceiptTreeArchive({
+    receiptTree,
+    files: [{ path, content }],
+  });
+  assert.deepEqual(second.archiveBytes, first.archiveBytes);
+  const reconstructed = reconstructReceiptTreeArchive({
+    archiveBytes: first.archiveBytes,
+    receiptTree,
+  });
+  assert.equal(reconstructed.files[0].path, path);
+  assert.deepEqual(reconstructed.files[0].content, content);
+  assert.equal(reconstructed.result.receipt_status_audit.overall_status, "PASS");
+});
+
+test("root receipt extractor blocks a valid raw failure status", async () => {
+  const result = await runReceiptExtractor({ runStatus: "failure" });
+  assert.notEqual(result.exitCode, 0);
+  assert.match(result.stderr, /BLOCKED: unexpected runx raw status: failure; expected sealed/);
+  const error = JSON.parse(
+    await readFile(join(result.outputDir, "root-receipt-error.json"), "utf8"),
+  );
+  assert.equal(error.status, "BLOCKED");
+  assert.match(error.error, /unexpected runx raw status: failure/);
+});
+
+test("failed child receipt blocks extraction and archive packaging", async () => {
+  const result = await runReceiptExtractor({ failedChild: true });
+  assert.notEqual(result.exitCode, 0);
+  assert.match(result.stderr, /BLOCKED: stored receipt status audit blocked/);
+  const treePath = join(result.outputDir, "receipt-tree.json");
+  const tree = JSON.parse(await readFile(treePath, "utf8"));
+  const audit = JSON.parse(
+    await readFile(join(result.outputDir, "receipt-status-audit.json"), "utf8"),
+  );
+  assert.equal(tree.receipt_status_audit.overall_status, "BLOCKED");
+  assert.equal(audit.failed_json_count, 1);
+  assert.match(JSON.stringify(audit.files), /children\/child\.json/);
+  await assert.rejects(
+    packReceiptTree({
+      receiptDir: result.receiptDir,
+      receiptTreePath: treePath,
+      archivePath: join(result.directory, "blocked.archive.json"),
+    }),
+    /receipt tree status audit is missing, blocked, or inconsistent/,
+  );
 });
 
 test("root receipt extractor blocks duplicate or absent root receipts", async () => {

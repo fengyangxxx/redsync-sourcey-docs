@@ -9,6 +9,8 @@ Read the Docs provides a durable, project-named documentation service rather
 than a personal GitHub Pages site, tunnel, or deploy-preview URL. After the
 project exists, upstream maintainers can be invited and operational control can
 be transferred if the Redsync maintainers choose to adopt the documentation.
+Until that happens, this remains claimant-authored community documentation; it
+must not be presented as target-owned or official.
 
 The repository commits the generated Sourcey snapshot and static output.
 `.readthedocs.yaml` installs the pinned dependencies, rebuilds the static site

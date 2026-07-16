@@ -1,84 +1,110 @@
-# Frantic #113 - Redsync Sourcey Adoption Report (Draft)
+# Frantic #33 - Redsync Sourcey Community Documentation Report (QA Candidate)
 
-## Status
+## Status And Boundary
 
-This is a local implementation draft. It is not a final delivery payload.
-External publication, upstream contribution, immutable URLs, and the governed
-receipt remain explicit placeholders until the main agent completes and
-verifies those actions.
+This is a post-claim pre-publication candidate for active claim
+`4ec19597-79e9-499b-a932-d91fc0150881`, claimed at
+`2026-07-16T19:14:58.021Z` with fuse and delivery deadline
+`2026-07-17T00:14:58.021Z`. Its source snapshot was prepared earlier under
+fy's task-specific pre-claim-work override. It is not a Frantic delivery payload.
+The site is claimant-authored, project-named community documentation hosted on
+Read the Docs; it is not target-owned or official. The upstream PR is open and
+unmerged and is only an optional README link proposal, never adoption,
+endorsement, or maintainer acceptance.
 
-## Target
+## Target And Generation
 
-- Repository: `https://github.com/go-redsync/redsync`
-- Commit: `79f6ba24a8bf41f35141de700d410a06bb27622f`
-- Module: `github.com/go-redsync/redsync/v4`
-- Sourcey: `3.6.3`, `godoc()` adapter
-- Governed CLI version evidence: `runx-cli 0.6.14`
+- Repository: `https://github.com/go-redsync/redsync`.
+- Pinned commit: `79f6ba24a8bf41f35141de700d410a06bb27622f`.
+- License: `BSD-3-Clause`, verified from the pinned [`LICENSE`](https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/LICENSE).
+- Sourcey: `3.6.3`, `godoc` adapter, configured in `sourcey.config.ts`.
+- Exact command: `sourcey godoc --module ./source/redsync --packages ./... --out godoc.json`.
+- Exact CLI observation: `runx-cli 0.6.14`, satisfying the required `>=0.6.13` floor.
+- Snapshot: schema `1`, 15 packages, zero diagnostics.
+- Coverage: 15 packages, 19 non-test Go files, and 110 exported symbols.
+- Static output: 23 Sourcey-generated HTML pages plus one navigation
+  compatibility redirect, for 24 HTML pages and 30 packaged files.
+- Exact byte/source checks: five generated pages map to pinned source line,
+  repository-LF SHA-256, and Git blob SHA-1 records.
 
-## Generated Documentation
+The complete HTML list is recorded in `evidence/evidence.draft.json`; the raw
+inventory and byte manifest are `evidence/inventory.json` and
+`evidence/sha256-manifest.json`.
 
-The package runs Sourcey's Go introspector against the real pinned module,
-commits the resulting `godoc.json`, and builds a navigable static site from that
-snapshot. The site covers the root distributed-lock API, core Redis contracts,
-and the go-redis, Redigo, Rueidis, and Valkey adapter packages.
+## Maintainer-Facing Gaps
 
-Measured local output:
+1. **Legacy reference link.** The pinned Redsync README still links to
+   `http://godoc.org/github.com/go-redsync/redsync` at
+   [`README.md#L20-L22`](https://github.com/go-redsync/redsync/blob/79f6ba24a8bf41f35141de700d410a06bb27622f/README.md#L20-L22).
+   The generated community site replaces that single legacy entry point with a
+   navigable package map while preserving exact pinned source links.
+2. **Adapter discovery is fragmented.** The public interfaces begin at
+   [`redis/redis.go#L9-L26`](https://github.com/go-redsync/redsync/blob/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/redis.go#L9-L26),
+   while go-redis, Redigo, Rueidis, and Valkey implementations live in separate
+   directories. The 15-page API list makes those variants comparable without
+   browsing the source tree manually.
+3. **Lock-option behavior lacks task guidance.** Expiry, retries, drift,
+   timeout, fail-fast, and pool shuffling are declared across
+   [`redsync.go#L67-L155`](https://github.com/go-redsync/redsync/blob/79f6ba24a8bf41f35141de700d410a06bb27622f/redsync.go#L67-L155),
+   while lifecycle methods such as `Lock`, `Unlock`, `Extend`, and `Valid` are
+   spread across
+   [`mutex.go#L55-L196`](https://github.com/go-redsync/redsync/blob/79f6ba24a8bf41f35141de700d410a06bb27622f/mutex.go#L55-L196).
+   The API reference exposes every symbol, but maintainers still need a
+   task-oriented correctness and recovery guide.
+4. **Refresh policy is missing.** The generated snapshot is intentionally
+   pinned. A release-aware rebuild or exported-symbol drift check is still
+   needed so future Redsync releases cannot silently outgrow the documentation.
 
-- Sourcey adapter: exit 0, schema 1, 15 packages, 0 diagnostics
-- Static site: 21 Sourcey pages and 28 Sourcey output files, plus one
-  `go-api/index.html` compatibility redirect for the tab link emitted by
-  Sourcey 3.6.3
-- Source inventory: 15 packages, 19 non-test Go files, 110 exported symbols
-- Exact page/source checks: 5
+These gaps and their generated-page counterparts are also published in
+`maintainer-gap-analysis.md`.
 
-Machine evidence:
+## Independent Machine Proof
 
-- Package/API/symbol inventory: `evidence/inventory.json`
-- Five exact page-to-source mappings: `evidence/page-source-mappings.json`
-- Byte hashes: `evidence/sha256-manifest.json`
-- Raw local commands: `evidence/commands.local.txt`
-- Reproduction steps: `README.md` and `reproduce.md`
+- Direct live validator result: `evidence/local-live-validation/evidence.json`.
+- Raw HTTP/check transcript: `evidence/local-live-validation/transcript.txt`.
+- Raw validator stdout/stderr: `evidence/local-live-validation/runner-stdout.json`
+  and `runner-stderr.txt`.
+- Machine-proof hashes: `evidence/local-live-validation/manifest.json`.
+- Receipt archive contract: each original receipt path, byte length, SHA-256,
+  and exact base64 bytes is stored in `runx-receipts.archive.json`; extraction
+  must reproduce the complete tree before workflow success.
+- Receipt status contract: raw `runx.skill_run.v1` status must be exactly
+  `sealed`; every parseable stored receipt JSON is audited for failed states,
+  false success flags, and nonzero exit codes before archive packaging.
+- Summary/raw consistency: a PASS is impossible when any raw check is BLOCKED,
+  any subprocess exit is nonzero, receipt reconstruction fails, or receipt
+  verification fails.
 
-## Focused Test Results
+All prior failed workflow runs and their receipts are excluded. Only the next
+successful post-claim governed run may supply final receipt evidence.
 
-- `go test -c -mod=readonly .`: exit 0 (root package compile-only)
-- `go test -mod=readonly ./redis/...`: exit 0 for the core Redis contracts and
-  all adapter packages
-- `go test -mod=readonly ./...`: exit 1 because the upstream root package
-  `TestMain` launches `redis-server`, which is not installed on the current
-  PATH. The remaining 14 packages passed or had no tests. This environment
-  dependency is intentionally reported rather than summarized as all-green.
+## Public Host And Provenance
 
-## Adoption Path
+- Public home: `https://redsync-sourcey-docs.readthedocs.io/en/latest/`.
+- Public source: `https://github.com/fengyangxxx/redsync-sourcey-docs`.
+- Existing base deployment: Read the Docs build `33591901` at commit
+  `2a572fee31bb273b3c16333c3a869798e8c5227f`; this is background provenance,
+  not proof that the new candidate commit is deployed.
+- Required publication proof: a fresh post-claim source commit, a successful
+  Read the Docs build tied to that exact commit, and anonymous page/hash
+  readback.
+- PR `https://github.com/go-redsync/redsync/pull/245` is open and unmerged at
+  head `f13cd302b903ae84fc21d914bbeb631a21bb9521`; it is optional proposal evidence
+  only.
 
-- Planned public site: `PLACEHOLDER_PUBLIC_URL`
-- Public site state: `PLACEHOLDER_PUBLIC_URL_STATE`
-- Open upstream PR: `PLACEHOLDER_OPEN_PR_URL`
-- PR state: `PLACEHOLDER_OPEN_PR_STATE`
-- PR head: `PLACEHOLDER_OPEN_PR_HEAD_COMMIT`
+## External-Only Remaining Steps
 
-The maintainer-facing rationale is in `upstream-pr-rationale.md`; the exact
-README-only proposal is in `upstream/README-sourcey-docs.patch`. The proposal
-replaces the legacy HTTP godoc.org link with the project-named Read the Docs
-site and offers maintainers ownership of the docs project.
+1. Obtain Dirac outbound-publication QA for this exact post-claim commit, then
+   push only the reviewed commit.
+2. Confirm a fresh Read the Docs build deploys that exact commit.
+3. Dispatch the governed workflow exactly once with the immutable values listed
+   below; require a successful run, one archive artifact, exact reconstruction,
+   root receipt verification, and clean raw output.
+4. Materialize the successful workflow outputs into immutable evidence URLs,
+   replace the null external fields in `evidence/evidence.draft.json`, and run
+   complete Dirac line-by-line final QA.
+5. Use the guarded Frantic delivery path only after final QA PASS and before the
+   recorded deadline.
 
-## Provenance and Regression Controls
-
-This work is generated after claim from Redsync source at the pinned commit. It
-does not reuse go-chi or scafld pages, evidence, or target claims. The public URL
-must be a newly deployed worker-authored site whose bytes match this package,
-and the upstream PR must expose the contribution diff and open state. URL 200
-alone is not sufficient.
-
-## Governed Receipt and Immutable Evidence
-
-- Receipt: `PLACEHOLDER_GOVERNED_RECEIPT_REF`
-- Receipt evidence: `PLACEHOLDER_IMMUTABLE_RECEIPT_URL`
-- Evidence JSON: `PLACEHOLDER_IMMUTABLE_EVIDENCE_URL`
-- Final report: `PLACEHOLDER_IMMUTABLE_REPORT_URL`
-- Inventory: `PLACEHOLDER_IMMUTABLE_INVENTORY_URL`
-- Mappings: `PLACEHOLDER_IMMUTABLE_MAPPINGS_URL`
-- Command transcript: `PLACEHOLDER_IMMUTABLE_COMMAND_TRANSCRIPT_URL`
-
-Every placeholder must be replaced with fresh exact evidence before Nietzsche
-final QA. Any artifact change after that QA invalidates the PASS.
+No push, workflow dispatch, Read the Docs publication, PR mutation, or Frantic
+delivery has been performed by this local implementation step.

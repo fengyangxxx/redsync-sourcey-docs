@@ -26,7 +26,8 @@ function parseArgs(argv) {
 async function collectFiles(root, directory = root) {
   const files = [];
   const entries = await readdir(directory, { withFileTypes: true });
-  for (const entry of entries.sort((left, right) => left.name.localeCompare(right.name))) {
+  for (const entry of entries.sort((left, right) =>
+    left.name < right.name ? -1 : left.name > right.name ? 1 : 0)) {
     const fullPath = join(directory, entry.name);
     if (entry.isSymbolicLink()) throw new Error(`receipt tree contains symlink: ${fullPath}`);
     if (entry.isDirectory()) files.push(...(await collectFiles(root, fullPath)));
@@ -38,6 +39,58 @@ async function collectFiles(root, directory = root) {
     }
   }
   return files;
+}
+
+const FAILED_STATUSES = new Set([
+  "blocked",
+  "cancelled",
+  "error",
+  "failed",
+  "failure",
+  "invalid",
+  "timed_out",
+  "timeout",
+]);
+
+function auditStoredJson(value) {
+  const status_signals = [];
+  const exit_code_signals = [];
+  const boolean_signals = [];
+
+  function visit(current, path) {
+    if (Array.isArray(current)) {
+      current.forEach((item, index) => visit(item, `${path}[${index}]`));
+      return;
+    }
+    if (!current || typeof current !== "object") return;
+    for (const [key, item] of Object.entries(current)) {
+      const itemPath = `${path}.${key}`;
+      if (key === "status" && typeof item === "string") {
+        status_signals.push({ path: itemPath, value: item });
+      }
+      if (/^(exit_code|exitCode)$/.test(key) && (typeof item === "number" || /^-?\d+$/.test(String(item)))) {
+        exit_code_signals.push({ path: itemPath, value: Number(item) });
+      }
+      if (/^(success|ok|passed)$/.test(key) && typeof item === "boolean") {
+        boolean_signals.push({ path: itemPath, value: item });
+      }
+      visit(item, itemPath);
+    }
+  }
+
+  visit(value, "$");
+  const failure_signals = [
+    ...status_signals.filter((signal) => FAILED_STATUSES.has(signal.value.toLowerCase())),
+    ...exit_code_signals.filter((signal) => signal.value !== 0),
+    ...boolean_signals.filter((signal) => signal.value === false),
+  ];
+  return {
+    status: failure_signals.length === 0 ? "PASS" : "BLOCKED",
+    status_signals,
+    exit_code_signals,
+    boolean_signals,
+    failure_signals,
+  };
 }
 
 async function writeBlocked(outputDir, error) {
@@ -75,6 +128,9 @@ async function main() {
     if (run.schema !== "runx.skill_run.v1") {
       throw new Error(`unexpected runx raw schema: ${run.schema ?? "missing"}`);
     }
+    if (run.status !== "sealed") {
+      throw new Error(`unexpected runx raw status: ${run.status ?? "missing"}; expected sealed`);
+    }
     if (!/^sha256:[0-9a-f]{64}$/.test(rootReceiptId ?? "")) {
       throw new Error("runx raw JSON has no exact sha256 receipt_id");
     }
@@ -87,6 +143,7 @@ async function main() {
 
     const records = [];
     const rootMatches = [];
+    const jsonAudits = [];
     for (const file of treeFiles) {
       const bytes = await readFile(file.fullPath);
       const record = {
@@ -97,8 +154,11 @@ async function main() {
       if (file.path.endsWith(".json")) {
         try {
           const parsed = JSON.parse(bytes.toString("utf8"));
+          record.json_parse = "parsed";
           if (typeof parsed.schema === "string") record.schema = parsed.schema;
           if (typeof parsed.id === "string") record.receipt_id = parsed.id;
+          record.status_audit = auditStoredJson(parsed);
+          jsonAudits.push({ path: file.path, ...record.status_audit });
           if (parsed.schema === "runx.receipt.v1" && parsed.id === rootReceiptId) {
             rootMatches.push({ ...file, bytes, parsed, record });
           }
@@ -120,6 +180,14 @@ async function main() {
       throw new Error("stored root receipt does not match the root receipt embedded in runx raw JSON");
     }
 
+    const receiptStatusAudit = {
+      schema: "redsync.receipt_status_audit.v1",
+      overall_status: jsonAudits.every((audit) => audit.status === "PASS") ? "PASS" : "BLOCKED",
+      parseable_json_count: jsonAudits.length,
+      failed_json_count: jsonAudits.filter((audit) => audit.status === "BLOCKED").length,
+      files: jsonAudits,
+    };
+
     const treeHash = sha256(Buffer.from(JSON.stringify(records), "utf8"));
     const receiptTree = {
       schema: "redsync.receipt_tree.v1",
@@ -129,6 +197,7 @@ async function main() {
       root_receipt_path: root.path,
       file_count: records.length,
       tree_sha256: treeHash,
+      receipt_status_audit: receiptStatusAudit,
       files: records,
     };
     const rootReference = {
@@ -139,16 +208,34 @@ async function main() {
       root_receipt_path: root.path,
       root_receipt_sha256: root.record.sha256,
       runx_raw_schema: run.schema,
+      runx_raw_status: run.status,
       runx_raw_sha256: sha256(runBytes),
       receipt_tree_file_count: records.length,
       receipt_tree_sha256: treeHash,
+      receipt_status_audit: {
+        overall_status: receiptStatusAudit.overall_status,
+        parseable_json_count: receiptStatusAudit.parseable_json_count,
+        failed_json_count: receiptStatusAudit.failed_json_count,
+      },
     };
+
+    await writeFile(
+      join(outputDir, "receipt-status-audit.json"),
+      `${JSON.stringify(receiptStatusAudit, null, 2)}\n`,
+    );
+    await writeFile(join(outputDir, "receipt-tree.json"), `${JSON.stringify(receiptTree, null, 2)}\n`);
+    if (receiptStatusAudit.overall_status !== "PASS") {
+      const failedPaths = jsonAudits
+        .filter((audit) => audit.status === "BLOCKED")
+        .map((audit) => audit.path)
+        .join(", ");
+      throw new Error(`stored receipt status audit blocked: ${failedPaths}`);
+    }
 
     await writeFile(join(outputDir, "root-receipt-id.txt"), `${rootReceiptId}\n`);
     await writeFile(join(outputDir, "root-receipt-ref.txt"), `${rootReceiptId}\n`);
     await writeFile(join(outputDir, "root-receipt.json"), root.bytes);
     await writeFile(join(outputDir, "root-receipt-ref.json"), `${JSON.stringify(rootReference, null, 2)}\n`);
-    await writeFile(join(outputDir, "receipt-tree.json"), `${JSON.stringify(receiptTree, null, 2)}\n`);
     process.stdout.write(`${JSON.stringify({ status: "PASS", ...rootReference }, null, 2)}\n`);
   } catch (error) {
     await writeBlocked(outputDir, error);

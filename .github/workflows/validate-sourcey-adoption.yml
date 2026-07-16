@@ -1,4 +1,4 @@
-name: Validate Sourcey adoption
+name: Validate Sourcey community publication
 
 on:
   workflow_dispatch:
@@ -65,10 +65,10 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Create ephemeral CI receipt identity
+      - name: Provision Linux bubblewrap sandbox
         shell: bash
         run: |
-          set -euo pipefail
+          set -uo pipefail
           runx_receipt_dir="$RUNNER_TEMP/runx-receipts"
           validation_output_dir="$RUNNER_TEMP/sourcey-validation"
           {
@@ -76,6 +76,53 @@ jobs:
             printf 'VALIDATION_OUTPUT_DIR=%s\n' "$validation_output_dir"
           } >>"$GITHUB_ENV"
           mkdir -p "$runx_receipt_dir" "$validation_output_dir"
+
+          install_exit=0
+          apt_update_exit=0
+          apt_install_exit=0
+          {
+            printf '%s\n' 'command=sudo apt-get update'
+            sudo apt-get update
+            apt_update_exit=$?
+            printf 'apt_update_exit_code=%s\n' "$apt_update_exit"
+            if [[ "$apt_update_exit" -eq 0 ]]; then
+              printf '%s\n' 'command=sudo apt-get install --yes --no-install-recommends bubblewrap'
+              sudo apt-get install --yes --no-install-recommends bubblewrap
+              apt_install_exit=$?
+              printf 'apt_install_exit_code=%s\n' "$apt_install_exit"
+              install_exit="$apt_install_exit"
+            else
+              printf '%s\n' 'apt_install_exit_code=SKIPPED'
+              install_exit="$apt_update_exit"
+            fi
+          } >"$validation_output_dir/bubblewrap-install.txt" 2>&1
+          printf '%s\n' "$install_exit" \
+            >"$validation_output_dir/bubblewrap-install-exit-code.txt"
+
+          version_exit=0
+          if [[ "$install_exit" -eq 0 ]]; then
+            {
+              bwrap_path="$(command -v bwrap)"
+              printf 'path=%s\n' "$bwrap_path"
+              "$bwrap_path" --version
+            } >"$validation_output_dir/bubblewrap-version.txt" 2>&1 \
+              || version_exit=$?
+          else
+            printf '%s\n' 'bubblewrap version check skipped because installation failed' \
+              >"$validation_output_dir/bubblewrap-version.txt"
+            version_exit=1
+          fi
+          printf '%s\n' "$version_exit" \
+            >"$validation_output_dir/bubblewrap-version-exit-code.txt"
+
+          if [[ "$install_exit" -ne 0 || "$version_exit" -ne 0 ]]; then
+            exit 1
+          fi
+
+      - name: Create ephemeral CI receipt identity
+        shell: bash
+        run: |
+          set -euo pipefail
           node <<'NODE'
           const { appendFileSync } = require("node:fs");
           const { createPrivateKey, createPublicKey, randomBytes } = require("node:crypto");
@@ -96,9 +143,11 @@ jobs:
           });
           const publicKey = publicDer.subarray(publicDer.length - 32);
           const kid = `github-actions-ephemeral-${process.env.GITHUB_RUN_ID}`;
+          const seedBase64 = seed.toString("base64");
+          process.stdout.write(`::add-mask::${seedBase64}\n`);
           const lines = [
             `RUNX_RECEIPT_SIGN_KID=${kid}`,
-            `RUNX_RECEIPT_SIGN_ED25519_SEED_BASE64=${seed.toString("base64")}`,
+            `RUNX_RECEIPT_SIGN_ED25519_SEED_BASE64=${seedBase64}`,
             "RUNX_RECEIPT_SIGN_ISSUER_TYPE=ci",
             `RUNX_RECEIPT_VERIFY_KID=${kid}`,
             `RUNX_RECEIPT_VERIFY_ED25519_PUBLIC_KEY_BASE64=${publicKey.toString("base64")}`,
@@ -121,6 +170,8 @@ jobs:
           validation_exit=0
           artifact_copy_exit=0
           receipt_resolution_exit=0
+          receipt_archive_exit=0
+          receipt_reconstruction_exit=0
           verify_exit=0
 
           npx -y @runxhq/cli@0.6.14 skill \
@@ -133,6 +184,7 @@ jobs:
             -i "upstream_pr_url=$INPUT_UPSTREAM_PR_URL" \
             -i "upstream_pr_head_commit=$INPUT_UPSTREAM_PR_HEAD_COMMIT" \
             -i "mappings_url=$INPUT_MAPPINGS_URL" \
+            -i "runx_version_output=$(cat "$VALIDATION_OUTPUT_DIR/runx-version.txt")" \
             -i "validation_mode=live" \
             -i "output_dir=artifacts" \
             -R "$RUNX_RECEIPT_DIR" \
@@ -172,6 +224,46 @@ jobs:
             >"$VALIDATION_OUTPUT_DIR/root-receipt-resolution-exit-code.txt"
 
           if [[ "$receipt_resolution_exit" -eq 0 ]]; then
+            node ./validation-skill/redsync-sourcey-validation/scripts/receipt-tree-archive.mjs \
+              pack \
+              --receipt-dir "$RUNX_RECEIPT_DIR" \
+              --receipt-tree "$VALIDATION_OUTPUT_DIR/receipt-tree.json" \
+              --archive "$VALIDATION_OUTPUT_DIR/runx-receipts.archive.json" \
+              >"$VALIDATION_OUTPUT_DIR/receipt-archive-pack.json" \
+              2>"$VALIDATION_OUTPUT_DIR/receipt-archive-pack-stderr.txt" \
+              || receipt_archive_exit=$?
+          else
+            printf '%s\n' '{"status":"BLOCKED","reason":"root_receipt_resolution_failed"}' \
+              >"$VALIDATION_OUTPUT_DIR/receipt-archive-pack.json"
+            printf '%s\n' 'Receipt archive packaging is blocked without an exact receipt tree.' \
+              >"$VALIDATION_OUTPUT_DIR/receipt-archive-pack-stderr.txt"
+            receipt_archive_exit=1
+          fi
+          printf '%s\n' "$receipt_archive_exit" \
+            >"$VALIDATION_OUTPUT_DIR/receipt-archive-pack-exit-code.txt"
+
+          if [[ "$receipt_archive_exit" -eq 0 ]]; then
+            sha256sum "$VALIDATION_OUTPUT_DIR/runx-receipts.archive.json" \
+              >"$VALIDATION_OUTPUT_DIR/runx-receipts.archive.sha256"
+            node ./validation-skill/redsync-sourcey-validation/scripts/receipt-tree-archive.mjs \
+              extract \
+              --archive "$VALIDATION_OUTPUT_DIR/runx-receipts.archive.json" \
+              --output-dir "$RUNNER_TEMP/reconstructed-runx-receipts" \
+              --receipt-tree "$VALIDATION_OUTPUT_DIR/receipt-tree.json" \
+              >"$VALIDATION_OUTPUT_DIR/receipt-archive-reconstruction.json" \
+              2>"$VALIDATION_OUTPUT_DIR/receipt-archive-reconstruction-stderr.txt" \
+              || receipt_reconstruction_exit=$?
+          else
+            printf '%s\n' '{"status":"BLOCKED","reason":"receipt_archive_pack_failed"}' \
+              >"$VALIDATION_OUTPUT_DIR/receipt-archive-reconstruction.json"
+            printf '%s\n' 'Receipt reconstruction is blocked because archive packaging failed.' \
+              >"$VALIDATION_OUTPUT_DIR/receipt-archive-reconstruction-stderr.txt"
+            receipt_reconstruction_exit=1
+          fi
+          printf '%s\n' "$receipt_reconstruction_exit" \
+            >"$VALIDATION_OUTPUT_DIR/receipt-archive-reconstruction-exit-code.txt"
+
+          if [[ "$receipt_resolution_exit" -eq 0 ]]; then
             npx -y @runxhq/cli@0.6.14 verify \
               --receipt "$VALIDATION_OUTPUT_DIR/root-receipt.json" \
               -j \
@@ -187,7 +279,7 @@ jobs:
           fi
           printf '%s\n' "$verify_exit" >"$VALIDATION_OUTPUT_DIR/runx-verify-exit-code.txt"
 
-          if [[ "$validation_exit" -ne 0 || "$artifact_copy_exit" -ne 0 || "$receipt_resolution_exit" -ne 0 || "$verify_exit" -ne 0 ]]; then
+          if [[ "$validation_exit" -ne 0 || "$artifact_copy_exit" -ne 0 || "$receipt_resolution_exit" -ne 0 || "$receipt_archive_exit" -ne 0 || "$receipt_reconstruction_exit" -ne 0 || "$verify_exit" -ne 0 ]]; then
             exit 1
           fi
 
@@ -195,10 +287,14 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: sourcey-adoption-validation-${{ github.run_id }}
+          name: sourcey-community-publication-${{ github.run_id }}
           if-no-files-found: error
           retention-days: 14
           path: |
+            ${{ runner.temp }}/sourcey-validation/bubblewrap-install.txt
+            ${{ runner.temp }}/sourcey-validation/bubblewrap-install-exit-code.txt
+            ${{ runner.temp }}/sourcey-validation/bubblewrap-version.txt
+            ${{ runner.temp }}/sourcey-validation/bubblewrap-version-exit-code.txt
             ${{ runner.temp }}/sourcey-validation/runx-version.txt
             ${{ runner.temp }}/sourcey-validation/runx-raw-stdout.json
             ${{ runner.temp }}/sourcey-validation/runx-raw-stderr.txt
@@ -212,11 +308,19 @@ jobs:
             ${{ runner.temp }}/sourcey-validation/root-receipt-ref.json
             ${{ runner.temp }}/sourcey-validation/root-receipt.json
             ${{ runner.temp }}/sourcey-validation/receipt-tree.json
+            ${{ runner.temp }}/sourcey-validation/receipt-status-audit.json
             ${{ runner.temp }}/sourcey-validation/root-receipt-error.json
             ${{ runner.temp }}/sourcey-validation/root-receipt-resolution-stdout.json
             ${{ runner.temp }}/sourcey-validation/root-receipt-resolution-stderr.txt
             ${{ runner.temp }}/sourcey-validation/root-receipt-resolution-exit-code.txt
+            ${{ runner.temp }}/sourcey-validation/runx-receipts.archive.json
+            ${{ runner.temp }}/sourcey-validation/runx-receipts.archive.sha256
+            ${{ runner.temp }}/sourcey-validation/receipt-archive-pack.json
+            ${{ runner.temp }}/sourcey-validation/receipt-archive-pack-stderr.txt
+            ${{ runner.temp }}/sourcey-validation/receipt-archive-pack-exit-code.txt
+            ${{ runner.temp }}/sourcey-validation/receipt-archive-reconstruction.json
+            ${{ runner.temp }}/sourcey-validation/receipt-archive-reconstruction-stderr.txt
+            ${{ runner.temp }}/sourcey-validation/receipt-archive-reconstruction-exit-code.txt
             ${{ runner.temp }}/sourcey-validation/runx-verify.json
             ${{ runner.temp }}/sourcey-validation/runx-verify-stderr.txt
             ${{ runner.temp }}/sourcey-validation/runx-verify-exit-code.txt
-            ${{ runner.temp }}/runx-receipts

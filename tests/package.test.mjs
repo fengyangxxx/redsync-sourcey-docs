@@ -10,6 +10,10 @@ import { repositoryLfBytes } from "../scripts/repository-bytes.mjs";
 
 const root = new URL("../", import.meta.url);
 const pin = "79f6ba24a8bf41f35141de700d410a06bb27622f";
+const claimId = "4ec19597-79e9-499b-a932-d91fc0150881";
+const claimedAt = "2026-07-16T19:14:58.021Z";
+const deliverDeadlineAt = "2026-07-17T00:14:58.021Z";
+const candidateParent = "2a572fee31bb273b3c16333c3a869798e8c5227f";
 const unresolved = (suffix) => ["PLACE", "HOLDER_", suffix].join("");
 const unresolvedPattern = new RegExp(["PLACE", "HOLDER_[A-Z0-9_]+"].join(""));
 const pinnedRawSourceHashes = new Map([
@@ -208,6 +212,12 @@ test("source snapshot and inventory prove real package and symbol depth", async 
   assert.equal(pinRecord.commit, pin);
   assert.equal(pinRecord.source_commit_committed_at, "2026-07-02T12:37:50+06:00");
   assert.equal(pinRecord.godoc_generated_at_policy, "source_commit_committed_at_utc");
+  assert.equal(pinRecord.snapshot_prepared_before_current_claim, true);
+  assert.equal(pinRecord.preclaim_work_override, "fy_task_specific_override");
+  assert.equal(pinRecord.current_publication_claim_id, claimId);
+  assert.equal(pinRecord.current_publication_claimed_at, claimedAt);
+  assert.ok(!Object.hasOwn(pinRecord, "copied_after_claim"));
+  assert.ok(!Object.hasOwn(pinRecord, "claim_id"));
   assert.equal(inventory.repository, pinRecord.repository);
   assert.equal(inventory.commit, pin);
   assert.ok(inventory.package_count >= 10, `package_count=${inventory.package_count}`);
@@ -310,38 +320,133 @@ test("pinned source coverage reports the audited inventory and publication bound
   assert.match(coverage, /must be deployed and checked/i);
 });
 
-test("generated maintainer rationale reflects finalized page counts", async () => {
+test("generated maintainer rationale reflects the raw packaged page counts", async () => {
   const page = await text("dist/upstream-pr-rationale.html");
 
   assert.ok(!page.includes(unresolved("GENERATED_PAGE_COUNT")));
-  assert.match(page, /Sourcey-generated pages:\s*<code>22<\/code> total/);
+  assert.match(page, /Sourcey-generated HTML pages:\s*<code>23<\/code>/);
   assert.match(page, /including\s*<code>15<\/code> API package pages/);
+  assert.match(page, /<code>24<\/code>\s*packaged\s+HTML files/);
 });
 
-test("draft evidence and report expose every unresolved external field as a placeholder", async () => {
+test("QA candidate evidence and report are complete for every locally controllable field", async () => {
   const evidence = await json("evidence/evidence.draft.json");
   const report = await text("report.draft.md");
 
-  assert.equal(evidence.claim_id, "817adb29-a5d5-493d-8a1d-9f7cb6911b86");
+  assert.equal(evidence.posting_id, "p-8b91e1ac8c");
+  assert.equal(evidence.claim_id, claimId);
+  assert.equal(evidence.claim_state, "active");
+  assert.equal(evidence.claimed_at, claimedAt);
+  assert.equal(evidence.fuse_expires_at, deliverDeadlineAt);
+  assert.equal(evidence.deliver_deadline_at, deliverDeadlineAt);
+  assert.equal(evidence.candidate_base_commit, candidateParent);
+  assert.match(evidence.summary, /claimant-authored ReadTheDocs community publication/i);
+  assert.ok(evidence.summary.includes(pin));
+  assert.match(evidence.summary, /Sourcey 3\.6\.3/);
+  assert.match(evidence.summary, /runx-cli 0\.6\.14 validation/);
+  assert.match(evidence.summary, /15 packages, 19 non-test Go files, and 110 exported symbols/);
+  assert.match(evidence.summary, /not target-owned or official/);
+  assert.match(evidence.summary, /not adoption or endorsement/);
   assert.equal(evidence.target.commit, pin);
+  assert.equal(evidence.target.license, "BSD-3-Clause");
+  assert.equal(evidence.sourcey.adapter, "godoc");
+  assert.equal(
+    evidence.sourcey.command,
+    "sourcey godoc --module ./source/redsync --packages ./... --out godoc.json",
+  );
   assert.ok(evidence.observations.includes("runx-cli 0.6.14"));
-  assert.equal(evidence.public_url, unresolved("PUBLIC_URL"));
-  assert.equal(evidence.upstream_pr.url, unresolved("OPEN_PR_URL"));
-  assert.equal(evidence.upstream_pr.state, unresolved("OPEN_PR_STATE"));
-  assert.equal(evidence.receipt_ref, unresolved("GOVERNED_RECEIPT_REF"));
-  assert.equal(evidence.immutable_refs.evidence_json, unresolved("IMMUTABLE_EVIDENCE_URL"));
-  assert.equal(evidence.immutable_refs.report, unresolved("IMMUTABLE_REPORT_URL"));
-  assert.match(report, new RegExp(unresolved("PUBLIC_URL")));
-  assert.match(report, new RegExp(unresolved("OPEN_PR_URL")));
-  assert.match(report, new RegExp(unresolved("GOVERNED_RECEIPT_REF")));
+  assert.ok(evidence.observations.length >= 6);
+  assert.equal(evidence.generated_docs.sourcey_html_page_count, 23);
+  assert.equal(evidence.generated_docs.navigation_compatibility_page_count, 1);
+  assert.equal(evidence.generated_docs.packaged_html_page_count, 24);
+  assert.equal(evidence.generated_docs.html_page_list.length, 24);
+  assert.equal(evidence.generated_docs.exported_symbol_count, 110);
+  assert.equal(evidence.public_host.target_owned, false);
+  assert.equal(evidence.public_host.official, false);
+  assert.equal(evidence.upstream_pr.state, "open");
+  assert.equal(evidence.upstream_pr.merged, false);
+  assert.equal(evidence.upstream_pr.adoption, false);
+  assert.equal(evidence.upstream_pr.endorsement, false);
+  assert.equal(evidence.workflow.successful_run_id, null);
+  assert.equal(evidence.workflow.receipt_ref, null);
+  assert.deepEqual(evidence.external_only_pending, [
+    "post-claim candidate commit push and exact ReadTheDocs build/deploy provenance",
+    "one successful governed workflow run and verified receipt",
+    "immutable final evidence/report URLs",
+    "Dirac final QA and guarded Frantic delivery",
+  ]);
+  assert.ok(evidence.evidence_items.length >= 6);
+  assert.match(report, /claimant-authored, project-named community documentation/i);
+  assert.match(report, /(?:not|never) adoption,\s*endorsement, or maintainer acceptance/i);
+  assert.ok((report.match(/^\s*\d+\.\s+\*\*/gm) ?? []).length >= 3);
+  assert.ok((report.match(/^\s*-\s+/gm) ?? []).length >= 6);
+  for (const forbiddenRun of ["29385064167", "29386361713"]) {
+    assert.doesNotMatch(JSON.stringify(evidence), new RegExp(forbiddenRun));
+    assert.doesNotMatch(report, new RegExp(forbiddenRun));
+  }
 });
 
-test("only explicit draft artifacts contain unresolved final-value tokens", async () => {
+test("current execution record binds the exact active claim and public parent", async () => {
+  const handoff = await text("evidence/hume-handoff.md");
+  const commands = await text("evidence/commands.local.txt");
+  const readme = await text("README.md");
+  const handoffParent = handoff.match(/direct\s+parent is `([0-9a-f]{40})`/i)?.[1];
+  const commandsParent = commands.match(/^Candidate parent: ([0-9a-f]{40})$/m)?.[1];
+  const git = (...args) => {
+    const result = spawnSync("git", args, {
+      cwd: fileURLToPath(root),
+      encoding: "utf8",
+    });
+    assert.equal(result.status, 0, result.stderr);
+    return result.stdout.trim();
+  };
+  const head = git("rev-parse", "HEAD");
+  const actualParent = head === candidateParent ? head : git("rev-parse", "HEAD^");
+  const currentSurfaces = `${handoff}\n${commands}\n${await text("report.draft.md")}\n${await text("evidence/evidence.draft.json")}`;
+  const staleClaimState = /claim_id"\s*:\s*null|claim_state"\s*:\s*"unclaimed"|no active claim|Active claim:\s*none|Reclaim #33|successful claim and exact claim\/deadline fields/i;
+
+  assert.match(handoff, /Gauss \(`019f65c3-203f-7990-8feb-3cc1ee98d86c`, xhigh\)/);
+  assert.match(handoff, /Dirac \(`019f65c3-29ec-7181-9277-b251442a3250`, xhigh\)/);
+  for (const value of [claimId, claimedAt, deliverDeadlineAt]) {
+    assert.match(handoff, new RegExp(value.replaceAll(".", "\\.")));
+    assert.match(commands, new RegExp(value.replaceAll(".", "\\.")));
+  }
+  assert.equal(handoffParent, candidateParent);
+  assert.equal(commandsParent, candidateParent);
+  assert.equal(actualParent, candidateParent);
+  assert.match(handoff, /QA_DECISION: PASS/);
+  assert.doesNotMatch(currentSurfaces, staleClaimState);
+  assert.doesNotMatch(handoff, /Nietzsche|Active claim:|Delivery deadline:|29 passed/i);
+  assert.doesNotMatch(readme, /Hume|Nietzsche/i);
+});
+
+test("publishable evidence contains no machine-local paths or private email", async () => {
+  const paths = [
+    "README.md",
+    "report.draft.md",
+    "evidence/commands.local.txt",
+    "evidence/hume-handoff.md",
+    "evidence/evidence.draft.json",
+    "evidence/local-live-validation/evidence.json",
+    "evidence/local-live-validation/manifest.json",
+    "evidence/local-live-validation/runner-stderr.txt",
+    "evidence/local-live-validation/runner-stdout.json",
+    "evidence/local-live-validation/runx-version.txt",
+    "evidence/local-live-validation/transcript.txt",
+  ];
+  const machinePath = /(?:(?<![A-Za-z0-9])[A-Za-z]:[\\/]|\/(?:home|Users|tmp|var\/folders)\/)/;
+  const email = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/;
+  for (const path of paths) {
+    const content = await text(path);
+    assert.doesNotMatch(content, machinePath, path);
+    assert.doesNotMatch(content, email, path);
+  }
+});
+
+test("no committed candidate artifact contains unresolved final-value tokens", async () => {
   const manifest = await json("evidence/sha256-manifest.json");
-  const allowed = new Set(["evidence/evidence.draft.json", "report.draft.md"]);
 
   for (const item of manifest.files) {
-    if (allowed.has(item.path)) continue;
     const content = (await readFile(new URL(item.path, root))).toString("utf8");
     assert.doesNotMatch(content, unresolvedPattern, item.path);
   }

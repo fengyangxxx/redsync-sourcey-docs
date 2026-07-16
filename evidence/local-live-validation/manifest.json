@@ -1,0 +1,33 @@
+{
+  "schema": "redsync.local_live_validation_manifest.v1",
+  "validated_docs_commit": "c302fc5b5593bbb82fcf1a7f3581f96800d44b16",
+  "checked_at": "2026-07-15T19:00:11.871Z",
+  "status": "PASS",
+  "files": [
+    {
+      "path": "evidence.json",
+      "bytes": 86891,
+      "sha256": "5d0c2f25b8e89b3b4506aa43ff73d0b6ea51acbc42157420c8ab04aa9432a159"
+    },
+    {
+      "path": "transcript.txt",
+      "bytes": 50686,
+      "sha256": "222e1b68f60c595b0f4fba46f026d9dde7a92c6c51437d71c44f12b061a30f88"
+    },
+    {
+      "path": "runner-stdout.json",
+      "bytes": 195446,
+      "sha256": "d67c3a014fc5a4bdddea9f9b6539792a70e664e88833c37a919956cf5427cc72"
+    },
+    {
+      "path": "runner-stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "runx-version.txt",
+      "bytes": 16,
+      "sha256": "e602819dc96361bd6584b33f6fd3f8724aaaf4b76a4b8bd4bf9a21119650f2ba"
+    }
+  ]
+}

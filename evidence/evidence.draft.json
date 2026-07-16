@@ -1,79 +1,120 @@
 {
-  "schema_version": "frantic-sourcey-adoption-evidence/v1",
-  "posting_id": "p-cb3858decc",
-  "claim_id": "817adb29-a5d5-493d-8a1d-9f7cb6911b86",
+  "schema_version": "frantic-sourcey-community-publication-evidence/v2",
+  "summary": "Claimant-authored ReadTheDocs community publication for go-redsync/redsync pinned at 79f6ba24a8bf41f35141de700d410a06bb27622f; Sourcey 3.6.3 and runx-cli 0.6.14 validation cover 15 packages, 19 non-test Go files, and 110 exported symbols. The site is not target-owned or official, and open PR #245 is not adoption or endorsement.",
+  "posting_id": "p-8b91e1ac8c",
+  "claim_id": "4ec19597-79e9-499b-a932-d91fc0150881",
+  "claim_state": "active",
+  "claimed_at": "2026-07-16T19:14:58.021Z",
+  "fuse_expires_at": "2026-07-17T00:14:58.021Z",
+  "deliver_deadline_at": "2026-07-17T00:14:58.021Z",
+  "candidate_base_commit": "2a572fee31bb273b3c16333c3a869798e8c5227f",
   "target": {
     "repository": "https://github.com/go-redsync/redsync",
     "commit": "79f6ba24a8bf41f35141de700d410a06bb27622f",
-    "module": "github.com/go-redsync/redsync/v4"
+    "module": "github.com/go-redsync/redsync/v4",
+    "license": "BSD-3-Clause",
+    "license_source": "https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/LICENSE"
   },
   "sourcey": {
     "version": "3.6.3",
     "adapter": "godoc",
-    "snapshot_command": "npm run snapshot",
-    "build_command": "npm run build",
+    "command": "sourcey godoc --module ./source/redsync --packages ./... --out godoc.json",
     "config": "sourcey.config.ts",
     "snapshot": "godoc.json",
     "snapshot_schema": 1,
     "diagnostics_count": 0
   },
   "generated_docs": {
-    "page_count": 21,
-    "sourcey_output_file_count": 28,
-    "packaged_file_count": 29,
-    "navigation_compatibility_file_count": 1,
+    "sourcey_html_page_count": 23,
+    "navigation_compatibility_page_count": 1,
+    "packaged_html_page_count": 24,
+    "packaged_file_count": 30,
     "api_package_page_count": 15,
     "source_package_count": 15,
     "non_test_go_file_count": 19,
-    "exported_symbol_count": 110
+    "exported_symbol_count": 110,
+    "html_page_list": [
+      "go-api.html",
+      "go-api/index.html",
+      "go-api/package-root.html",
+      "go-api/pkg-examples-goredis-v7.html",
+      "go-api/pkg-examples-goredis-v8.html",
+      "go-api/pkg-examples-goredis-v9.html",
+      "go-api/pkg-examples-goredis.html",
+      "go-api/pkg-examples-redigo.html",
+      "go-api/pkg-examples-valkego.html",
+      "go-api/pkg-redis-goredis-v7.html",
+      "go-api/pkg-redis-goredis-v8.html",
+      "go-api/pkg-redis-goredis-v9.html",
+      "go-api/pkg-redis-goredis.html",
+      "go-api/pkg-redis-redigo.html",
+      "go-api/pkg-redis-rueidis.html",
+      "go-api/pkg-redis-valkeygo.html",
+      "go-api/pkg-redis.html",
+      "hosting-decision.html",
+      "index.html",
+      "introduction.html",
+      "maintainer-gap-analysis.html",
+      "pinned-source-coverage.html",
+      "reproduce.html",
+      "upstream-pr-rationale.html"
+    ]
   },
-  "local_checks": {
-    "go_full_test": {
-      "command": "go test -mod=readonly ./...",
-      "exit_code": 1,
-      "result": "BLOCKED_ENVIRONMENT",
-      "reason": "root TestMain requires redis-server, which is not installed on PATH; the other 14 packages passed or had no tests"
-    },
-    "root_compile": {
-      "command": "go test -c -mod=readonly .",
-      "exit_code": 0
-    },
-    "redis_adapter_tests": {
-      "command": "go test -mod=readonly ./redis/...",
-      "exit_code": 0
-    }
+  "public_host": {
+    "url": "https://redsync-sourcey-docs.readthedocs.io/en/latest/",
+    "classification": "claimant-authored project-named community documentation",
+    "target_owned": false,
+    "official": false,
+    "public_source": "https://github.com/fengyangxxx/redsync-sourcey-docs",
+    "existing_base_build": "https://app.readthedocs.org/projects/redsync-sourcey-docs/builds/33591901/",
+    "existing_base_commit": "2a572fee31bb273b3c16333c3a869798e8c5227f",
+    "post_claim_build": null,
+    "post_claim_deployed_commit": null
   },
-  "public_url": "PLACEHOLDER_PUBLIC_URL",
-  "public_url_state": "PLACEHOLDER_PUBLIC_URL_STATE",
   "upstream_pr": {
-    "url": "PLACEHOLDER_OPEN_PR_URL",
-    "state": "PLACEHOLDER_OPEN_PR_STATE",
-    "head_commit": "PLACEHOLDER_OPEN_PR_HEAD_COMMIT"
+    "url": "https://github.com/go-redsync/redsync/pull/245",
+    "state": "open",
+    "draft": false,
+    "merged": false,
+    "head_commit": "f13cd302b903ae84fc21d914bbeb631a21bb9521",
+    "role": "optional unmerged README link proposal",
+    "adoption": false,
+    "endorsement": false
   },
-  "receipt_ref": "PLACEHOLDER_GOVERNED_RECEIPT_REF",
-  "governed_receipt_url": "PLACEHOLDER_IMMUTABLE_RECEIPT_URL",
-  "immutable_refs": {
-    "evidence_json": "PLACEHOLDER_IMMUTABLE_EVIDENCE_URL",
-    "report": "PLACEHOLDER_IMMUTABLE_REPORT_URL",
-    "inventory": "PLACEHOLDER_IMMUTABLE_INVENTORY_URL",
-    "page_source_mappings": "PLACEHOLDER_IMMUTABLE_MAPPINGS_URL",
-    "command_transcript": "PLACEHOLDER_IMMUTABLE_COMMAND_TRANSCRIPT_URL"
+  "local_machine_proof": {
+    "validated_docs_commit": "c302fc5b5593bbb82fcf1a7f3581f96800d44b16",
+    "evidence_json": "evidence/local-live-validation/evidence.json",
+    "raw_transcript": "evidence/local-live-validation/transcript.txt",
+    "runner_stdout": "evidence/local-live-validation/runner-stdout.json",
+    "runner_stderr": "evidence/local-live-validation/runner-stderr.txt",
+    "manifest": "evidence/local-live-validation/manifest.json"
+  },
+  "workflow": {
+    "trigger": "workflow_dispatch",
+    "dispatch_count_authorized_after_qa": 1,
+    "successful_run_id": null,
+    "successful_run_url": null,
+    "receipt_ref": null,
+    "receipt_archive": null,
+    "verification_json": null,
+    "failed_workflow_evidence_policy": "All prior failed workflow runs and receipts are excluded; only the next successful post-claim governed run may be cited."
   },
   "observations": [
     "runx-cli 0.6.14",
     "Target repository: https://github.com/go-redsync/redsync",
     "Pinned target commit: 79f6ba24a8bf41f35141de700d410a06bb27622f",
+    "License: BSD-3-Clause at the pinned target commit",
+    "Sourcey adapter: godoc",
     "Sourcey command: sourcey godoc --module ./source/redsync --packages ./... --out godoc.json",
-    "Sourcey adapter: godoc, committed snapshot mode for host rebuilds",
-    "Sourcey snapshot result: schema=1, packages=15, diagnostics=0",
-    "Generated static site: 21 Sourcey pages, 28 Sourcey output files, plus one go-api/index.html navigation redirect",
-    "Generated API inventory: 15 packages, 19 non-test Go files, 110 exported symbols",
+    "Sourcey config: sourcey.config.ts; snapshot mode; 15 packages; zero diagnostics",
+    "Generated site: 23 Sourcey HTML pages plus one navigation compatibility redirect; 30 packaged files",
+    "Coverage: 15 packages, 19 non-test Go files, 110 exported symbols",
     "Five exact generated-page to pinned-source mappings: evidence/page-source-mappings.json",
-    "Focused verification: root compile exit 0; redis adapter tests exit 0",
-    "Full go test limitation: root TestMain requires redis-server, unavailable on PATH; this is recorded as an environment blocker, not a pass",
-    "Hosting rationale: project-named, transferable Read the Docs project; not a personal preview host",
-    "Upstream PR: PLACEHOLDER_OPEN_PR_URL (PLACEHOLDER_OPEN_PR_STATE)",
-    "Governed receipt: PLACEHOLDER_GOVERNED_RECEIPT_REF"
+    "Public host: claimant-authored project-named ReadTheDocs community documentation, not target-owned or official",
+    "Upstream PR #245: open and unmerged optional proposal, not adoption or endorsement",
+    "Independent raw machine proof: evidence/local-live-validation/evidence.json and transcript.txt",
+    "Receipt tree publication: filename-safe archive with exact path, byte length, and SHA-256 reconstruction",
+    "Receipt status audit: raw run status must be sealed and every parseable stored receipt JSON must contain no failure, false success, or nonzero exit signal"
   ],
   "evidence_items": [
     {
@@ -81,7 +122,11 @@
       "local_ref": "source/redsync/.source-pin.json"
     },
     {
-      "type": "sourcey_config",
+      "type": "license",
+      "external_ref": "https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/LICENSE"
+    },
+    {
+      "type": "sourcey_config_and_command",
       "local_ref": "sourcey.config.ts"
     },
     {
@@ -93,42 +138,42 @@
       "local_ref": "evidence/inventory.json"
     },
     {
+      "type": "page_list_and_static_hashes",
+      "local_ref": "evidence/sha256-manifest.json"
+    },
+    {
       "type": "five_page_source_checks",
       "local_ref": "evidence/page-source-mappings.json"
     },
     {
-      "type": "static_site_hashes",
-      "local_ref": "evidence/sha256-manifest.json"
+      "type": "independent_live_machine_evidence",
+      "local_ref": "evidence/local-live-validation/evidence.json"
     },
     {
-      "type": "raw_command_transcript",
-      "local_ref": "evidence/commands.local.txt"
+      "type": "independent_raw_transcript",
+      "local_ref": "evidence/local-live-validation/transcript.txt"
     },
     {
       "type": "public_host",
-      "external_ref": "PLACEHOLDER_PUBLIC_URL"
+      "external_ref": "https://redsync-sourcey-docs.readthedocs.io/en/latest/"
     },
     {
-      "type": "worker_authored_upstream_pr",
-      "external_ref": "PLACEHOLDER_OPEN_PR_URL"
+      "type": "optional_unmerged_proposal",
+      "external_ref": "https://github.com/go-redsync/redsync/pull/245"
     },
     {
-      "type": "governed_receipt",
-      "external_ref": "PLACEHOLDER_GOVERNED_RECEIPT_REF"
+      "type": "receipt_status_audit_contract",
+      "local_ref": "validation-skill/redsync-sourcey-validation/scripts/extract-root-receipt.mjs"
     }
   ],
-  "placeholders": [
-    "PLACEHOLDER_PUBLIC_URL",
-    "PLACEHOLDER_PUBLIC_URL_STATE",
-    "PLACEHOLDER_OPEN_PR_URL",
-    "PLACEHOLDER_OPEN_PR_STATE",
-    "PLACEHOLDER_OPEN_PR_HEAD_COMMIT",
-    "PLACEHOLDER_GOVERNED_RECEIPT_REF",
-    "PLACEHOLDER_IMMUTABLE_RECEIPT_URL",
-    "PLACEHOLDER_IMMUTABLE_EVIDENCE_URL",
-    "PLACEHOLDER_IMMUTABLE_REPORT_URL",
-    "PLACEHOLDER_IMMUTABLE_INVENTORY_URL",
-    "PLACEHOLDER_IMMUTABLE_MAPPINGS_URL",
-    "PLACEHOLDER_IMMUTABLE_COMMAND_TRANSCRIPT_URL"
+  "graph_receipt": {
+    "applicable": false,
+    "reason": "The validator is standalone and does not compose another runx skill."
+  },
+  "external_only_pending": [
+    "post-claim candidate commit push and exact ReadTheDocs build/deploy provenance",
+    "one successful governed workflow run and verified receipt",
+    "immutable final evidence/report URLs",
+    "Dirac final QA and guarded Frantic delivery"
   ]
 }

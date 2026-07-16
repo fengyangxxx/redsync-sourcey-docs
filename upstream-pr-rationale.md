@@ -1,4 +1,4 @@
-# Upstream Adoption Sequence and PR Rationale
+# Optional Upstream Proposal Sequence and PR Rationale
 
 This page records the maintainer rationale and required phase ordering. The
 optional link proposal is
@@ -31,7 +31,9 @@ the PR must not be described as adoption unless maintainers merge it. The
 following package facts remain pinned:
 
 - Source commit: `79f6ba24a8bf41f35141de700d410a06bb27622f`
-- Sourcey-generated pages: `22` total, including `15` API package pages
+- Sourcey-generated HTML pages: `23`, including `15` API package pages; one
+  additional `go-api/index.html` compatibility redirect makes `24` packaged
+  HTML files
 - Five page-to-source checks: `evidence/page-source-mappings.json`
 
 No library code or runtime dependency changes are included.

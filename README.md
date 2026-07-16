@@ -4,7 +4,7 @@ This package builds Sourcey API documentation for
 [`go-redsync/redsync`](https://github.com/go-redsync/redsync) from pinned commit
 `79f6ba24a8bf41f35141de700d410a06bb27622f`.
 
-The source snapshot was copied from that commit after the Frantic #113 claim.
+The source snapshot is byte-bound to that immutable upstream commit.
 Sourcey generates `godoc.json` from the real Go module and then renders the
 committed snapshot into a static site. Snapshot mode lets Read the Docs rebuild
 the site with Node alone while preserving the exact Go API bytes audited
@@ -42,12 +42,12 @@ installation must not be used for governed evidence.
 - `godoc.json`: generated Sourcey Go API snapshot.
 - `dist/`: navigable static site.
 - `pinned-source-coverage.md`: public inventory and immutable byte-proof scope
-  for the post-claim publication candidate.
+  for the current publication candidate.
 - `evidence/inventory.json`: package, file, and exported-symbol inventory.
 - `evidence/page-source-mappings.json`: five exact immutable-page and pinned
   repository-LF source checks.
 - `evidence/evidence.draft.json`: local evidence draft with external fields
-  explicitly left as placeholders.
+  explicitly left null when they require future external actions.
 - `report.draft.md`: local delivery report draft.
 - `upstream/`: maintainer-facing README patch and PR rationale inputs.
 - `validation-skill/redsync-sourcey-validation/`: governed live validator with
@@ -67,9 +67,9 @@ current commit is deployed. The Read the Docs project and upstream PR #245
 exist, but the PR is open and unmerged; it is an optional link proposal, not
 proof of upstream adoption.
 
-## Governed adoption validation
+## Governed community publication validation
 
-After publication and upstream PR creation, run the validator with immutable
+After publication, run the validator with immutable
 values replacing the angle-bracket metavariables in this non-executable
 example:
 
@@ -87,8 +87,10 @@ npx -y @runxhq/cli@0.6.14 skill .\validation-skill\redsync-sourcey-validation de
   -i 'output_dir=<local-output-directory>' -j
 ```
 
-The runner checks the public documentation, immutable documentation commit,
-five API page/source mappings, pinned target source, and upstream PR fields.
+The runner checks the public community documentation, immutable documentation
+commit, five API page/source mappings, pinned target source, and the optional
+open, unmerged upstream proposal fields. The PR is never evidence of adoption,
+endorsement, or maintainer acceptance.
 For every mapped page it first hashes the immutable raw `dist` file, then
 requires the public Read the Docs response to reduce to those exact bytes after
 removing one recognized addon fragment immediately before `</head>`. The
@@ -111,10 +113,13 @@ The GitHub Actions workflow is intentionally limited to manual
 `workflow_dispatch`. It uses no repository secrets, creates a fresh signing
 seed without printing or uploading it, labels the receipt issuer as `ci`, runs
 the same skill in live mode, extracts the exact root `receipt_id` from runx raw
-JSON, requires one matching stored root receipt, verifies that receipt, and
-uploads its id/ref, exact JSON, and the complete receipt-store file/hash tree
-with raw verify outputs. Any parse, uniqueness, missing-file, validation, or
-verify failure exits nonzero. It has not been dispatched by Hume and is not
+JSON, requires raw status `sealed`, audits failure/status/exit signals in every
+parseable stored receipt JSON, and requires one matching stored root receipt.
+It then creates a filename-safe complete-tree archive, reconstructs every
+logical path and byte, verifies the root receipt, and uploads the status audit,
+tree identity, archive, and raw outputs. Any failed child receipt, parse,
+uniqueness, missing file, validation, reconstruction, or verify failure exits
+nonzero. It has not been dispatched for the current candidate and is not
 evidence of hosted authority.
 
 After the workflow artifact is downloaded, the main agent performs hosted

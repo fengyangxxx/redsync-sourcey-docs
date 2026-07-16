@@ -11,7 +11,8 @@
     "hashes": "node scripts/generate-hashes.mjs",
     "prepare:docs": "npm run snapshot && npm run inventory && npm run build && npm run mappings && npm run hashes",
     "test": "node --test --test-concurrency=1 tests/package.test.mjs tests/validation-skill.test.mjs",
-    "verify:runx-version": "npx -y @runxhq/cli@0.6.14 --version"
+    "verify:runx-version": "npx -y @runxhq/cli@0.6.14 --version",
+    "verify:local-live": "node scripts/verify-local-live-evidence.mjs"
   },
   "devDependencies": {
     "sourcey": "3.6.3"

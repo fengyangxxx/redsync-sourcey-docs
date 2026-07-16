@@ -34,6 +34,7 @@ const roots = [
   "evidence/inventory.json",
   "evidence/page-source-mappings.json",
   "evidence/evidence.draft.json",
+  "evidence/local-live-validation",
 ];
 
 async function collect(path) {

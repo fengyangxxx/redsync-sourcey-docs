@@ -18,3 +18,7 @@ Docs home `redsync-sourcey-docs.readthedocs.io`. A prior deployment does not
 prove this post-claim candidate is live. The candidate commit, its fresh Read
 the Docs build, and the still-open upstream link proposal must be verified as
 separate evidence surfaces before any final delivery.
+
+This is claimant-authored community documentation. It is not target-owned or
+official, and the open, unmerged upstream link proposal is not adoption,
+endorsement, or maintainer acceptance.
