@@ -2,11 +2,11 @@
 
 ## Status And Boundary
 
-This is a post-claim pre-publication candidate for active claim
-`4ec19597-79e9-499b-a932-d91fc0150881`, claimed at
-`2026-07-16T19:14:58.021Z` with fuse and delivery deadline
-`2026-07-17T00:14:58.021Z`. Its source snapshot was prepared earlier under
-fy's task-specific pre-claim-work override. It is not a Frantic delivery payload.
+This is a claim-neutral replacement publication candidate. The current task
+state is `work_status=delivered`, `capacity=1`, `occupied=1`, `available=0`,
+`active=0`, and `delivered=1`. Its source snapshot was prepared earlier under
+fy's task-specific pre-claim-work override. It is not a Frantic delivery payload,
+and final delivery authorization is `false`.
 The site is claimant-authored, project-named community documentation hosted on
 Read the Docs; it is not target-owned or official. The upstream PR is open and
 unmerged and is only an optional README link proposal, never adoption,
@@ -19,7 +19,7 @@ endorsement, or maintainer acceptance.
 - License: `BSD-3-Clause`, verified from the pinned [`LICENSE`](https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/LICENSE).
 - Sourcey: `3.6.3`, `godoc` adapter, configured in `sourcey.config.ts`.
 - Exact command: `sourcey godoc --module ./source/redsync --packages ./... --out godoc.json`.
-- Exact CLI observation: `runx-cli 0.6.14`, satisfying the required `>=0.6.13` floor.
+- Exact CLI observation: `runx-cli 0.7.1`, satisfying the required `>=0.6.13` floor.
 - Snapshot: schema `1`, 15 packages, zero diagnostics.
 - Coverage: 15 packages, 19 non-test Go files, and 110 exported symbols.
 - Static output: 23 Sourcey-generated HTML pages plus one navigation
@@ -76,16 +76,16 @@ These gaps and their generated-page counterparts are also published in
   verification fails.
 
 All prior failed workflow runs and their receipts are excluded. Only the next
-successful post-claim governed run may supply final receipt evidence.
+successful governed Linux CI run may supply final receipt evidence.
 
 ## Public Host And Provenance
 
 - Public home: `https://redsync-sourcey-docs.readthedocs.io/en/latest/`.
 - Public source: `https://github.com/fengyangxxx/redsync-sourcey-docs`.
-- Existing base deployment: Read the Docs build `33591901` at commit
-  `2a572fee31bb273b3c16333c3a869798e8c5227f`; this is background provenance,
-  not proof that the new candidate commit is deployed.
-- Required publication proof: a fresh post-claim source commit, a successful
+- Current deployment: Read the Docs build `33625834` at commit
+  `2b58caa8d60147df494ce995f3777944a400b9a9`; this is the replacement
+  candidate's exact public parent, not proof that the new candidate is deployed.
+- Required publication proof: a fresh replacement source commit, a successful
   Read the Docs build tied to that exact commit, and anonymous page/hash
   readback.
 - PR `https://github.com/go-redsync/redsync/pull/245` is open and unmerged at
@@ -94,8 +94,15 @@ successful post-claim governed run may supply final receipt evidence.
 
 ## External-Only Remaining Steps
 
-1. Obtain Dirac outbound-publication QA for this exact post-claim commit, then
-   push only the reviewed commit.
+The exact outbound publication plan is repository
+`https://github.com/fengyangxxx/redsync-sourcey-docs`, destination ref
+`refs/heads/fix/frantic33-governed-receipt-v3`, expected pre-push state branch
+absent, workflow `.github/workflows/validate-sourcey-adoption.yml`, and dispatch
+ref `fix/frantic33-governed-receipt-v3`.
+
+1. Obtain Dirac outbound-publication QA for this exact replacement commit,
+   fresh-check that the destination branch is absent, then push only the
+   reviewed commit.
 2. Confirm a fresh Read the Docs build deploys that exact commit.
 3. Dispatch the governed workflow exactly once with the immutable values listed
    below; require a successful run, one archive artifact, exact reconstruction,
@@ -103,8 +110,9 @@ successful post-claim governed run may supply final receipt evidence.
 4. Materialize the successful workflow outputs into immutable evidence URLs,
    replace the null external fields in `evidence/evidence.draft.json`, and run
    complete Dirac line-by-line final QA.
-5. Use the guarded Frantic delivery path only after final QA PASS and before the
-   recorded deadline.
+5. Keep final delivery authorization `false`. A guarded Frantic delivery is
+   possible only if the platform later exposes a valid claim or delivery path,
+   fresh fields are recorded, and separate final QA passes on the exact bytes.
 
 No push, workflow dispatch, Read the Docs publication, PR mutation, or Frantic
 delivery has been performed by this local implementation step.

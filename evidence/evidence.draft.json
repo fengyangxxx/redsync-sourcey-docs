@@ -1,13 +1,17 @@
 {
   "schema_version": "frantic-sourcey-community-publication-evidence/v2",
-  "summary": "Claimant-authored ReadTheDocs community publication for go-redsync/redsync pinned at 79f6ba24a8bf41f35141de700d410a06bb27622f; Sourcey 3.6.3 and runx-cli 0.6.14 validation cover 15 packages, 19 non-test Go files, and 110 exported symbols. The site is not target-owned or official, and open PR #245 is not adoption or endorsement.",
+  "summary": "Claimant-authored ReadTheDocs community publication for go-redsync/redsync pinned at 79f6ba24a8bf41f35141de700d410a06bb27622f; Sourcey 3.6.3 and runx-cli 0.7.1 validation cover 15 packages, 19 non-test Go files, and 110 exported symbols. The site is not target-owned or official, and open PR #245 is not adoption or endorsement.",
   "posting_id": "p-8b91e1ac8c",
-  "claim_id": "4ec19597-79e9-499b-a932-d91fc0150881",
-  "claim_state": "active",
-  "claimed_at": "2026-07-16T19:14:58.021Z",
-  "fuse_expires_at": "2026-07-17T00:14:58.021Z",
-  "deliver_deadline_at": "2026-07-17T00:14:58.021Z",
-  "candidate_base_commit": "2a572fee31bb273b3c16333c3a869798e8c5227f",
+  "claim_state": "claim_neutral_task_delivered_occupied",
+  "platform_live_state": {
+    "work_status": "delivered",
+    "capacity": 1,
+    "occupied": 1,
+    "available": 0,
+    "active": 0,
+    "delivered": 1
+  },
+  "candidate_base_commit": "2b58caa8d60147df494ce995f3777944a400b9a9",
   "target": {
     "repository": "https://github.com/go-redsync/redsync",
     "commit": "79f6ba24a8bf41f35141de700d410a06bb27622f",
@@ -66,10 +70,10 @@
     "target_owned": false,
     "official": false,
     "public_source": "https://github.com/fengyangxxx/redsync-sourcey-docs",
-    "existing_base_build": "https://app.readthedocs.org/projects/redsync-sourcey-docs/builds/33591901/",
-    "existing_base_commit": "2a572fee31bb273b3c16333c3a869798e8c5227f",
-    "post_claim_build": null,
-    "post_claim_deployed_commit": null
+    "current_deployed_build": "https://app.readthedocs.org/projects/redsync-sourcey-docs/builds/33625834/",
+    "current_deployed_commit": "2b58caa8d60147df494ce995f3777944a400b9a9",
+    "replacement_candidate_build": null,
+    "replacement_candidate_deployed_commit": null
   },
   "upstream_pr": {
     "url": "https://github.com/go-redsync/redsync/pull/245",
@@ -97,10 +101,18 @@
     "receipt_ref": null,
     "receipt_archive": null,
     "verification_json": null,
-    "failed_workflow_evidence_policy": "All prior failed workflow runs and receipts are excluded; only the next successful post-claim governed run may be cited."
+    "failed_workflow_evidence_policy": "All prior failed workflow runs and receipts are excluded; only the next successful governed Linux CI run may be cited."
+  },
+  "outbound_publication_plan": {
+    "repository": "https://github.com/fengyangxxx/redsync-sourcey-docs",
+    "destination_ref": "refs/heads/fix/frantic33-governed-receipt-v3",
+    "expected_pre_push_state": "branch_absent",
+    "workflow": ".github/workflows/validate-sourcey-adoption.yml",
+    "dispatch_ref": "fix/frantic33-governed-receipt-v3",
+    "final_delivery_authorization": false
   },
   "observations": [
-    "runx-cli 0.6.14",
+    "runx-cli 0.7.1",
     "Target repository: https://github.com/go-redsync/redsync",
     "Pinned target commit: 79f6ba24a8bf41f35141de700d410a06bb27622f",
     "License: BSD-3-Clause at the pinned target commit",
@@ -171,9 +183,9 @@
     "reason": "The validator is standalone and does not compose another runx skill."
   },
   "external_only_pending": [
-    "post-claim candidate commit push and exact ReadTheDocs build/deploy provenance",
-    "one successful governed workflow run and verified receipt",
+    "replacement candidate publication to the reviewed destination ref after a fresh branch-absent check",
+    "one successful governed Linux CI workflow run and verified receipt",
     "immutable final evidence/report URLs",
-    "Dirac final QA and guarded Frantic delivery"
+    "future platform-authorized claim or delivery path, final Dirac QA, and guarded submission authorization"
   ]
 }

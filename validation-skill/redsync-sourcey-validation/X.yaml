@@ -16,8 +16,9 @@ runners:
     args:
       - scripts/run.mjs
     sandbox:
-      profile: network
+      profile: unrestricted-local-dev
       cwd_policy: skill-directory
+      network: true
       require_enforcement: false
     inputs:
       public_url:
@@ -56,6 +57,10 @@ runners:
         type: string
         required: true
         description: Literal output captured from the pinned outer runx --version command.
+      claimant_github_login:
+        type: string
+        required: false
+        description: Public GitHub login whose anonymous sourcey/sourcey star state must be verified.
       output_dir:
         type: string
         required: false

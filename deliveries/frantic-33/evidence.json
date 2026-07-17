@@ -1,0 +1,179 @@
+{
+  "schema_version": "frantic.delivery-preparation.evidence.v1",
+  "task": 33,
+  "posting_id": "p-8b91e1ac8c",
+  "preparation_state": "claim_neutral",
+  "platform_live_state": {
+    "work_status": "delivered",
+    "capacity": 1,
+    "occupied": 1,
+    "available": 0,
+    "active": 0,
+    "delivered": 1
+  },
+  "outbound_publication_plan": {
+    "repository": "https://github.com/fengyangxxx/redsync-sourcey-docs",
+    "destination_ref": "refs/heads/fix/frantic33-governed-receipt-v3",
+    "expected_pre_push_state": "branch_absent",
+    "workflow": ".github/workflows/validate-sourcey-adoption.yml",
+    "dispatch_ref": "fix/frantic33-governed-receipt-v3",
+    "final_delivery_authorization": false
+  },
+  "summary": "Claimant-authored ReadTheDocs community publication for pinned Redsync, validated with Sourcey and runx-cli 0.7.1 across complete package coverage while preserving the honest non-official and non-adopted boundary; Linux CI receipt sealing remains explicit.",
+  "observations": [
+    "runx-cli 0.7.1",
+    "Target repository: https://github.com/go-redsync/redsync",
+    "Pinned target commit: 79f6ba24a8bf41f35141de700d410a06bb27622f",
+    "License: BSD-3-Clause",
+    "Sourcey adapter: godoc",
+    "Sourcey command: sourcey godoc --module ./source/redsync --packages ./... --out godoc.json",
+    "Sourcey config: https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/sourcey.config.ts",
+    "Generated page count: 24",
+    "Generated page list: go-api.html, go-api/index.html, go-api/package-root.html, go-api/pkg-examples-goredis-v7.html, go-api/pkg-examples-goredis-v8.html, go-api/pkg-examples-goredis-v9.html, go-api/pkg-examples-goredis.html, go-api/pkg-examples-redigo.html, go-api/pkg-examples-valkego.html, go-api/pkg-redis-goredis-v7.html, go-api/pkg-redis-goredis-v8.html, go-api/pkg-redis-goredis-v9.html, go-api/pkg-redis-goredis.html, go-api/pkg-redis-redigo.html, go-api/pkg-redis-rueidis.html, go-api/pkg-redis-valkeygo.html, go-api/pkg-redis.html, hosting-decision.html, index.html, introduction.html, maintainer-gap-analysis.html, pinned-source-coverage.html, reproduce.html, upstream-pr-rationale.html",
+    "Coverage: packages=15, non-test Go files=19, exported symbols=110",
+    "Public host boundary: claimant-authored project-named community documentation; target_owned=false; official=false",
+    "Upstream PR boundary: optional unmerged link proposal; adoption=false; endorsement=false",
+    "Public star: fengyangxxx stars sourcey/sourcey; HTTP 200; authentication=none"
+  ],
+  "evidence_items": [
+    {
+      "type": "literal_runx_version",
+      "observed": "runx-cli 0.7.1",
+      "command": "npx -y @runxhq/cli@0.7.1 --version"
+    },
+    {
+      "type": "target_repository",
+      "refs": [
+        "https://api.github.com/repos/go-redsync/redsync",
+        "https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/LICENSE"
+      ]
+    },
+    {
+      "type": "immutable_source_commit",
+      "refs": [
+        "https://api.github.com/repos/go-redsync/redsync/commits/79f6ba24a8bf41f35141de700d410a06bb27622f"
+      ]
+    },
+    {
+      "type": "sourcey_config_and_command",
+      "refs": [
+        "https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/sourcey.config.ts",
+        "https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/scripts/generate-godoc-snapshot.mjs",
+        "https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/godoc.json",
+        "https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/dist/index.html",
+        "https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/evidence/inventory.json",
+        "https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/evidence/page-source-mappings.json",
+        "https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/evidence/sha256-manifest.json"
+      ]
+    },
+    {
+      "type": "inventory_and_page_list",
+      "refs": [
+        "https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/evidence/inventory.json",
+        "https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/evidence/sha256-manifest.json"
+      ]
+    },
+    {
+      "type": "five_page_source_mappings",
+      "refs": [
+        "https://github.com/go-redsync/redsync/blob/79f6ba24a8bf41f35141de700d410a06bb27622f/redsync.go#L17",
+        "https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/redsync.go",
+        "https://github.com/go-redsync/redsync/blob/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/redis.go#L9",
+        "https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/redis.go",
+        "https://github.com/go-redsync/redsync/blob/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/goredis/v9/goredis.go#L24",
+        "https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/goredis/v9/goredis.go",
+        "https://github.com/go-redsync/redsync/blob/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/redigo/redigo.go#L33",
+        "https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/redigo/redigo.go",
+        "https://github.com/go-redsync/redsync/blob/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/rueidis/rueidis.go#L26",
+        "https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/rueidis/rueidis.go"
+      ]
+    },
+    {
+      "type": "public_page_http_and_hashes",
+      "refs": [
+        "https://redsync-sourcey-docs.readthedocs.io/en/latest/go-api/package-root.html",
+        "https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/dist/go-api/package-root.html",
+        "https://redsync-sourcey-docs.readthedocs.io/en/latest/go-api/pkg-redis.html",
+        "https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/dist/go-api/pkg-redis.html",
+        "https://redsync-sourcey-docs.readthedocs.io/en/latest/go-api/pkg-redis-goredis-v9.html",
+        "https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/dist/go-api/pkg-redis-goredis-v9.html",
+        "https://redsync-sourcey-docs.readthedocs.io/en/latest/go-api/pkg-redis-redigo.html",
+        "https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/dist/go-api/pkg-redis-redigo.html",
+        "https://redsync-sourcey-docs.readthedocs.io/en/latest/go-api/pkg-redis-rueidis.html",
+        "https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/dist/go-api/pkg-redis-rueidis.html"
+      ]
+    },
+    {
+      "type": "independent_raw_transcript",
+      "path": "artifacts/transcript.txt",
+      "sha256": "1ebd14aeaa4fccc54943961327062cd802b6bc3b7740219f37c1e0c56faa8c0b"
+    },
+    {
+      "type": "live_machine_validation",
+      "local_ref": "deliveries/shared-validation/evidence.json",
+      "sha256": "09a4746efcce5213c8424bbd69e81ac3005ac3b4851407cd92ba97d109160792"
+    },
+    {
+      "type": "receipt_gate",
+      "local_ref": "deliveries/shared-receipt/receipt-proof.json",
+      "status": "BLOCKED"
+    }
+  ],
+  "target": {
+    "repository": "https://github.com/go-redsync/redsync",
+    "commit": "79f6ba24a8bf41f35141de700d410a06bb27622f",
+    "license": "BSD-3-Clause"
+  },
+  "sourcey": {
+    "version": "3.6.3",
+    "adapter": "godoc",
+    "command": "sourcey godoc --module ./source/redsync --packages ./... --out godoc.json",
+    "config": "sourcey.config.ts"
+  },
+  "coverage": {
+    "package_count": 15,
+    "non_test_go_file_count": 19,
+    "exported_symbols": 110,
+    "generated_pages": [
+      "go-api.html",
+      "go-api/index.html",
+      "go-api/package-root.html",
+      "go-api/pkg-examples-goredis-v7.html",
+      "go-api/pkg-examples-goredis-v8.html",
+      "go-api/pkg-examples-goredis-v9.html",
+      "go-api/pkg-examples-goredis.html",
+      "go-api/pkg-examples-redigo.html",
+      "go-api/pkg-examples-valkego.html",
+      "go-api/pkg-redis-goredis-v7.html",
+      "go-api/pkg-redis-goredis-v8.html",
+      "go-api/pkg-redis-goredis-v9.html",
+      "go-api/pkg-redis-goredis.html",
+      "go-api/pkg-redis-redigo.html",
+      "go-api/pkg-redis-rueidis.html",
+      "go-api/pkg-redis-valkeygo.html",
+      "go-api/pkg-redis.html",
+      "hosting-decision.html",
+      "index.html",
+      "introduction.html",
+      "maintainer-gap-analysis.html",
+      "pinned-source-coverage.html",
+      "reproduce.html",
+      "upstream-pr-rationale.html"
+    ]
+  },
+  "public_host": {
+    "url": "https://redsync-sourcey-docs.readthedocs.io/en/latest/",
+    "classification": "claimant-authored project-named community documentation",
+    "target_owned": false,
+    "official": false
+  },
+  "governed_receipt": {
+    "status": "BLOCKED",
+    "receipt_ref": null,
+    "proof_path": "deliveries/shared-receipt/receipt-proof.json",
+    "proof_sha256": null,
+    "archive_sha256": null,
+    "blocker": "linux_ci_receipt_required",
+    "final_delivery_authorization": false
+  }
+}

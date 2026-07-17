@@ -10,13 +10,13 @@
     },
     {
       "path": ".github/workflows/validate-sourcey-adoption.yml",
-      "bytes": 15252,
-      "sha256": "38095e45127ac26a84d238c340f30d1dce069f7e3ff2d9543e0480a48f10496d"
+      "bytes": 17949,
+      "sha256": "23411200a3f9d53cbca75ab096ace7a5d426d08d0c9d26bd0c27a9f6dbf0cc2e"
     },
     {
       "path": ".gitignore",
-      "bytes": 68,
-      "sha256": "c9a07e85a644c4284a6c0101b792fe1d148bb6c39e2b03d91b941740ac1472a2"
+      "bytes": 76,
+      "sha256": "9e46a6bc3e48578f7a7befa346827f8f65996fe804e71e0abbc43d132b0a0a48"
     },
     {
       "path": ".readthedocs.yaml",
@@ -180,18 +180,18 @@
     },
     {
       "path": "evidence/commands.local.txt",
-      "bytes": 2097,
-      "sha256": "b5396c10abc90bddafc69fa3873182190890bfc4fcb2cf0452d98633912f8bcf"
+      "bytes": 2512,
+      "sha256": "a5447f1e579de418976d93a2019e8187f74d3387a597c9d8cf88c30fea8c39be"
     },
     {
       "path": "evidence/evidence.draft.json",
-      "bytes": 7457,
-      "sha256": "c4d8d067ce65326a6df92ac6f622d42a421f2d535f530a8dff27342494ae55e5"
+      "bytes": 7956,
+      "sha256": "0eaf1b274b2c5f61811e6833e077e2bf416d8f5c1aac41c7fe6747f6ed057d88"
     },
     {
       "path": "evidence/hume-handoff.md",
-      "bytes": 2287,
-      "sha256": "5b7b4b5eba8c8d9f95715327d2aea21d5dca601a5a36aa34dbe6056c7023735c"
+      "bytes": 2803,
+      "sha256": "552cd1c7a1eaf493405512dfd0344ff93c3e72cdb3d6f59c10b9a27d45684871"
     },
     {
       "path": "evidence/inventory.json",
@@ -260,8 +260,8 @@
     },
     {
       "path": "package.json",
-      "bytes": 789,
-      "sha256": "413ea71fcc8415fd01fb5e9e383a3780e530fd16bfa6a967e1a71acb542a5f32"
+      "bytes": 1124,
+      "sha256": "ffdaff93f4774a7ee23aaf5cb34fdac0fc1fd4764c667d21dc2a38927b36b6fd"
     },
     {
       "path": "pinned-source-coverage.md",
@@ -270,8 +270,8 @@
     },
     {
       "path": "report.draft.md",
-      "bytes": 6327,
-      "sha256": "c66d4065f96780769478286a90a5b676dbbf3bdc86e193bddccb34d39340a9e3"
+      "bytes": 6874,
+      "sha256": "75d70e43e00949acad703c3f0fc532bd78714f615cedbeb60e1bd7c46ddedf28"
     },
     {
       "path": "reproduce.md",
@@ -284,9 +284,14 @@
       "sha256": "8e68fe4dfb08c8b865e88c5da85552e9f8c66f832d154e5d5832b6b1347ca749"
     },
     {
+      "path": "scripts/capture-governed-receipt.mjs",
+      "bytes": 14615,
+      "sha256": "fb28d0fce67c62c59b798bf0f3f46b2a99642d85d28141202170bf570e3e75a7"
+    },
+    {
       "path": "scripts/generate-godoc-snapshot.mjs",
-      "bytes": 2099,
-      "sha256": "11a145367338d3811c068687bd3e5ca11d0d87a99b40be56eb47a6e148251038"
+      "bytes": 2055,
+      "sha256": "e04af5f8ef86735cc18440f417c824d27eac8825eb990a207b1f19c5a087f489"
     },
     {
       "path": "scripts/generate-hashes.mjs",
@@ -304,9 +309,29 @@
       "sha256": "e39c4ca4244badc69af7afb7a8acaa29889e84341b727f512b5d47b6f7d9b88d"
     },
     {
+      "path": "scripts/materialize-deliveries.mjs",
+      "bytes": 21210,
+      "sha256": "b41df45b0d1ba616aff3bf9aa0382dad3702103f864bd902aefed4641686c6d7"
+    },
+    {
+      "path": "scripts/materialize-receipt-proof.mjs",
+      "bytes": 7520,
+      "sha256": "e74b44f7237da39c7c9de4af9b1c7506c8bb405da1bf60762a1ba19e84e9549c"
+    },
+    {
+      "path": "scripts/npx-invocation.mjs",
+      "bytes": 1108,
+      "sha256": "f676ef556a0169d78d4dc40b56c10689453fa6f604851592c2e7519721dd6ce1"
+    },
+    {
       "path": "scripts/repository-bytes.mjs",
       "bytes": 335,
       "sha256": "daf69fad64afb5882963f54ddf3d7de0faed6740bac8272c1d1b15c30b3ac4d3"
+    },
+    {
+      "path": "scripts/verify-delivery-preparation.mjs",
+      "bytes": 1866,
+      "sha256": "e931b5e5cb2d07eca240c2d4f71656893727cf4d3134d81d472816bf2e2d8c8d"
     },
     {
       "path": "scripts/verify-local-live-evidence.mjs",
@@ -335,8 +360,8 @@
     },
     {
       "path": "source/redsync/.source-pin.json",
-      "bytes": 579,
-      "sha256": "3cec6606882d7693248e887551a2d390bf25eaca5788676c2e87eb6e7e0b6616"
+      "bytes": 449,
+      "sha256": "86819b65ea2902d5c39e21f0e8473abdee368b6359cc454dde774de6415a801c"
     },
     {
       "path": "source/redsync/.travis.yml",
@@ -529,14 +554,24 @@
       "sha256": "c672993df238bd5c856092db488d1ddc4ca96898d4791acb7df0d1d238e19f7f"
     },
     {
+      "path": "tests/delivery-preparation.test.mjs",
+      "bytes": 14712,
+      "sha256": "a3400a8881e2d8aa1fb6de91ffb4b0e5b70c37e4b212af7852ae1e2f49e71998"
+    },
+    {
       "path": "tests/package.test.mjs",
-      "bytes": 21372,
-      "sha256": "0b4d053f5e7d1e5d5729f0a1971819c6238c85d4b30040682f0aeafa632d507a"
+      "bytes": 23090,
+      "sha256": "2a7c2b439709344f13078258f71a040561b0b4e39cc39b806fb92150db4f5dfb"
     },
     {
       "path": "tests/validation-skill.test.mjs",
-      "bytes": 43080,
-      "sha256": "9bff69cd24ebeae1d7af10984f3867a155dd62eab0ac5f73ab97d32919a29794"
+      "bytes": 45771,
+      "sha256": "4a91bec9e64ea3e77e61766f9e9588b384e7d8cd80b0726bb94ebb623236a59e"
+    },
+    {
+      "path": "tests/workspace-temp.mjs",
+      "bytes": 1158,
+      "sha256": "8a635ce1cfafa9b4bbde00f119815fba01a6527caadb110478301807ff0634bc"
     },
     {
       "path": "upstream-pr-rationale.md",
@@ -550,13 +585,13 @@
     },
     {
       "path": "validation-skill/redsync-sourcey-validation/SKILL.md",
-      "bytes": 1695,
-      "sha256": "fd611bd060f2e336f968d3040894aedb640469235b0739ff2606ea2cd0af9b66"
+      "bytes": 2092,
+      "sha256": "bca47cdc14f01f96e61b55922199d300084e73ca8935a1c479a90fd5bab52e7f"
     },
     {
       "path": "validation-skill/redsync-sourcey-validation/X.yaml",
-      "bytes": 2157,
-      "sha256": "f9a9b0d54bab3ed1649e6249f4e5e4eb5f43dcf2c471c3abe88c0006fe0c3c91"
+      "bytes": 2368,
+      "sha256": "f07835f4f1284955ff8678b16c6a921b21984953c9ece47faeecb26854651c21"
     },
     {
       "path": "validation-skill/redsync-sourcey-validation/scripts/bounded-get.mjs",
@@ -565,8 +600,8 @@
     },
     {
       "path": "validation-skill/redsync-sourcey-validation/scripts/extract-root-receipt.mjs",
-      "bytes": 8942,
-      "sha256": "ce34374c2b2c80635748827a20861b5eb7efe1c450ac8cfa994d81c7e7444014"
+      "bytes": 9379,
+      "sha256": "385b25124c5910cd32ec635f9410cd0e8b3d5bd66934a64591e7cdb12e02bc08"
     },
     {
       "path": "validation-skill/redsync-sourcey-validation/scripts/receipt-tree-archive.mjs",
@@ -580,8 +615,8 @@
     },
     {
       "path": "validation-skill/redsync-sourcey-validation/scripts/run.mjs",
-      "bytes": 38362,
-      "sha256": "06b5ea0dc358af474aecb228313d6536e04dad8d68f40d41653fca655cd2a5fa"
+      "bytes": 41646,
+      "sha256": "8750b5d432612e2bd4212f2474e85485c904e33685ef294369cb6e08aced7e05"
     }
   ]
 }

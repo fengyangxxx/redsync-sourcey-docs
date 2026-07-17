@@ -1,11 +1,10 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
 import { dirname, isAbsolute, join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const goCache = join(tmpdir(), "redsync-sourcey-go-build");
+const goCache = join(root, ".cache", "go-build");
 const sourceyCli = join(root, "node_modules", "sourcey", "dist", "cli.js");
 const goFlags = [process.env.GOFLAGS, "-buildvcs=false"].filter(Boolean).join(" ");
 const output = process.env.SOURCEY_GODOC_OUTPUT ?? "godoc.json";

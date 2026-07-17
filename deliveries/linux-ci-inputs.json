@@ -1,0 +1,61 @@
+{
+  "schema_version": "frantic.sourcey.linux-ci-inputs.v1",
+  "status": "BLOCKED_UNTIL_DISPATCHED_AND_VERIFIED",
+  "workflow": ".github/workflows/validate-sourcey-adoption.yml",
+  "publication": {
+    "repository": "https://github.com/fengyangxxx/redsync-sourcey-docs",
+    "destination_ref": "refs/heads/fix/frantic33-governed-receipt-v3",
+    "expected_pre_push_state": "branch_absent",
+    "workflow": ".github/workflows/validate-sourcey-adoption.yml",
+    "dispatch_ref": "fix/frantic33-governed-receipt-v3"
+  },
+  "runx_version_output": "runx-cli 0.7.1",
+  "receipt_issuer_type": "ci",
+  "final_delivery_authorization": false,
+  "inputs": {
+    "public_url": "https://redsync-sourcey-docs.readthedocs.io/en/latest/",
+    "docs_repo_url": "https://github.com/fengyangxxx/redsync-sourcey-docs",
+    "docs_commit": "2b58caa8d60147df494ce995f3777944a400b9a9",
+    "target_repo_url": "https://github.com/go-redsync/redsync",
+    "target_commit": "79f6ba24a8bf41f35141de700d410a06bb27622f",
+    "upstream_pr_url": "https://github.com/go-redsync/redsync/pull/245",
+    "upstream_pr_head_commit": "f13cd302b903ae84fc21d914bbeb631a21bb9521",
+    "mappings_url": "https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/evidence/page-source-mappings.json",
+    "claimant_github_login": "fengyangxxx"
+  },
+  "required_outputs": [
+    "evidence.json",
+    "transcript.txt",
+    "runx-raw-stdout.json",
+    "root-receipt.json",
+    "root-receipt-ref.json",
+    "receipt-tree.json",
+    "receipt-status-audit.json",
+    "runx-receipts.archive.json",
+    "receipt-archive-reconstruction.json",
+    "runx-verify.json"
+  ],
+  "final_materialization_command": "node scripts/materialize-deliveries.mjs --validation-evidence deliveries/shared-validation/evidence.json --receipt-proof deliveries/shared-receipt/receipt-proof.json",
+  "blocker": {
+    "code": "linux_ci_receipt_required",
+    "detail": "Native Windows runx 0.6.14 cannot persist colon receipt filenames; 0.7.1 writes a safe filename but the native store reread still fails. A successful Linux CI run, archive reconstruction, and independent runx verify are mandatory.",
+    "native_windows_attempts": [
+      {
+        "runx_version_output": "runx-cli 0.6.14",
+        "status": "BLOCKED",
+        "error": "receipt store is unreadable (os error 87)",
+        "raw_sha256": "ca84470db9a2d8b71d9f0e94a0d0523c395a6b4897ec2fa6640774faeda0c594",
+        "evidence_sha256": "6b6fc1ee7cfd200acd9aef68234a7c071030b794a084ec358c66c14e0de0bd17",
+        "receipt_ref": null
+      },
+      {
+        "runx_version_output": "runx-cli 0.7.1",
+        "status": "BLOCKED",
+        "error": "receipt store is unreadable (os error 5)",
+        "raw_sha256": "9c732347527191128f1db3bca03b7b135f386c61cf9894d9a9acf763aaae06a2",
+        "evidence_sha256": "84c2564941effd9cc802947874048331a425961c11511f3c5e9725a1295bea51",
+        "receipt_ref": null
+      }
+    ]
+  }
+}

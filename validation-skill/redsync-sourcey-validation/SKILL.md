@@ -26,3 +26,10 @@ Idempotent GETs use at most four attempts; only network errors, HTTP 429, and
 HTTP 5xx are retried with bounded deterministic backoff. Every attempt is
 recorded. Failures exit nonzero; exhausted retries are failures and remain
 visible in both artifacts and stdout.
+
+The cli-tool declares `unrestricted-local-dev`, `network=true`, and
+`require_enforcement=false`. Runx requires an exact operator-context digest
+approval before this profile executes it directly, and records the approved
+escalation plus host-ambient enforcement in the signed receipt. This avoids an
+unusable Bubblewrap user namespace on the hosted runner without claiming OS
+sandbox enforcement.

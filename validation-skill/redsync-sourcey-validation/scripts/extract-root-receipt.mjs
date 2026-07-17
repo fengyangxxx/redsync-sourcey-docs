@@ -131,6 +131,16 @@ async function main() {
     if (run.status !== "sealed") {
       throw new Error(`unexpected runx raw status: ${run.status ?? "missing"}; expected sealed`);
     }
+    const executionExitCode = run.execution?.exit_code;
+    if (!Number.isInteger(executionExitCode) || executionExitCode !== 0) {
+      const stderr = typeof run.execution?.stderr === "string"
+        ? run.execution.stderr.trim().split(/\r?\n/, 1)[0]
+        : "";
+      throw new Error(
+        `runx execution exit code must be 0, observed ${executionExitCode ?? "missing"}` +
+          (stderr ? `: ${stderr}` : ""),
+      );
+    }
     if (!/^sha256:[0-9a-f]{64}$/.test(rootReceiptId ?? "")) {
       throw new Error("runx raw JSON has no exact sha256 receipt_id");
     }

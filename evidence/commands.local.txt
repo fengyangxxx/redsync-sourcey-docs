@@ -1,12 +1,18 @@
 Frantic #33 local command record
 
 Scope: deterministic local implementation and read-only public validation.
-ClaimId: 4ec19597-79e9-499b-a932-d91fc0150881
-ClaimedAt: 2026-07-16T19:14:58.021Z
-FuseExpiresAt: 2026-07-17T00:14:58.021Z
-DeliverDeadlineAt: 2026-07-17T00:14:58.021Z
+Claim state: claim-neutral; no active claim or usable delivery deadline.
+Live task state: work_status=delivered; capacity=1; occupied=1; available=0; active=0; delivered=1.
 External writes: none.
-Candidate parent: 2a572fee31bb273b3c16333c3a869798e8c5227f
+Candidate parent: 2b58caa8d60147df494ce995f3777944a400b9a9
+
+OUTBOUND PUBLICATION PLAN
+public repository: https://github.com/fengyangxxx/redsync-sourcey-docs
+destination ref: refs/heads/fix/frantic33-governed-receipt-v3
+expected pre-push state: branch absent
+workflow: .github/workflows/validate-sourcey-adoption.yml
+dispatch ref: fix/frantic33-governed-receipt-v3
+final delivery authorization: false
 
 SOURCE AND DOCUMENTATION GENERATION
 command: npm run prepare:docs
@@ -16,27 +22,27 @@ expected depth: packages=15; non-test Go files=19; exported symbols=110; mapping
 
 DIRECT LIVE VALIDATION
 command: node validation-skill/redsync-sourcey-validation/scripts/run.mjs
-logical output: evidence/local-live-validation
+logical output: deliveries/shared-validation
 inputs: public ReadTheDocs URL, public docs repository, immutable docs commit,
   pinned target repository/commit, optional open PR URL/head, immutable mappings
-  URL, literal runx-cli 0.6.14 output, validation_mode=live
+  URL, literal runx-cli 0.7.1 output, validation_mode=live
 required result: PASS; live_pass=true; no blocked/raw failures; logical artifact refs only
 
 LOCAL TESTS AND EVIDENCE CHECKS
 command: npm test
 required result: all package, privacy, validator, raw-run-status, receipt-status,
-  deterministic colon-path archive, and reconstruction tests pass
+  deterministic colon-path archive, reconstruction, and claim-neutral publication tests pass
 command: npm run verify:local-live
-required result: PASS with exact evidence/stdout/transcript/version hash identity
+required result: PASS with exact historical evidence/stdout/transcript/version hash identity
 command: npm run verify:runx-version
-required stdout: runx-cli 0.6.14
+required stdout: runx-cli 0.7.1
 command: <preferred-python> <skill-validator>/quick_validate.py validation-skill/redsync-sourcey-validation
 required result: Skill is valid!
-command: npx -y @runxhq/cli@0.6.14 skill inspect validation-skill/redsync-sourcey-validation -j
+command: npx -y @runxhq/cli@0.7.1 skill inspect validation-skill/redsync-sourcey-validation -j
 required result: status=ok; version=0.2.0; default runner present
 
 BOUNDARIES
 No push, publication, workflow dispatch, PR mutation, additional claim action,
 or Frantic delivery is part of this record. Test counts are intentionally not
 hard-coded; the exact runner output and immutable commit are authoritative.
-Fresh Dirac QA is required.
+Fresh Dirac QA is required before any listed outbound action.
