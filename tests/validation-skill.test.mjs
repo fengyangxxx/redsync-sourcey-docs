@@ -2,11 +2,11 @@ import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { createHash, randomBytes } from "node:crypto";
 import { createServer } from "node:http";
-import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
+import { makeWorkspaceTemp } from "./workspace-temp.mjs";
 import {
   canonicalizeReadTheDocsPage,
   readTheDocsAddonFragment,
@@ -32,6 +32,9 @@ const publicUrl = "https://redsync-sourcey-docs.readthedocs.io/en/latest/";
 const docsRepoUrl = "https://github.com/fengyangxxx/redsync-sourcey-docs";
 const targetRepoUrl = "https://github.com/go-redsync/redsync";
 const prUrl = "https://github.com/go-redsync/redsync/pull/999";
+const claimantGithubLogin = "fengyangxxx";
+const claimantStarApi =
+  `https://api.github.com/users/${claimantGithubLogin}/starred?per_page=100`;
 const mappingsUrl =
   `https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/${docsCommit}/evidence/page-source-mappings.json`;
 const fixtureUnresolvedPublicUrl = ["PLACE", "HOLDER_PUBLIC_URL"].join("");
@@ -106,6 +109,15 @@ async function fixtureResponse(logicalUrl, options = {}) {
     };
   }
   if (logicalUrl === targetApi) return { body: JSON.stringify({ sha: targetCommit }) };
+  if (logicalUrl === claimantStarApi) {
+    return {
+      status: 200,
+      body: JSON.stringify([
+        { full_name: "example/another-repository" },
+        { full_name: "sourcey/sourcey" },
+      ]),
+    };
+  }
   if (logicalUrl === docsApi) {
     return {
       body: JSON.stringify({
@@ -249,10 +261,14 @@ async function fixtureResponse(logicalUrl, options = {}) {
 
 async function startProxy(options) {
   const requestCounts = new Map();
+  const starAuthorizationHeaders = [];
   const server = createServer(async (request, response) => {
     try {
       const incoming = new URL(request.url, "http://127.0.0.1");
       const logicalUrl = incoming.searchParams.get("url") ?? "";
+      if (logicalUrl === claimantStarApi) {
+        starAuthorizationHeaders.push(request.headers.authorization ?? null);
+      }
       const requestCount = (requestCounts.get(logicalUrl) ?? 0) + 1;
       requestCounts.set(logicalUrl, requestCount);
       const retryFailureLimit = options.retryFailures ?? 0;
@@ -279,12 +295,13 @@ async function startProxy(options) {
   return {
     server,
     proxyUrl: `http://127.0.0.1:${address.port}/proxy`,
+    starAuthorizationHeaders,
   };
 }
 
 async function runFixture(options = {}) {
-  const { server, proxyUrl } = await startProxy(options);
-  const outputDir = await mkdtemp(join(tmpdir(), "redsync-validation-"));
+  const { server, proxyUrl, starAuthorizationHeaders } = await startProxy(options);
+  const outputDir = await makeWorkspaceTemp("redsync-validation-");
   const fixturePublicUrl = options.publicUrl ?? publicUrl;
   try {
     const child = spawn(process.execPath, [fileURLToPath(runnerPath)], {
@@ -299,10 +316,11 @@ async function runFixture(options = {}) {
         RUNX_INPUT_UPSTREAM_PR_URL: prUrl,
         RUNX_INPUT_UPSTREAM_PR_HEAD_COMMIT: prHeadCommit,
         RUNX_INPUT_MAPPINGS_URL: mappingsUrl,
-        RUNX_INPUT_RUNX_VERSION_OUTPUT: "runx-cli 0.6.14",
+        RUNX_INPUT_RUNX_VERSION_OUTPUT: "runx-cli 0.7.1",
         RUNX_INPUT_OUTPUT_DIR: outputDir,
         RUNX_INPUT_VALIDATION_MODE: "fixture",
         RUNX_INPUT_FIXTURE_PROXY_URL: proxyUrl,
+        RUNX_INPUT_CLAIMANT_GITHUB_LOGIN: options.claimantGithubLogin ?? "",
       },
       stdio: ["ignore", "pipe", "pipe"],
     });
@@ -311,7 +329,7 @@ async function runFixture(options = {}) {
     child.stdout.on("data", (chunk) => (stdout += chunk));
     child.stderr.on("data", (chunk) => (stderr += chunk));
     const exitCode = await new Promise((resolve) => child.on("close", resolve));
-    return { exitCode, stdout, stderr, outputDir };
+    return { exitCode, stdout, stderr, outputDir, starAuthorizationHeaders };
   } finally {
     await new Promise((resolve) => server.close(resolve));
   }
@@ -341,7 +359,7 @@ async function runReceiptExtractor({
   runStatus = "sealed",
   failedChild = false,
 } = {}) {
-  const directory = await mkdtemp(join(tmpdir(), "redsync-root-receipt-"));
+  const directory = await makeWorkspaceTemp("redsync-root-receipt-");
   const receiptDir = join(directory, "receipts");
   const outputDir = join(directory, "output");
   await mkdir(join(receiptDir, "children"), { recursive: true });
@@ -363,8 +381,8 @@ async function runReceiptExtractor({
     lineage: { children: [] },
   };
   const rootBytes = `${JSON.stringify(rootReceipt)}\n`;
-  const rootName = process.platform === "win32" ? "root.json" : `${rootId}.json`;
-  const childName = process.platform === "win32" ? "child.json" : `${childId}.json`;
+  const rootName = `sha256-${"a".repeat(64)}.json`;
+  const childName = `sha256-${"b".repeat(64)}.json`;
   const runJson = {
     schema: "runx.skill_run.v1",
     status: runStatus,
@@ -405,7 +423,7 @@ async function runGovernedFixture(outputDir) {
   const fixtureSigningSeed = randomBytes(32).toString("base64");
   const args = [
     "-y",
-    "@runxhq/cli@0.6.14",
+    "@runxhq/cli@0.7.1",
     "skill",
     ".\\validation-skill\\redsync-sourcey-validation",
     "default",
@@ -417,7 +435,7 @@ async function runGovernedFixture(outputDir) {
     "-i", `upstream_pr_url=${prUrl}`,
     "-i", `upstream_pr_head_commit=${prHeadCommit}`,
     "-i", `mappings_url=${mappingsUrl}`,
-    "-i", "runx_version_output=runx-cli 0.6.14",
+    "-i", "runx_version_output=runx-cli 0.7.1",
     "-i", `output_dir=${join(outputDir, "artifacts")}`,
     "-i", "validation_mode=fixture",
     "-i", `fixture_proxy_url=${proxyUrl}`,
@@ -430,7 +448,7 @@ async function runGovernedFixture(outputDir) {
       cwd: fileURLToPath(root),
       env: {
         ...process.env,
-        npm_config_cache: join(tmpdir(), "frantic113-validation-npm-cache"),
+        npm_config_cache: join(outputDir, "npm-cache"),
         RUNX_RECEIPT_SIGN_KID: "frantic113-public-fixture",
         RUNX_RECEIPT_SIGN_ED25519_SEED_BASE64: fixtureSigningSeed,
         RUNX_RECEIPT_SIGN_ISSUER_TYPE: "hosted",
@@ -454,7 +472,7 @@ async function runGovernedFixture(outputDir) {
 
 if (process.argv.includes("--governed-run")) {
   const index = process.argv.indexOf("--governed-run");
-  const outputDir = process.argv[index + 1] || await mkdtemp(join(tmpdir(), "redsync-governed-"));
+  const outputDir = process.argv[index + 1] || await makeWorkspaceTemp("redsync-governed-");
   await runGovernedFixture(outputDir);
 } else if (process.argv.includes("--serve-fixture")) {
   const { server, proxyUrl } = await startProxy({});
@@ -480,6 +498,7 @@ test("validation skill declares the complete governed network contract", async (
     "upstream_pr_head_commit",
     "mappings_url",
     "runx_version_output",
+    "claimant_github_login",
   ]) {
     assert.match(xYaml, new RegExp(`\\n      ${input}:`), input);
   }
@@ -518,9 +537,15 @@ test("Linux workflow is manual, live-only, pinned, and preserves raw evidence", 
   assert.match(workflow, /RUNX_RECEIPT_DIR=%s\\n/);
   assert.match(workflow, /VALIDATION_OUTPUT_DIR=%s\\n/);
   assert.match(workflow, /\}\s*>>"\$GITHUB_ENV"/);
-  assert.match(workflow, /npx -y @runxhq\/cli@0\.6\.14 --version/);
-  assert.match(workflow, /npx -y @runxhq\/cli@0\.6\.14 skill/);
+  assert.match(workflow, /npx -y @runxhq\/cli@0\.7\.1 --version/);
+  assert.match(workflow, /npx -y @runxhq\/cli@0\.7\.1 skill/);
   assert.match(workflow, /runx_version_output=\$\(cat/);
+  assert.match(workflow, /claimant_github_login=\$INPUT_CLAIMANT_GITHUB_LOGIN/);
+  assert.match(workflow, /needs_operator_approval/);
+  assert.match(workflow, /--approve-operator-context "\$approval_digest"/);
+  assert.match(workflow, /runx-operator-context-stdout\.json/);
+  assert.match(workflow, /"\$operator_context_exit" -ne 0/);
+  assert.doesNotMatch(workflow, /"\$operator_context_exit" -(?:eq|ne) 2/);
   assert.match(workflow, /validation_mode=live/);
   assert.doesNotMatch(workflow, /validation_mode=fixture|fixture_proxy_url/);
   assert.match(workflow, /output_dir=artifacts/);
@@ -531,10 +556,11 @@ test("Linux workflow is manual, live-only, pinned, and preserves raw evidence", 
   assert.doesNotMatch(workflow, /RUNX_TOKEN|evidence_path|report_path/);
   assert.doesNotMatch(workflow, /find[^\n]*-print[^\n]*-quit/);
   assert.match(workflow, /extract-root-receipt\.mjs/);
+  assert.match(workflow, /materialize-receipt-proof\.mjs/);
   assert.match(workflow, /--receipt "\$VALIDATION_OUTPUT_DIR\/root-receipt\.json"/);
   assert.match(workflow, /artifact_copy_exit/);
   assert.match(workflow, /receipt_resolution_exit/);
-  assert.match(workflow, /npx -y @runxhq\/cli@0\.6\.14 verify/);
+  assert.match(workflow, /npx -y @runxhq\/cli@0\.7\.1 verify/);
   assert.match(
     workflow,
     /actions\/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5d/,
@@ -561,6 +587,8 @@ test("Linux workflow is manual, live-only, pinned, and preserves raw evidence", 
     "runx-verify.json",
     "runx-receipts.archive.json",
     "receipt-archive-reconstruction.json",
+    "verification-public-key.json",
+    "receipt-proof.json",
   ]) {
     assert.match(workflow, new RegExp(artifact.replace(".", "\\.")), artifact);
   }
@@ -576,7 +604,7 @@ test("Linux workflow provisions the required runx network sandbox and masks the 
 
   const provisionIndex = workflow.indexOf("name: Provision Linux bubblewrap sandbox");
   const identityIndex = workflow.indexOf("name: Create ephemeral CI receipt identity");
-  const runxIndex = workflow.indexOf("npx -y @runxhq/cli@0.6.14 skill");
+  const runxIndex = workflow.indexOf("npx -y @runxhq/cli@0.7.1 skill");
   assert.ok(provisionIndex >= 0 && provisionIndex < identityIndex && identityIndex < runxIndex);
   const provisionStep = workflow.slice(provisionIndex, identityIndex);
   assert.match(provisionStep, /set -uo pipefail/);
@@ -618,6 +646,22 @@ test("Linux workflow provisions the required runx network sandbox and masks the 
     "bubblewrap-version.txt",
     "bubblewrap-version-exit-code.txt",
   ]) assert.match(uploadPaths, new RegExp(artifact.replace(".", "\\.")), artifact);
+});
+
+test("CI receipt proof materializer remains preparation-only and fail-closed", async () => {
+  const script = await text(new URL("scripts/materialize-receipt-proof.mjs", root));
+  for (const exitFile of [
+    "runx-exit-code.txt",
+    "root-receipt-resolution-exit-code.txt",
+    "receipt-archive-pack-exit-code.txt",
+    "receipt-archive-reconstruction-exit-code.txt",
+    "runx-verify-exit-code.txt",
+  ]) assert.match(script, new RegExp(exitFile.replaceAll(".", "\\.")), exitFile);
+  assert.match(script, /raw\.status !== "sealed"/);
+  assert.match(script, /receipt_status_audit\.overall_status !== "PASS"/);
+  assert.match(script, /reconstructReceiptTreeArchive/);
+  assert.match(script, /final_delivery_authorization:\s*false/);
+  assert.doesNotMatch(script, /final_delivery_authorization:\s*true/);
 });
 
 test("bounded RTD addon matches the observed live package-root insertion exactly", async () => {
@@ -668,7 +712,7 @@ test("fixture mode exercises every check without claiming a live pass", async ()
   assert.ok(output.http_checks.every((item) => item.attempt_count === 1));
   assert.ok(output.http_checks.every((item) => item.attempts.length === 1));
   assert.ok(output.http_checks.every((item) => item.retry_exhausted === false));
-  assert.equal(output.cli_version.output, "runx-cli 0.6.14");
+  assert.equal(output.cli_version.output, "runx-cli 0.7.1");
   assert.equal(output.cli_version.source, "captured_outer_command");
   assert.equal(output.project_facts.license, "BSD-3-Clause");
   assert.equal(output.project_facts.sourcey_adapter, "godoc");
@@ -683,7 +727,7 @@ test("fixture mode exercises every check without claiming a live pass", async ()
   assert.equal(output.project_facts.upstream_pr.adoption, false);
   assert.equal(output.project_facts.upstream_pr.endorsement, false);
   assert.ok(output.observations.length >= 6);
-  assert.equal(output.observations[0], "runx-cli 0.6.14");
+  assert.equal(output.observations[0], "runx-cli 0.7.1");
   assert.ok(output.evidence_items.some((item) => item.type === "independent_raw_transcript"));
   assert.equal(output.summary_consistency.status_matches_raw_failures, true);
   assert.equal(output.summary_consistency.live_pass_matches_status, true);
@@ -726,12 +770,27 @@ test("fixture mode exercises every check without claiming a live pass", async ()
   assert.equal(placeholderCheck.status, "PASS");
   assert.deepEqual(placeholderCheck.observed.placeholder_occurrences, []);
   assert.ok(placeholderCheck.observed.excluded_response_classes.includes("github_commit_api_patch"));
-  assert.match(transcript, /CLI_VERSION_OUTPUT runx-cli 0\.6\.14/);
+  assert.match(transcript, /CLI_VERSION_OUTPUT runx-cli 0\.7\.1/);
   assert.match(transcript, /HTTP_STATUS 200/);
   assert.match(transcript, /CONTENT_SHA256 [0-9a-f]{64}/);
   assert.match(transcript, /PR_STATE open/);
   assert.match(transcript, /PR_DRAFT false/);
   assert.match(transcript, /PR_MERGED_AT null/);
+});
+
+test("fixture mode verifies the claimant Sourcey star without an authorization header", async () => {
+  const result = await runFixture({ claimantGithubLogin });
+  assert.equal(result.exitCode, 0, result.stderr || result.stdout);
+  const output = JSON.parse(result.stdout);
+  const star = output.checks.find((item) => item.id === "claimant_sourcey_star");
+  assert.equal(star.status, "PASS");
+  assert.equal(star.observed.repository, "sourcey/sourcey");
+  assert.equal(star.observed.http_status, 200);
+  assert.equal(star.observed.authentication, "none");
+  assert.equal(star.observed.matched_repository, "sourcey/sourcey");
+  assert.equal(star.observed.list_item_count, 2);
+  assert.deepEqual(result.starAuthorizationHeaders, [null]);
+  assert.match(output.observations.join("\n"), /sourcey\/sourcey/);
 });
 
 test("bounded HTTP retry records two transient failures before a clean PASS", async () => {
@@ -843,6 +902,7 @@ test("root receipt extractor binds raw runx JSON to one exact stored root", asyn
   assert.equal(reference.root_receipt_ref, result.rootId);
   assert.equal(copiedRoot, result.rootBytes);
   assert.equal(tree.root_receipt_id, result.rootId);
+  assert.equal(tree.root_receipt_path, `sha256-${"a".repeat(64)}.json`);
   assert.equal(tree.file_count, 3);
   assert.match(tree.tree_sha256, /^[0-9a-f]{64}$/);
   assert.ok(tree.files.every((item) => /^[0-9a-f]{64}$/.test(item.sha256)));
@@ -885,9 +945,7 @@ test("filename-safe receipt archive reconstructs every original path and byte", 
   assert.deepEqual(archive.files.map((file) => file.path).sort(), result.receiptPaths);
   assert.ok(archive.files.every((file) => !file.path.includes("\\")));
   assert.ok(archive.files.every((file) => Buffer.from(file.content_base64, "base64").length === file.bytes));
-  if (process.platform !== "win32") {
-    assert.ok(archive.files.some((file) => file.path.includes("sha256:")));
-  }
+  assert.ok(archive.files.some((file) => /^sha256-[0-9a-f]{64}\.json$/.test(file.path)));
 
   const extracted = await extractReceiptTree({
     archivePath,
@@ -988,7 +1046,7 @@ test("failed child receipt blocks extraction and archive packaging", async () =>
   );
   assert.equal(tree.receipt_status_audit.overall_status, "BLOCKED");
   assert.equal(audit.failed_json_count, 1);
-  assert.match(JSON.stringify(audit.files), /children\/child\.json/);
+  assert.match(JSON.stringify(audit.files), /children\/sha256-b{64}\.json/);
   await assert.rejects(
     packReceiptTree({
       receiptDir: result.receiptDir,

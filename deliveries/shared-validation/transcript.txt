@@ -1,0 +1,421 @@
+Redsync Sourcey governed validation transcript
+CHECKED_AT 2026-07-17T16:49:03.645Z
+VALIDATION_MODE live
+CHECK input_contract PASS
+OBSERVED {"failures":[],"target_repo_url":"https://github.com/go-redsync/redsync"}
+CLI_COMMAND npx -y @runxhq/cli@0.7.1 --version
+CLI_SOURCE captured_outer_command
+CLI_EXIT 0
+CLI_VERSION_OUTPUT runx-cli 0.7.1
+CHECK cli_version_exact PASS
+OBSERVED {"command":"npx -y @runxhq/cli@0.7.1 --version","output":"runx-cli 0.7.1","exit_code":0,"source":"captured_outer_command"}
+CHECK github_url_shapes PASS
+OBSERVED {"docs_repo":"https://github.com/fengyangxxx/redsync-sourcey-docs","target_repo":"https://github.com/go-redsync/redsync","pull_request":"https://github.com/go-redsync/redsync/pull/245"}
+HTTP_ATTEMPT 1 STATUS 200 RETRYABLE false
+HTTP_ATTEMPT_URL https://api.github.com/repos/go-redsync/redsync
+HTTP_ATTEMPT_RESULT {"attempt":1,"url":"https://api.github.com/repos/go-redsync/redsync","http_status":200,"retryable":false,"elapsed_ms":1114,"bytes":6362,"content_sha256":"7d9503046371deab5d1a19889de0b04a9149c5d6d66f3f88fe2cc47a4f4bc9ee","error":null}
+HTTP_LABEL target_repository_api
+HTTP_URL https://api.github.com/repos/go-redsync/redsync
+HTTP_STATUS 200
+HTTP_ATTEMPT_COUNT 1
+HTTP_RETRY_EXHAUSTED false
+HTTP_FINAL_OUTCOME response_ok
+CONTENT_SHA256 7d9503046371deab5d1a19889de0b04a9149c5d6d66f3f88fe2cc47a4f4bc9ee
+CONTENT_BYTES 6362
+CHECKED_TEXT "{\"id\":50891360,\"node_id\":\"MDEwOlJlcG9zaXRvcnk1MDg5MTM2MA==\",\"name\":\"redsync\",\"full_name\":\"go-redsync/redsync\",\"private\":false,\"owner\":{\"login\":\"go-redsync\",\"id\":17018239,\"node_id\":\"MDEyOk9yZ2FuaXphdGlvbjE3MDE4MjM5\",\"avatar_url\":\"https://ava"
+HTTP_ATTEMPT 1 STATUS 200 RETRYABLE false
+HTTP_ATTEMPT_URL https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/LICENSE
+HTTP_ATTEMPT_RESULT {"attempt":1,"url":"https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/LICENSE","http_status":200,"retryable":false,"elapsed_ms":1114,"bytes":1482,"content_sha256":"b401cbca260ddfe2594d28ebe1fb8495830fb640af80dbef8118b6e77fb818ba","error":null}
+HTTP_LABEL target_license
+HTTP_URL https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/LICENSE
+HTTP_STATUS 200
+HTTP_ATTEMPT_COUNT 1
+HTTP_RETRY_EXHAUSTED false
+HTTP_FINAL_OUTCOME response_ok
+CONTENT_SHA256 b401cbca260ddfe2594d28ebe1fb8495830fb640af80dbef8118b6e77fb818ba
+CONTENT_BYTES 1482
+CHECKED_TEXT "Copyright (c) 2023, Mahmud Ridwan All rights reserved. Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: * Redistributions of source code must reta"
+CHECK target_project PASS
+OBSERVED {"repository_http_status":200,"full_name":"go-redsync/redsync","archived":false,"pushed_at":"2026-07-13T11:12:49Z","activity_age_days":4,"license_spdx":"BSD-3-Clause","license_http_status":200,"license_sha256":"b401cbca260ddfe2594d28ebe1fb8495830fb640af80dbef8118b6e77fb818ba"}
+HTTP_ATTEMPT 1 STATUS 200 RETRYABLE false
+HTTP_ATTEMPT_URL https://api.github.com/repos/go-redsync/redsync/commits/79f6ba24a8bf41f35141de700d410a06bb27622f
+HTTP_ATTEMPT_RESULT {"attempt":1,"url":"https://api.github.com/repos/go-redsync/redsync/commits/79f6ba24a8bf41f35141de700d410a06bb27622f","http_status":200,"retryable":false,"elapsed_ms":377,"bytes":13317,"content_sha256":"82d78d90733933f14306e1814ccd49c3f979c57c4822e6b36698cc609426723d","error":null}
+HTTP_LABEL target_commit_api
+HTTP_URL https://api.github.com/repos/go-redsync/redsync/commits/79f6ba24a8bf41f35141de700d410a06bb27622f
+HTTP_STATUS 200
+HTTP_ATTEMPT_COUNT 1
+HTTP_RETRY_EXHAUSTED false
+HTTP_FINAL_OUTCOME response_ok
+CONTENT_SHA256 82d78d90733933f14306e1814ccd49c3f979c57c4822e6b36698cc609426723d
+CONTENT_BYTES 13317
+CHECKED_TEXT "{\"sha\":\"79f6ba24a8bf41f35141de700d410a06bb27622f\",\"files\":[{\"filename\":\"redis/goredis/goredis.go\"},{\"filename\":\"redis/goredis/v7/goredis.go\"},{\"filename\":\"redis/goredis/v8/goredis.go\"},{\"filename\":\"redis/goredis/v9/goredis.go\"},{\"filename\":\"redis/redigo/redigo.go\"},{\"filename\":\"redis/redis.go\"},{\"filename\":\"redis/rueidis/rueidis.go\"},{\"filename\":\"redis/valkeygo/valkeygo.go\"}]}"
+CHECK target_commit PASS
+OBSERVED {"http_status":200,"sha":"79f6ba24a8bf41f35141de700d410a06bb27622f"}
+HTTP_ATTEMPT 1 STATUS 200 RETRYABLE false
+HTTP_ATTEMPT_URL https://api.github.com/repos/fengyangxxx/redsync-sourcey-docs/commits/2b58caa8d60147df494ce995f3777944a400b9a9
+HTTP_ATTEMPT_RESULT {"attempt":1,"url":"https://api.github.com/repos/fengyangxxx/redsync-sourcey-docs/commits/2b58caa8d60147df494ce995f3777944a400b9a9","http_status":200,"retryable":false,"elapsed_ms":775,"bytes":677621,"content_sha256":"a2884c63096c03e9d3fb2212a7c468f5d39f2db0ac458236c1ef5335fa151aca","error":null}
+HTTP_LABEL docs_commit_api
+HTTP_URL https://api.github.com/repos/fengyangxxx/redsync-sourcey-docs/commits/2b58caa8d60147df494ce995f3777944a400b9a9
+HTTP_STATUS 200
+HTTP_ATTEMPT_COUNT 1
+HTTP_RETRY_EXHAUSTED false
+HTTP_FINAL_OUTCOME response_ok
+CONTENT_SHA256 a2884c63096c03e9d3fb2212a7c468f5d39f2db0ac458236c1ef5335fa151aca
+CONTENT_BYTES 677621
+CHECKED_TEXT "{\"sha\":\"2b58caa8d60147df494ce995f3777944a400b9a9\",\"files\":[{\"filename\":\".github/workflows/validate-sourcey-adoption.yml\"},{\"filename\":\"README.md\"},{\"filename\":\"dist/hosting-decision.html\"},{\"filename\":\"dist/index.html\"},{\"filename\":\"dist/introduction.html\"},{\"filename\":\"dist/llms-full.txt\"},{\"filename\":\"dist/llms.txt\"},{\"filename\":\"dist/maintainer-gap-analysis.html\"},{\"filename\":\"dist/pinned-source-coverage.html\"},{\"filename\":\"dist/reproduce.html\"},{\"filename\":\"dist/search-index.json\"},{\"filename\":\"dist/upstream-pr-rationale.html\"},{\"filename\":\"evidence/commands.local.txt\"},{\"filename\":\"evidence/evidence.draft.json\"},{\"filename\":\"evidence/hume-handoff.md\"},{\"filename\":\"evidence/local-live-validation/evidence.json\"},{\"filename\":\"evidence/local-live-validation/manifest.json\"},{\"filename\":\"evidence/local-live-validation/runner-stderr.txt\"},{\"filename\":\"evidence/local-live-validation/runner-stdout.json\"},{\"filename\":\"evidence/local-live-validation/runx-version.txt\"},{\"filename\":\"evidence/local-live-validation/transcript.txt\"},{\"filename\":\"evidence/sha256-manifest.json\"},{\"filename\":\"hosting-decision.md\"},{\"filename\":\"introduction.md\"},{\"filename\":\"maintainer-gap-analysis.md\"},{\"filename\":\"package.json\"},{\"filename\":\"report.draft.md\"},{\"filename\":\"scripts/generate-hashes.mjs\"},{\"filename\":\"scripts/verify-local-live-evidence.mjs\"},{\"filename\":\"source/redsync/.source-pin.json\"},{\"filename\":\"tests/package.test.mjs\"},{\"filename\":\"tests/validation-skill.test.mjs\"},{\"filename\":\"upstream-pr-rationale.md\"},{\"filename\":\"validation-skill/redsync-sourcey-validation/SKILL.md\"},{\"filename\":\"validation-skill/redsync-sourcey-validation/X.yaml\"},{\"filename\":\"validation-skill/redsync-sourcey-validation/scripts/extract-root-receipt.mjs\"},{\"filename\":\"validation-skill/redsync-sourcey-validation/scripts/receipt-tree-archive.mjs\"},{\"filename\":\"validation-skill/redsync-sourcey-validation/scripts/run.mjs\"}]}"
+CHECK docs_commit PASS
+OBSERVED {"http_status":200,"sha":"2b58caa8d60147df494ce995f3777944a400b9a9"}
+HTTP_ATTEMPT 1 STATUS 200 RETRYABLE false
+HTTP_ATTEMPT_URL https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/evidence/page-source-mappings.json
+HTTP_ATTEMPT_RESULT {"attempt":1,"url":"https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/evidence/page-source-mappings.json","http_status":200,"retryable":false,"elapsed_ms":439,"bytes":2987,"content_sha256":"401ef15db2d63e178a92c2961c721661a370903e13da172d043c293ccb6b7d40","error":null}
+HTTP_LABEL page_source_mappings
+HTTP_URL https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/evidence/page-source-mappings.json
+HTTP_STATUS 200
+HTTP_ATTEMPT_COUNT 1
+HTTP_RETRY_EXHAUSTED false
+HTTP_FINAL_OUTCOME response_ok
+CONTENT_SHA256 401ef15db2d63e178a92c2961c721661a370903e13da172d043c293ccb6b7d40
+CONTENT_BYTES 2987
+CHECKED_TEXT "[ { \"generated_page\": \"go-api/package-root.html\", \"rendered_symbol\": \"Redsync\", \"source_path\": \"redsync.go\", \"source_line_pattern\": \"^type Redsync struct \\\\{\", \"source_git_blob_sha1\": \"bfec2c9361f283b8f2fab5db25e7e584a4daab96\", \"source_line"
+CHECK mappings_shape PASS
+OBSERVED {"http_status":200,"count":5,"immutable_url_matches_docs_commit":true}
+HTTP_ATTEMPT 1 STATUS 200 RETRYABLE false
+HTTP_ATTEMPT_URL https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/sourcey.config.ts
+HTTP_ATTEMPT_RESULT {"attempt":1,"url":"https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/sourcey.config.ts","http_status":200,"retryable":false,"elapsed_ms":355,"bytes":1767,"content_sha256":"c672993df238bd5c856092db488d1ddc4ca96898d4791acb7df0d1d238e19f7f","error":null}
+HTTP_LABEL docs_file:sourcey.config.ts
+HTTP_URL https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/sourcey.config.ts
+HTTP_STATUS 200
+HTTP_ATTEMPT_COUNT 1
+HTTP_RETRY_EXHAUSTED false
+HTTP_FINAL_OUTCOME response_ok
+CONTENT_SHA256 c672993df238bd5c856092db488d1ddc4ca96898d4791acb7df0d1d238e19f7f
+CONTENT_BYTES 1767
+CHECKED_TEXT "import { defineConfig, godoc, markdown } from \"sourcey\"; const redsyncCommit = \"79f6ba24a8bf41f35141de700d410a06bb27622f\"; export default defineConfig({ name: \"Redsync Sourcey API Documentation\", description: \"Sourcey-generated API document"
+HTTP_ATTEMPT 1 STATUS 200 RETRYABLE false
+HTTP_ATTEMPT_URL https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/scripts/generate-godoc-snapshot.mjs
+HTTP_ATTEMPT_RESULT {"attempt":1,"url":"https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/scripts/generate-godoc-snapshot.mjs","http_status":200,"retryable":false,"elapsed_ms":344,"bytes":2099,"content_sha256":"11a145367338d3811c068687bd3e5ca11d0d87a99b40be56eb47a6e148251038","error":null}
+HTTP_LABEL docs_file:scripts/generate-godoc-snapshot.mjs
+HTTP_URL https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/scripts/generate-godoc-snapshot.mjs
+HTTP_STATUS 200
+HTTP_ATTEMPT_COUNT 1
+HTTP_RETRY_EXHAUSTED false
+HTTP_FINAL_OUTCOME response_ok
+CONTENT_SHA256 11a145367338d3811c068687bd3e5ca11d0d87a99b40be56eb47a6e148251038
+CONTENT_BYTES 2099
+CHECKED_TEXT "import { mkdirSync, readFileSync, writeFileSync } from \"node:fs\"; import { tmpdir } from \"node:os\"; import { dirname, isAbsolute, join } from \"node:path\"; import { spawnSync } from \"node:child_process\"; import { fileURLToPath } from \"node:u"
+HTTP_ATTEMPT 1 STATUS 200 RETRYABLE false
+HTTP_ATTEMPT_URL https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/godoc.json
+HTTP_ATTEMPT_RESULT {"attempt":1,"url":"https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/godoc.json","http_status":200,"retryable":false,"elapsed_ms":344,"bytes":29784,"content_sha256":"1f14fdaef7fa00a9d67273273db1cdb2f05b1b9461d45ca9a873a7fcfef5d31e","error":null}
+HTTP_LABEL docs_file:godoc.json
+HTTP_URL https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/godoc.json
+HTTP_STATUS 200
+HTTP_ATTEMPT_COUNT 1
+HTTP_RETRY_EXHAUSTED false
+HTTP_FINAL_OUTCOME response_ok
+CONTENT_SHA256 1f14fdaef7fa00a9d67273273db1cdb2f05b1b9461d45ca9a873a7fcfef5d31e
+CONTENT_BYTES 29784
+CHECKED_TEXT "{ \"schema_version\": 1, \"source\": \"sourcey-godoc\", \"module_path\": \"github.com/go-redsync/redsync/v4\", \"generated_at\": \"2026-07-02T06:37:50Z\", \"packages\": [ { \"importPath\": \"github.com/go-redsync/redsync/v4\", \"name\": \"redsync\", \"synopsis\": \"P"
+HTTP_ATTEMPT 1 STATUS 200 RETRYABLE false
+HTTP_ATTEMPT_URL https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/dist/index.html
+HTTP_ATTEMPT_RESULT {"attempt":1,"url":"https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/dist/index.html","http_status":200,"retryable":false,"elapsed_ms":360,"bytes":22844,"content_sha256":"6c6d01cba9613c6ba72dc653906cd6e9e9bda32ba4761a0e0c406e6ce3f52dc8","error":null}
+HTTP_LABEL docs_file:dist/index.html
+HTTP_URL https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/dist/index.html
+HTTP_STATUS 200
+HTTP_ATTEMPT_COUNT 1
+HTTP_RETRY_EXHAUSTED false
+HTTP_FINAL_OUTCOME response_ok
+CONTENT_SHA256 6c6d01cba9613c6ba72dc653906cd6e9e9bda32ba4761a0e0c406e6ce3f52dc8
+CONTENT_BYTES 22844
+CHECKED_TEXT "Redsync Sourcey API Documentation :root { --color-primary: 180 35 24; --color-primary-light: 180 35 24; --color-primary-dark: 180 35 24; --color-primary-ink: 180 35 24; --color-background-light: 255 255 255; --color-background-dark: 11 12 1"
+HTTP_ATTEMPT 1 STATUS 200 RETRYABLE false
+HTTP_ATTEMPT_URL https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/evidence/inventory.json
+HTTP_ATTEMPT_RESULT {"attempt":1,"url":"https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/evidence/inventory.json","http_status":200,"retryable":false,"elapsed_ms":326,"bytes":20200,"content_sha256":"32d64a8c92aff9a2e9f049dede51a75b3a781f285bff50c139d4ffa114bc0fbc","error":null}
+HTTP_LABEL docs_file:evidence/inventory.json
+HTTP_URL https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/evidence/inventory.json
+HTTP_STATUS 200
+HTTP_ATTEMPT_COUNT 1
+HTTP_RETRY_EXHAUSTED false
+HTTP_FINAL_OUTCOME response_ok
+CONTENT_SHA256 32d64a8c92aff9a2e9f049dede51a75b3a781f285bff50c139d4ffa114bc0fbc
+CONTENT_BYTES 20200
+CHECKED_TEXT "{ \"schema_version\": \"redsync-sourcey-inventory/v1\", \"repository\": \"https://github.com/go-redsync/redsync\", \"commit\": \"79f6ba24a8bf41f35141de700d410a06bb27622f\", \"module\": \"github.com/go-redsync/redsync/v4\", \"package_count\": 15, \"non_test_go"
+HTTP_ATTEMPT 1 STATUS 200 RETRYABLE false
+HTTP_ATTEMPT_URL https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/evidence/sha256-manifest.json
+HTTP_ATTEMPT_RESULT {"attempt":1,"url":"https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/evidence/sha256-manifest.json","http_status":200,"retryable":false,"elapsed_ms":723,"bytes":19563,"content_sha256":"323451c06f3b60e4b78d1e6343adca60f5feceda41a8234fff9a7e7fa12b7739","error":null}
+HTTP_LABEL docs_file:evidence/sha256-manifest.json
+HTTP_URL https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/evidence/sha256-manifest.json
+HTTP_STATUS 200
+HTTP_ATTEMPT_COUNT 1
+HTTP_RETRY_EXHAUSTED false
+HTTP_FINAL_OUTCOME response_ok
+CONTENT_SHA256 323451c06f3b60e4b78d1e6343adca60f5feceda41a8234fff9a7e7fa12b7739
+CONTENT_BYTES 19563
+CHECKED_TEXT "{ \"schema_version\": \"sha256-manifest/v1\", \"repository\": \"https://github.com/go-redsync/redsync\", \"commit\": \"79f6ba24a8bf41f35141de700d410a06bb27622f\", \"files\": [ { \"path\": \".gitattributes\", \"bytes\": 19, \"sha256\": \"d60f352d0db1404c70afb4bb8b"
+CHECK immutable_docs_files PASS
+OBSERVED {"files":[{"path":"sourcey.config.ts","http_status":200},{"path":"scripts/generate-godoc-snapshot.mjs","http_status":200},{"path":"godoc.json","http_status":200},{"path":"dist/index.html","http_status":200},{"path":"evidence/inventory.json","http_status":200},{"path":"evidence/page-source-mappings.json","http_status":200},{"path":"evidence/sha256-manifest.json","http_status":200}],"godoc_schema":1,"godoc_module":"github.com/go-redsync/redsync/v4","godoc_packages":15,"sourcey_adapter":"godoc","sourcey_command":"sourcey godoc --module ./source/redsync --packages ./... --out godoc.json","sourcey_command_configured":true,"package_count":15,"non_test_go_file_count":19,"exported_symbol_count":110,"api_package_pages":["go-api/package-root.html","go-api/pkg-examples-goredis-v7.html","go-api/pkg-examples-goredis-v8.html","go-api/pkg-examples-goredis-v9.html","go-api/pkg-examples-goredis.html","go-api/pkg-examples-redigo.html","go-api/pkg-examples-valkego.html","go-api/pkg-redis-goredis-v7.html","go-api/pkg-redis-goredis-v8.html","go-api/pkg-redis-goredis-v9.html","go-api/pkg-redis-goredis.html","go-api/pkg-redis-redigo.html","go-api/pkg-redis-rueidis.html","go-api/pkg-redis-valkeygo.html","go-api/pkg-redis.html"],"generated_page_count":24,"generated_page_list":["go-api.html","go-api/index.html","go-api/package-root.html","go-api/pkg-examples-goredis-v7.html","go-api/pkg-examples-goredis-v8.html","go-api/pkg-examples-goredis-v9.html","go-api/pkg-examples-goredis.html","go-api/pkg-examples-redigo.html","go-api/pkg-examples-valkego.html","go-api/pkg-redis-goredis-v7.html","go-api/pkg-redis-goredis-v8.html","go-api/pkg-redis-goredis-v9.html","go-api/pkg-redis-goredis.html","go-api/pkg-redis-redigo.html","go-api/pkg-redis-rueidis.html","go-api/pkg-redis-valkeygo.html","go-api/pkg-redis.html","hosting-decision.html","index.html","introduction.html","maintainer-gap-analysis.html","pinned-source-coverage.html","reproduce.html","upstream-pr-rationale.html"],"config_has_target_repo":true,"config_has_target_commit":true,"dist_has_target_module":true,"dist_has_target_commit":true,"mappings_count":5}
+CHECK documentation_depth PASS
+OBSERVED {"non_test_go_file_count":19,"exported_symbol_count":110,"package_count":15,"generated_page_count":24,"api_package_page_list":["go-api/package-root.html","go-api/pkg-examples-goredis-v7.html","go-api/pkg-examples-goredis-v8.html","go-api/pkg-examples-goredis-v9.html","go-api/pkg-examples-goredis.html","go-api/pkg-examples-redigo.html","go-api/pkg-examples-valkego.html","go-api/pkg-redis-goredis-v7.html","go-api/pkg-redis-goredis-v8.html","go-api/pkg-redis-goredis-v9.html","go-api/pkg-redis-goredis.html","go-api/pkg-redis-redigo.html","go-api/pkg-redis-rueidis.html","go-api/pkg-redis-valkeygo.html","go-api/pkg-redis.html"]}
+HTTP_ATTEMPT 1 STATUS 200 RETRYABLE false
+HTTP_ATTEMPT_URL https://redsync-sourcey-docs.readthedocs.io/en/latest/
+HTTP_ATTEMPT_RESULT {"attempt":1,"url":"https://redsync-sourcey-docs.readthedocs.io/en/latest/","http_status":200,"retryable":false,"elapsed_ms":823,"bytes":23177,"content_sha256":"4cf1b9e3a0473f87cf2a0e12a446010d992661ef8434c4cd73ddfd5a67e87531","error":null}
+HTTP_LABEL public_url
+HTTP_URL https://redsync-sourcey-docs.readthedocs.io/en/latest/
+HTTP_STATUS 200
+HTTP_ATTEMPT_COUNT 1
+HTTP_RETRY_EXHAUSTED false
+HTTP_FINAL_OUTCOME response_ok
+CONTENT_SHA256 4cf1b9e3a0473f87cf2a0e12a446010d992661ef8434c4cd73ddfd5a67e87531
+CONTENT_BYTES 23177
+CHECKED_TEXT "Redsync Sourcey API Documentation :root { --color-primary: 180 35 24; --color-primary-light: 180 35 24; --color-primary-dark: 180 35 24; --color-primary-ink: 180 35 24; --color-background-light: 255 255 255; --color-background-dark: 11 12 1"
+CHECK public_url PASS
+OBSERVED {"http_status":200,"content_sha256":"4cf1b9e3a0473f87cf2a0e12a446010d992661ef8434c4cd73ddfd5a67e87531","checked_text":"Redsync Sourcey API Documentation :root { --color-primary: 180 35 24; --color-primary-light: 180 35 24; --color-primary-dark: 180 35 24; --color-primary-ink: 180 35 24; --color-background-light: 255 255 255; --color-background-dark: 11 12 1"}
+HTTP_ATTEMPT 1 STATUS 200 RETRYABLE false
+HTTP_ATTEMPT_URL https://redsync-sourcey-docs.readthedocs.io/en/latest/introduction.html
+HTTP_ATTEMPT_RESULT {"attempt":1,"url":"https://redsync-sourcey-docs.readthedocs.io/en/latest/introduction.html","http_status":200,"retryable":false,"elapsed_ms":288,"bytes":23194,"content_sha256":"129e838a78b01bce61ae9019040da491271cb68edab4ba2a2a798de4a8e1c9f2","error":null}
+HTTP_LABEL sourcey_introduction
+HTTP_URL https://redsync-sourcey-docs.readthedocs.io/en/latest/introduction.html
+HTTP_STATUS 200
+HTTP_ATTEMPT_COUNT 1
+HTTP_RETRY_EXHAUSTED false
+HTTP_FINAL_OUTCOME response_ok
+CONTENT_SHA256 129e838a78b01bce61ae9019040da491271cb68edab4ba2a2a798de4a8e1c9f2
+CONTENT_BYTES 23194
+CHECKED_TEXT "Redsync Sourcey API Documentation :root { --color-primary: 180 35 24; --color-primary-light: 180 35 24; --color-primary-dark: 180 35 24; --color-primary-ink: 180 35 24; --color-background-light: 255 255 255; --color-background-dark: 11 12 1"
+HTTP_ATTEMPT 1 STATUS 200 RETRYABLE false
+HTTP_ATTEMPT_URL https://redsync-sourcey-docs.readthedocs.io/en/latest/go-api.html
+HTTP_ATTEMPT_RESULT {"attempt":1,"url":"https://redsync-sourcey-docs.readthedocs.io/en/latest/go-api.html","http_status":200,"retryable":false,"elapsed_ms":208,"bytes":27876,"content_sha256":"873f69b37e3957106a054b27ec244bc09b336b620247917f931113e93919308d","error":null}
+HTTP_LABEL sourcey_api_home
+HTTP_URL https://redsync-sourcey-docs.readthedocs.io/en/latest/go-api.html
+HTTP_STATUS 200
+HTTP_ATTEMPT_COUNT 1
+HTTP_RETRY_EXHAUSTED false
+HTTP_FINAL_OUTCOME response_ok
+CONTENT_SHA256 873f69b37e3957106a054b27ec244bc09b336b620247917f931113e93919308d
+CONTENT_BYTES 27876
+CHECKED_TEXT "Go API - Redsync Sourcey API Documentation :root { --color-primary: 180 35 24; --color-primary-light: 180 35 24; --color-primary-dark: 180 35 24; --color-primary-ink: 180 35 24; --color-background-light: 255 255 255; --color-background-dark"
+CHECK sourcey_home PASS
+OBSERVED {"introduction_status":200,"api_home_status":200,"introduction_sha256":"129e838a78b01bce61ae9019040da491271cb68edab4ba2a2a798de4a8e1c9f2","api_home_sha256":"873f69b37e3957106a054b27ec244bc09b336b620247917f931113e93919308d"}
+HTTP_ATTEMPT 1 STATUS 200 RETRYABLE false
+HTTP_ATTEMPT_URL https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/dist/go-api/package-root.html
+HTTP_ATTEMPT_RESULT {"attempt":1,"url":"https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/dist/go-api/package-root.html","http_status":200,"retryable":false,"elapsed_ms":399,"bytes":72834,"content_sha256":"af75739a73f365c9421b3ffbe07df8beaab0d24ac879307aee293aeac3375a23","error":null}
+HTTP_LABEL immutable_api_page:go-api/package-root.html
+HTTP_URL https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/dist/go-api/package-root.html
+HTTP_STATUS 200
+HTTP_ATTEMPT_COUNT 1
+HTTP_RETRY_EXHAUSTED false
+HTTP_FINAL_OUTCOME response_ok
+CONTENT_SHA256 af75739a73f365c9421b3ffbe07df8beaab0d24ac879307aee293aeac3375a23
+CONTENT_BYTES 72834
+CHECKED_TEXT "github.com/go-redsync/redsync/v4 - Redsync Sourcey API Documentation :root { --color-primary: 180 35 24; --color-primary-light: 180 35 24; --color-primary-dark: 180 35 24; --color-primary-ink: 180 35 24; --color-background-light: 255 255 25"
+HTTP_ATTEMPT 1 STATUS 200 RETRYABLE false
+HTTP_ATTEMPT_URL https://redsync-sourcey-docs.readthedocs.io/en/latest/go-api/package-root.html
+HTTP_ATTEMPT_RESULT {"attempt":1,"url":"https://redsync-sourcey-docs.readthedocs.io/en/latest/go-api/package-root.html","http_status":200,"retryable":false,"elapsed_ms":290,"bytes":73191,"content_sha256":"37232211ac094e2620353ebfc758e36ce1aabf4739431467cd0c926940f517ae","error":null}
+HTTP_LABEL public_api_page:go-api/package-root.html
+HTTP_URL https://redsync-sourcey-docs.readthedocs.io/en/latest/go-api/package-root.html
+HTTP_STATUS 200
+HTTP_ATTEMPT_COUNT 1
+HTTP_RETRY_EXHAUSTED false
+HTTP_FINAL_OUTCOME response_ok
+CONTENT_SHA256 37232211ac094e2620353ebfc758e36ce1aabf4739431467cd0c926940f517ae
+CONTENT_BYTES 73191
+CHECKED_TEXT "github.com/go-redsync/redsync/v4 - Redsync Sourcey API Documentation :root { --color-primary: 180 35 24; --color-primary-light: 180 35 24; --color-primary-dark: 180 35 24; --color-primary-ink: 180 35 24; --color-background-light: 255 255 25"
+HTTP_ATTEMPT 1 STATUS 200 RETRYABLE false
+HTTP_ATTEMPT_URL https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/dist/go-api/pkg-redis.html
+HTTP_ATTEMPT_RESULT {"attempt":1,"url":"https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/dist/go-api/pkg-redis.html","http_status":200,"retryable":false,"elapsed_ms":355,"bytes":42300,"content_sha256":"6d8184491c7a18d2a8716c22c471afe067cacd3aa5a68c3322deaf30bb3eb3ee","error":null}
+HTTP_LABEL immutable_api_page:go-api/pkg-redis.html
+HTTP_URL https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/dist/go-api/pkg-redis.html
+HTTP_STATUS 200
+HTTP_ATTEMPT_COUNT 1
+HTTP_RETRY_EXHAUSTED false
+HTTP_FINAL_OUTCOME response_ok
+CONTENT_SHA256 6d8184491c7a18d2a8716c22c471afe067cacd3aa5a68c3322deaf30bb3eb3ee
+CONTENT_BYTES 42300
+CHECKED_TEXT "redis - Redsync Sourcey API Documentation :root { --color-primary: 180 35 24; --color-primary-light: 180 35 24; --color-primary-dark: 180 35 24; --color-primary-ink: 180 35 24; --color-background-light: 255 255 255; --color-background-dark:"
+HTTP_ATTEMPT 1 STATUS 200 RETRYABLE false
+HTTP_ATTEMPT_URL https://redsync-sourcey-docs.readthedocs.io/en/latest/go-api/pkg-redis.html
+HTTP_ATTEMPT_RESULT {"attempt":1,"url":"https://redsync-sourcey-docs.readthedocs.io/en/latest/go-api/pkg-redis.html","http_status":200,"retryable":false,"elapsed_ms":366,"bytes":42654,"content_sha256":"11725a34d95ee09927fda0ab7a907fa79cf32d8e271ace235b83e1c7dcb16f13","error":null}
+HTTP_LABEL public_api_page:go-api/pkg-redis.html
+HTTP_URL https://redsync-sourcey-docs.readthedocs.io/en/latest/go-api/pkg-redis.html
+HTTP_STATUS 200
+HTTP_ATTEMPT_COUNT 1
+HTTP_RETRY_EXHAUSTED false
+HTTP_FINAL_OUTCOME response_ok
+CONTENT_SHA256 11725a34d95ee09927fda0ab7a907fa79cf32d8e271ace235b83e1c7dcb16f13
+CONTENT_BYTES 42654
+CHECKED_TEXT "redis - Redsync Sourcey API Documentation :root { --color-primary: 180 35 24; --color-primary-light: 180 35 24; --color-primary-dark: 180 35 24; --color-primary-ink: 180 35 24; --color-background-light: 255 255 255; --color-background-dark:"
+HTTP_ATTEMPT 1 STATUS 200 RETRYABLE false
+HTTP_ATTEMPT_URL https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/dist/go-api/pkg-redis-goredis-v9.html
+HTTP_ATTEMPT_RESULT {"attempt":1,"url":"https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/dist/go-api/pkg-redis-goredis-v9.html","http_status":200,"retryable":false,"elapsed_ms":405,"bytes":26585,"content_sha256":"8b0e81c14c6f5810bec0c9e9229d252e6d10032dde32d1c42371acf075e9d224","error":null}
+HTTP_LABEL immutable_api_page:go-api/pkg-redis-goredis-v9.html
+HTTP_URL https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/dist/go-api/pkg-redis-goredis-v9.html
+HTTP_STATUS 200
+HTTP_ATTEMPT_COUNT 1
+HTTP_RETRY_EXHAUSTED false
+HTTP_FINAL_OUTCOME response_ok
+CONTENT_SHA256 8b0e81c14c6f5810bec0c9e9229d252e6d10032dde32d1c42371acf075e9d224
+CONTENT_BYTES 26585
+CHECKED_TEXT "redis/goredis/v9 - Redsync Sourcey API Documentation :root { --color-primary: 180 35 24; --color-primary-light: 180 35 24; --color-primary-dark: 180 35 24; --color-primary-ink: 180 35 24; --color-background-light: 255 255 255; --color-backg"
+HTTP_ATTEMPT 1 STATUS 200 RETRYABLE false
+HTTP_ATTEMPT_URL https://redsync-sourcey-docs.readthedocs.io/en/latest/go-api/pkg-redis-goredis-v9.html
+HTTP_ATTEMPT_RESULT {"attempt":1,"url":"https://redsync-sourcey-docs.readthedocs.io/en/latest/go-api/pkg-redis-goredis-v9.html","http_status":200,"retryable":false,"elapsed_ms":345,"bytes":26950,"content_sha256":"26e543a54fab1a4cf958dbf044cabba354a6079101e7c62a1fd98a1bb30c1525","error":null}
+HTTP_LABEL public_api_page:go-api/pkg-redis-goredis-v9.html
+HTTP_URL https://redsync-sourcey-docs.readthedocs.io/en/latest/go-api/pkg-redis-goredis-v9.html
+HTTP_STATUS 200
+HTTP_ATTEMPT_COUNT 1
+HTTP_RETRY_EXHAUSTED false
+HTTP_FINAL_OUTCOME response_ok
+CONTENT_SHA256 26e543a54fab1a4cf958dbf044cabba354a6079101e7c62a1fd98a1bb30c1525
+CONTENT_BYTES 26950
+CHECKED_TEXT "redis/goredis/v9 - Redsync Sourcey API Documentation :root { --color-primary: 180 35 24; --color-primary-light: 180 35 24; --color-primary-dark: 180 35 24; --color-primary-ink: 180 35 24; --color-background-light: 255 255 255; --color-backg"
+HTTP_ATTEMPT 1 STATUS 200 RETRYABLE false
+HTTP_ATTEMPT_URL https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/dist/go-api/pkg-redis-redigo.html
+HTTP_ATTEMPT_RESULT {"attempt":1,"url":"https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/dist/go-api/pkg-redis-redigo.html","http_status":200,"retryable":false,"elapsed_ms":348,"bytes":30553,"content_sha256":"397953e75e24cc7c713843f83b67538b41e4f879323e60f474d15c7f0e562772","error":null}
+HTTP_LABEL immutable_api_page:go-api/pkg-redis-redigo.html
+HTTP_URL https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/dist/go-api/pkg-redis-redigo.html
+HTTP_STATUS 200
+HTTP_ATTEMPT_COUNT 1
+HTTP_RETRY_EXHAUSTED false
+HTTP_FINAL_OUTCOME response_ok
+CONTENT_SHA256 397953e75e24cc7c713843f83b67538b41e4f879323e60f474d15c7f0e562772
+CONTENT_BYTES 30553
+CHECKED_TEXT "redis/redigo - Redsync Sourcey API Documentation :root { --color-primary: 180 35 24; --color-primary-light: 180 35 24; --color-primary-dark: 180 35 24; --color-primary-ink: 180 35 24; --color-background-light: 255 255 255; --color-backgroun"
+HTTP_ATTEMPT 1 STATUS 200 RETRYABLE false
+HTTP_ATTEMPT_URL https://redsync-sourcey-docs.readthedocs.io/en/latest/go-api/pkg-redis-redigo.html
+HTTP_ATTEMPT_RESULT {"attempt":1,"url":"https://redsync-sourcey-docs.readthedocs.io/en/latest/go-api/pkg-redis-redigo.html","http_status":200,"retryable":false,"elapsed_ms":270,"bytes":30914,"content_sha256":"5060205f84aee7790c520b939d28c4c94377af0c84590e5f0e53e3d3856fc8cc","error":null}
+HTTP_LABEL public_api_page:go-api/pkg-redis-redigo.html
+HTTP_URL https://redsync-sourcey-docs.readthedocs.io/en/latest/go-api/pkg-redis-redigo.html
+HTTP_STATUS 200
+HTTP_ATTEMPT_COUNT 1
+HTTP_RETRY_EXHAUSTED false
+HTTP_FINAL_OUTCOME response_ok
+CONTENT_SHA256 5060205f84aee7790c520b939d28c4c94377af0c84590e5f0e53e3d3856fc8cc
+CONTENT_BYTES 30914
+CHECKED_TEXT "redis/redigo - Redsync Sourcey API Documentation :root { --color-primary: 180 35 24; --color-primary-light: 180 35 24; --color-primary-dark: 180 35 24; --color-primary-ink: 180 35 24; --color-background-light: 255 255 255; --color-backgroun"
+HTTP_ATTEMPT 1 STATUS 200 RETRYABLE false
+HTTP_ATTEMPT_URL https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/dist/go-api/pkg-redis-rueidis.html
+HTTP_ATTEMPT_RESULT {"attempt":1,"url":"https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/dist/go-api/pkg-redis-rueidis.html","http_status":200,"retryable":false,"elapsed_ms":720,"bytes":26542,"content_sha256":"2c000f02474f2222503db9433b9669195101f46f6af2a19527271fb0bbc50d86","error":null}
+HTTP_LABEL immutable_api_page:go-api/pkg-redis-rueidis.html
+HTTP_URL https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/dist/go-api/pkg-redis-rueidis.html
+HTTP_STATUS 200
+HTTP_ATTEMPT_COUNT 1
+HTTP_RETRY_EXHAUSTED false
+HTTP_FINAL_OUTCOME response_ok
+CONTENT_SHA256 2c000f02474f2222503db9433b9669195101f46f6af2a19527271fb0bbc50d86
+CONTENT_BYTES 26542
+CHECKED_TEXT "redis/rueidis - Redsync Sourcey API Documentation :root { --color-primary: 180 35 24; --color-primary-light: 180 35 24; --color-primary-dark: 180 35 24; --color-primary-ink: 180 35 24; --color-background-light: 255 255 255; --color-backgrou"
+HTTP_ATTEMPT 1 STATUS 200 RETRYABLE false
+HTTP_ATTEMPT_URL https://redsync-sourcey-docs.readthedocs.io/en/latest/go-api/pkg-redis-rueidis.html
+HTTP_ATTEMPT_RESULT {"attempt":1,"url":"https://redsync-sourcey-docs.readthedocs.io/en/latest/go-api/pkg-redis-rueidis.html","http_status":200,"retryable":false,"elapsed_ms":281,"bytes":26904,"content_sha256":"efc0a6fc587a6ca8af9c439b648243868d4148b69c215b9033ed52470d8ca1e9","error":null}
+HTTP_LABEL public_api_page:go-api/pkg-redis-rueidis.html
+HTTP_URL https://redsync-sourcey-docs.readthedocs.io/en/latest/go-api/pkg-redis-rueidis.html
+HTTP_STATUS 200
+HTTP_ATTEMPT_COUNT 1
+HTTP_RETRY_EXHAUSTED false
+HTTP_FINAL_OUTCOME response_ok
+CONTENT_SHA256 efc0a6fc587a6ca8af9c439b648243868d4148b69c215b9033ed52470d8ca1e9
+CONTENT_BYTES 26904
+CHECKED_TEXT "redis/rueidis - Redsync Sourcey API Documentation :root { --color-primary: 180 35 24; --color-primary-light: 180 35 24; --color-primary-dark: 180 35 24; --color-primary-ink: 180 35 24; --color-background-light: 255 255 255; --color-backgrou"
+CHECK five_api_pages PASS
+OBSERVED {"pages":[{"generated_page":"go-api/package-root.html","public_url":"https://redsync-sourcey-docs.readthedocs.io/en/latest/go-api/package-root.html","immutable_url":"https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/dist/go-api/package-root.html","public_http_status":200,"immutable_http_status":200,"public_raw_sha256":"37232211ac094e2620353ebfc758e36ce1aabf4739431467cd0c926940f517ae","immutable_raw_sha256":"af75739a73f365c9421b3ffbe07df8beaab0d24ac879307aee293aeac3375a23","mapped_immutable_sha256":"af75739a73f365c9421b3ffbe07df8beaab0d24ac879307aee293aeac3375a23","canonicalized_public_sha256":"af75739a73f365c9421b3ffbe07df8beaab0d24ac879307aee293aeac3375a23","immutable_hash_matches_mapping":true,"canonicalized_public_matches_immutable":true,"rtd_addon":{"recognized":true,"removed_fragment_count":1,"removed_fragment_bytes":357,"removed_fragment_sha256":"63076bc613211dc2ee8d0ed46903b22e04ef58cc7bd22d904ba50fad81a0e2b6","removed_fragment_identity":{"script_src":"/_/static/javascript/readthedocs-addons.js","project_slug":"redsync-sourcey-docs","version_slug":"latest","resolver_filename":"/go-api/package-root.html","http_status":"200","insertion_boundary":"immediately_before_closing_head"},"marker_counts":{"readthedocs-addons.js":1,"readthedocs-project-slug":1,"readthedocs-version-slug":1,"readthedocs-resolver-filename":1,"readthedocs-http-status":1},"error":null},"rendered_symbol":"Redsync","public_contains_sourcey":true,"public_contains_symbol":true,"pass":true},{"generated_page":"go-api/pkg-redis.html","public_url":"https://redsync-sourcey-docs.readthedocs.io/en/latest/go-api/pkg-redis.html","immutable_url":"https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/dist/go-api/pkg-redis.html","public_http_status":200,"immutable_http_status":200,"public_raw_sha256":"11725a34d95ee09927fda0ab7a907fa79cf32d8e271ace235b83e1c7dcb16f13","immutable_raw_sha256":"6d8184491c7a18d2a8716c22c471afe067cacd3aa5a68c3322deaf30bb3eb3ee","mapped_immutable_sha256":"6d8184491c7a18d2a8716c22c471afe067cacd3aa5a68c3322deaf30bb3eb3ee","canonicalized_public_sha256":"6d8184491c7a18d2a8716c22c471afe067cacd3aa5a68c3322deaf30bb3eb3ee","immutable_hash_matches_mapping":true,"canonicalized_public_matches_immutable":true,"rtd_addon":{"recognized":true,"removed_fragment_count":1,"removed_fragment_bytes":354,"removed_fragment_sha256":"b43140bc8c4a3136582f36da61b03f02d6e5b2c7c27ab78f7c9130fd63ace615","removed_fragment_identity":{"script_src":"/_/static/javascript/readthedocs-addons.js","project_slug":"redsync-sourcey-docs","version_slug":"latest","resolver_filename":"/go-api/pkg-redis.html","http_status":"200","insertion_boundary":"immediately_before_closing_head"},"marker_counts":{"readthedocs-addons.js":1,"readthedocs-project-slug":1,"readthedocs-version-slug":1,"readthedocs-resolver-filename":1,"readthedocs-http-status":1},"error":null},"rendered_symbol":"Pool","public_contains_sourcey":true,"public_contains_symbol":true,"pass":true},{"generated_page":"go-api/pkg-redis-goredis-v9.html","public_url":"https://redsync-sourcey-docs.readthedocs.io/en/latest/go-api/pkg-redis-goredis-v9.html","immutable_url":"https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/dist/go-api/pkg-redis-goredis-v9.html","public_http_status":200,"immutable_http_status":200,"public_raw_sha256":"26e543a54fab1a4cf958dbf044cabba354a6079101e7c62a1fd98a1bb30c1525","immutable_raw_sha256":"8b0e81c14c6f5810bec0c9e9229d252e6d10032dde32d1c42371acf075e9d224","mapped_immutable_sha256":"8b0e81c14c6f5810bec0c9e9229d252e6d10032dde32d1c42371acf075e9d224","canonicalized_public_sha256":"8b0e81c14c6f5810bec0c9e9229d252e6d10032dde32d1c42371acf075e9d224","immutable_hash_matches_mapping":true,"canonicalized_public_matches_immutable":true,"rtd_addon":{"recognized":true,"removed_fragment_count":1,"removed_fragment_bytes":365,"removed_fragment_sha256":"0df812a4efee51bf36950c3a3f503aa231075700c3f72a24a954e67ffb6881fc","removed_fragment_identity":{"script_src":"/_/static/javascript/readthedocs-addons.js","project_slug":"redsync-sourcey-docs","version_slug":"latest","resolver_filename":"/go-api/pkg-redis-goredis-v9.html","http_status":"200","insertion_boundary":"immediately_before_closing_head"},"marker_counts":{"readthedocs-addons.js":1,"readthedocs-project-slug":1,"readthedocs-version-slug":1,"readthedocs-resolver-filename":1,"readthedocs-http-status":1},"error":null},"rendered_symbol":"NewPool","public_contains_sourcey":true,"public_contains_symbol":true,"pass":true},{"generated_page":"go-api/pkg-redis-redigo.html","public_url":"https://redsync-sourcey-docs.readthedocs.io/en/latest/go-api/pkg-redis-redigo.html","immutable_url":"https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/dist/go-api/pkg-redis-redigo.html","public_http_status":200,"immutable_http_status":200,"public_raw_sha256":"5060205f84aee7790c520b939d28c4c94377af0c84590e5f0e53e3d3856fc8cc","immutable_raw_sha256":"397953e75e24cc7c713843f83b67538b41e4f879323e60f474d15c7f0e562772","mapped_immutable_sha256":"397953e75e24cc7c713843f83b67538b41e4f879323e60f474d15c7f0e562772","canonicalized_public_sha256":"397953e75e24cc7c713843f83b67538b41e4f879323e60f474d15c7f0e562772","immutable_hash_matches_mapping":true,"canonicalized_public_matches_immutable":true,"rtd_addon":{"recognized":true,"removed_fragment_count":1,"removed_fragment_bytes":361,"removed_fragment_sha256":"a51c9a6ff4e908c64bcc90dbe5b39e9ff6c7fd8f732f72bccbcf05bb2c5b3264","removed_fragment_identity":{"script_src":"/_/static/javascript/readthedocs-addons.js","project_slug":"redsync-sourcey-docs","version_slug":"latest","resolver_filename":"/go-api/pkg-redis-redigo.html","http_status":"200","insertion_boundary":"immediately_before_closing_head"},"marker_counts":{"readthedocs-addons.js":1,"readthedocs-project-slug":1,"readthedocs-version-slug":1,"readthedocs-resolver-filename":1,"readthedocs-http-status":1},"error":null},"rendered_symbol":"NewPool","public_contains_sourcey":true,"public_contains_symbol":true,"pass":true},{"generated_page":"go-api/pkg-redis-rueidis.html","public_url":"https://redsync-sourcey-docs.readthedocs.io/en/latest/go-api/pkg-redis-rueidis.html","immutable_url":"https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/2b58caa8d60147df494ce995f3777944a400b9a9/dist/go-api/pkg-redis-rueidis.html","public_http_status":200,"immutable_http_status":200,"public_raw_sha256":"efc0a6fc587a6ca8af9c439b648243868d4148b69c215b9033ed52470d8ca1e9","immutable_raw_sha256":"2c000f02474f2222503db9433b9669195101f46f6af2a19527271fb0bbc50d86","mapped_immutable_sha256":"2c000f02474f2222503db9433b9669195101f46f6af2a19527271fb0bbc50d86","canonicalized_public_sha256":"2c000f02474f2222503db9433b9669195101f46f6af2a19527271fb0bbc50d86","immutable_hash_matches_mapping":true,"canonicalized_public_matches_immutable":true,"rtd_addon":{"recognized":true,"removed_fragment_count":1,"removed_fragment_bytes":362,"removed_fragment_sha256":"5369710f77f8ea83a4acfdda41b3640b4770fb1190fc02aef186c52198ca73b6","removed_fragment_identity":{"script_src":"/_/static/javascript/readthedocs-addons.js","project_slug":"redsync-sourcey-docs","version_slug":"latest","resolver_filename":"/go-api/pkg-redis-rueidis.html","http_status":"200","insertion_boundary":"immediately_before_closing_head"},"marker_counts":{"readthedocs-addons.js":1,"readthedocs-project-slug":1,"readthedocs-version-slug":1,"readthedocs-resolver-filename":1,"readthedocs-http-status":1},"error":null},"rendered_symbol":"NewPool","public_contains_sourcey":true,"public_contains_symbol":true,"pass":true}]}
+HTTP_ATTEMPT 1 STATUS 200 RETRYABLE false
+HTTP_ATTEMPT_URL https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/redsync.go
+HTTP_ATTEMPT_RESULT {"attempt":1,"url":"https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/redsync.go","http_status":200,"retryable":false,"elapsed_ms":347,"bytes":4477,"content_sha256":"763b22db61d2377cc070039ed7f1f9591ce4be765319288891596ffbdc2bf151","error":null}
+HTTP_LABEL raw_source:redsync.go
+HTTP_URL https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/redsync.go
+HTTP_STATUS 200
+HTTP_ATTEMPT_COUNT 1
+HTTP_RETRY_EXHAUSTED false
+HTTP_FINAL_OUTCOME response_ok
+CONTENT_SHA256 763b22db61d2377cc070039ed7f1f9591ce4be765319288891596ffbdc2bf151
+CONTENT_BYTES 4477
+CHECKED_TEXT "package redsync import ( \"math/rand\" \"slices\" \"time\" \"github.com/go-redsync/redsync/v4/redis\" ) const ( minRetryDelayMilliSec = 50 maxRetryDelayMilliSec = 250 ) // Redsync provides a simple method for creating distributed mutexes using mult"
+HTTP_ATTEMPT 1 STATUS 200 RETRYABLE false
+HTTP_ATTEMPT_URL https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/redis.go
+HTTP_ATTEMPT_RESULT {"attempt":1,"url":"https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/redis.go","http_status":200,"retryable":false,"elapsed_ms":335,"bytes":1327,"content_sha256":"3426e5543bfdd497221a8cc4d5a9a5ea86c993b2d4816f0e650d38ba696a7c9e","error":null}
+HTTP_LABEL raw_source:redis/redis.go
+HTTP_URL https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/redis.go
+HTTP_STATUS 200
+HTTP_ATTEMPT_COUNT 1
+HTTP_RETRY_EXHAUSTED false
+HTTP_FINAL_OUTCOME response_ok
+CONTENT_SHA256 3426e5543bfdd497221a8cc4d5a9a5ea86c993b2d4816f0e650d38ba696a7c9e
+CONTENT_BYTES 1327
+CHECKED_TEXT "package redis import ( \"context\" \"time\" ) // Pool maintains a pool of Redis connections. type Pool interface { Get(ctx context.Context) (Conn, error) } // Conn is a single Redis connection. type Conn interface { Get(name string) (string, er"
+HTTP_ATTEMPT 1 STATUS 200 RETRYABLE false
+HTTP_ATTEMPT_URL https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/goredis/v9/goredis.go
+HTTP_ATTEMPT_RESULT {"attempt":1,"url":"https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/goredis/v9/goredis.go","http_status":200,"retryable":false,"elapsed_ms":326,"bytes":2003,"content_sha256":"ed479a6b9eb37cb77a768074e68f2852c680206ec9fb67a9eac777f54b80da3b","error":null}
+HTTP_LABEL raw_source:redis/goredis/v9/goredis.go
+HTTP_URL https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/goredis/v9/goredis.go
+HTTP_STATUS 200
+HTTP_ATTEMPT_COUNT 1
+HTTP_RETRY_EXHAUSTED false
+HTTP_FINAL_OUTCOME response_ok
+CONTENT_SHA256 ed479a6b9eb37cb77a768074e68f2852c680206ec9fb67a9eac777f54b80da3b
+CONTENT_BYTES 2003
+CHECKED_TEXT "package goredis import ( \"context\" \"strings\" \"time\" redsyncredis \"github.com/go-redsync/redsync/v4/redis\" \"github.com/redis/go-redis/v9\" ) type pool struct { delegate redis.UniversalClient } func (p *pool) Get(ctx context.Context) (redsyncr"
+HTTP_ATTEMPT 1 STATUS 200 RETRYABLE false
+HTTP_ATTEMPT_URL https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/redigo/redigo.go
+HTTP_ATTEMPT_RESULT {"attempt":1,"url":"https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/redigo/redigo.go","http_status":200,"retryable":false,"elapsed_ms":336,"bytes":2461,"content_sha256":"bbcea02ae4dc8c6214e92606973e839f6bf868aa48f020f63350c1f6ea39cc39","error":null}
+HTTP_LABEL raw_source:redis/redigo/redigo.go
+HTTP_URL https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/redigo/redigo.go
+HTTP_STATUS 200
+HTTP_ATTEMPT_COUNT 1
+HTTP_RETRY_EXHAUSTED false
+HTTP_FINAL_OUTCOME response_ok
+CONTENT_SHA256 bbcea02ae4dc8c6214e92606973e839f6bf868aa48f020f63350c1f6ea39cc39
+CONTENT_BYTES 2461
+CHECKED_TEXT "package redigo import ( \"context\" \"strings\" \"time\" redsyncredis \"github.com/go-redsync/redsync/v4/redis\" \"github.com/gomodule/redigo/redis\" ) type Pool interface { Get() redis.Conn GetContext(ctx context.Context) (redis.Conn, error) } type "
+HTTP_ATTEMPT 1 STATUS 200 RETRYABLE false
+HTTP_ATTEMPT_URL https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/rueidis/rueidis.go
+HTTP_ATTEMPT_RESULT {"attempt":1,"url":"https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/rueidis/rueidis.go","http_status":200,"retryable":false,"elapsed_ms":382,"bytes":2044,"content_sha256":"be591138e687282ef35cf179026b9f27e9ec9676fdcfa6cb027f1473eae70aec","error":null}
+HTTP_LABEL raw_source:redis/rueidis/rueidis.go
+HTTP_URL https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/rueidis/rueidis.go
+HTTP_STATUS 200
+HTTP_ATTEMPT_COUNT 1
+HTTP_RETRY_EXHAUSTED false
+HTTP_FINAL_OUTCOME response_ok
+CONTENT_SHA256 be591138e687282ef35cf179026b9f27e9ec9676fdcfa6cb027f1473eae70aec
+CONTENT_BYTES 2044
+CHECKED_TEXT "package rueidis import ( \"context\" \"strings\" \"time\" redsyncredis \"github.com/go-redsync/redsync/v4/redis\" \"github.com/redis/rueidis\" \"github.com/redis/rueidis/rueidiscompat\" ) type pool struct { delegate rueidiscompat.Cmdable } func (p *poo"
+CHECK five_pinned_sources PASS
+OBSERVED {"sources":[{"source_url":"https://github.com/go-redsync/redsync/blob/79f6ba24a8bf41f35141de700d410a06bb27622f/redsync.go#L17","raw_source_url":"https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/redsync.go","source_url_shape_verified":true,"source_page_fetch":"not_required","raw_source_status":200,"source_url_pinned":true,"content_sha256":"763b22db61d2377cc070039ed7f1f9591ce4be765319288891596ffbdc2bf151","expected_sha256":"763b22db61d2377cc070039ed7f1f9591ce4be765319288891596ffbdc2bf151","git_blob_sha1":"bfec2c9361f283b8f2fab5db25e7e584a4daab96","expected_git_blob_sha1":"bfec2c9361f283b8f2fab5db25e7e584a4daab96","checked_line":"type Redsync struct {","line_matches":true,"pass":true},{"source_url":"https://github.com/go-redsync/redsync/blob/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/redis.go#L9","raw_source_url":"https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/redis.go","source_url_shape_verified":true,"source_page_fetch":"not_required","raw_source_status":200,"source_url_pinned":true,"content_sha256":"3426e5543bfdd497221a8cc4d5a9a5ea86c993b2d4816f0e650d38ba696a7c9e","expected_sha256":"3426e5543bfdd497221a8cc4d5a9a5ea86c993b2d4816f0e650d38ba696a7c9e","git_blob_sha1":"cbae6772aec654bf09b31e2c5aa88b6019563446","expected_git_blob_sha1":"cbae6772aec654bf09b31e2c5aa88b6019563446","checked_line":"type Pool interface {","line_matches":true,"pass":true},{"source_url":"https://github.com/go-redsync/redsync/blob/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/goredis/v9/goredis.go#L24","raw_source_url":"https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/goredis/v9/goredis.go","source_url_shape_verified":true,"source_page_fetch":"not_required","raw_source_status":200,"source_url_pinned":true,"content_sha256":"ed479a6b9eb37cb77a768074e68f2852c680206ec9fb67a9eac777f54b80da3b","expected_sha256":"ed479a6b9eb37cb77a768074e68f2852c680206ec9fb67a9eac777f54b80da3b","git_blob_sha1":"8a29077d1e9a9075bb373a22bce20c2b44302ef7","expected_git_blob_sha1":"8a29077d1e9a9075bb373a22bce20c2b44302ef7","checked_line":"func NewPool(delegate redis.UniversalClient) redsyncredis.Pool {","line_matches":true,"pass":true},{"source_url":"https://github.com/go-redsync/redsync/blob/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/redigo/redigo.go#L33","raw_source_url":"https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/redigo/redigo.go","source_url_shape_verified":true,"source_page_fetch":"not_required","raw_source_status":200,"source_url_pinned":true,"content_sha256":"bbcea02ae4dc8c6214e92606973e839f6bf868aa48f020f63350c1f6ea39cc39","expected_sha256":"bbcea02ae4dc8c6214e92606973e839f6bf868aa48f020f63350c1f6ea39cc39","git_blob_sha1":"127370be6926c23b242d818a8776562b2f70ba5c","expected_git_blob_sha1":"127370be6926c23b242d818a8776562b2f70ba5c","checked_line":"func NewPool(delegate Pool) redsyncredis.Pool {","line_matches":true,"pass":true},{"source_url":"https://github.com/go-redsync/redsync/blob/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/rueidis/rueidis.go#L26","raw_source_url":"https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/redis/rueidis/rueidis.go","source_url_shape_verified":true,"source_page_fetch":"not_required","raw_source_status":200,"source_url_pinned":true,"content_sha256":"be591138e687282ef35cf179026b9f27e9ec9676fdcfa6cb027f1473eae70aec","expected_sha256":"be591138e687282ef35cf179026b9f27e9ec9676fdcfa6cb027f1473eae70aec","git_blob_sha1":"ce9601a298b24a67217bc250aa460fc3825e5cd9","expected_git_blob_sha1":"ce9601a298b24a67217bc250aa460fc3825e5cd9","checked_line":"func NewPool(delegate rueidiscompat.Cmdable) redsyncredis.Pool {","line_matches":true,"pass":true}]}
+HTTP_ATTEMPT 1 STATUS 200 RETRYABLE false
+HTTP_ATTEMPT_URL https://api.github.com/repos/go-redsync/redsync/pulls/245
+HTTP_ATTEMPT_RESULT {"attempt":1,"url":"https://api.github.com/repos/go-redsync/redsync/pulls/245","http_status":200,"retryable":false,"elapsed_ms":1411,"bytes":17467,"content_sha256":"4b5c95470d3b815f4c2c2f96b2ea3f7e0dff91954d837bd7ea6983c5af1a14f6","error":null}
+HTTP_LABEL upstream_pull_request
+HTTP_URL https://api.github.com/repos/go-redsync/redsync/pulls/245
+HTTP_STATUS 200
+HTTP_ATTEMPT_COUNT 1
+HTTP_RETRY_EXHAUSTED false
+HTTP_FINAL_OUTCOME response_ok
+CONTENT_SHA256 4b5c95470d3b815f4c2c2f96b2ea3f7e0dff91954d837bd7ea6983c5af1a14f6
+CONTENT_BYTES 17467
+CHECKED_TEXT "{\"url\":\"https://api.github.com/repos/go-redsync/redsync/pulls/245\",\"id\":4047254251,\"node_id\":\"PR_kwDOAwiKYM7xPDLr\",\"html_url\":\"https://github.com/go-redsync/redsync/pull/245\",\"diff_url\":\"https://github.com/go-redsync/redsync/pull/245.diff\","
+PR_URL https://github.com/go-redsync/redsync/pull/245
+PR_STATE open
+PR_DRAFT false
+PR_MERGED_AT null
+PR_BASE_REF master
+PR_HEAD_SHA f13cd302b903ae84fc21d914bbeb631a21bb9521
+PR_BODY_SHA256 e6deccdfa0b0a19320dad0626aa9825dfd29508f5a2d2f14fc53f6b7efbf89be
+CHECK upstream_pr PASS
+OBSERVED {"http_status":200,"api_url":"https://api.github.com/repos/go-redsync/redsync/pulls/245","html_url":"https://github.com/go-redsync/redsync/pull/245","state":"open","draft":false,"merged_at":null,"base_ref":"master","head_sha":"f13cd302b903ae84fc21d914bbeb631a21bb9521","body_sha256":"e6deccdfa0b0a19320dad0626aa9825dfd29508f5a2d2f14fc53f6b7efbf89be","body_checked_text":"This change replaces the legacy `godoc.org` documentation link with a project-named Read the Docs site generated from Redsync source by Sourcey: https://redsync-sourcey-docs.readthedocs.io/en/latest/ The initial site is pinned to Redsync co"}
+HTTP_ATTEMPT 1 STATUS 200 RETRYABLE false
+HTTP_ATTEMPT_URL https://api.github.com/users/fengyangxxx/starred?per_page=100
+HTTP_ATTEMPT_RESULT {"attempt":1,"url":"https://api.github.com/users/fengyangxxx/starred?per_page=100","http_status":200,"retryable":false,"elapsed_ms":1157,"bytes":66288,"content_sha256":"853e72930dff8adbff52b838af5b88483622612b11eb162f6a9bb957a44c5480","error":null}
+HTTP_LABEL claimant_sourcey_star_page_1
+HTTP_URL https://api.github.com/users/fengyangxxx/starred?per_page=100
+HTTP_STATUS 200
+HTTP_ATTEMPT_COUNT 1
+HTTP_RETRY_EXHAUSTED false
+HTTP_FINAL_OUTCOME response_ok
+CONTENT_SHA256 853e72930dff8adbff52b838af5b88483622612b11eb162f6a9bb957a44c5480
+CONTENT_BYTES 66288
+CHECKED_TEXT "[{\"id\":49493043,\"node_id\":\"MDEwOlJlcG9zaXRvcnk0OTQ5MzA0Mw==\",\"name\":\"sourcey\",\"full_name\":\"sourcey/sourcey\",\"private\":false,\"owner\":{\"login\":\"sourcey\",\"id\":7104704,\"node_id\":\"MDEyOk9yZ2FuaXphdGlvbjcxMDQ3MDQ=\",\"avatar_url\":\"https://avatars.g"
+CHECK claimant_sourcey_star PASS
+OBSERVED {"claimant":"fengyangxxx","repository":"sourcey/sourcey","url":"https://api.github.com/users/fengyangxxx/starred?per_page=100","http_status":200,"authentication":"none","matched_repository":"sourcey/sourcey","list_item_count":12,"pages_checked":1,"parse_error":null}
+CHECK no_delivery_placeholders PASS
+OBSERVED {"scanned_surface_count":28,"excluded_response_classes":["github_commit_api_metadata","github_commit_api_patch","github_ui_wrapper"],"placeholder_occurrences":[]}
+FINAL_STATUS PASS
+LIVE_PASS true
+BLOCKED_COUNT 0

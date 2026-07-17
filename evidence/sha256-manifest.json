@@ -10,13 +10,13 @@
     },
     {
       "path": ".github/workflows/validate-sourcey-adoption.yml",
-      "bytes": 15252,
-      "sha256": "38095e45127ac26a84d238c340f30d1dce069f7e3ff2d9543e0480a48f10496d"
+      "bytes": 19581,
+      "sha256": "6b80794fec2327a1eb71427331aa446ea714ea79771bbdc0b89767a5cfd15873"
     },
     {
       "path": ".gitignore",
-      "bytes": 68,
-      "sha256": "c9a07e85a644c4284a6c0101b792fe1d148bb6c39e2b03d91b941740ac1472a2"
+      "bytes": 76,
+      "sha256": "9e46a6bc3e48578f7a7befa346827f8f65996fe804e71e0abbc43d132b0a0a48"
     },
     {
       "path": ".readthedocs.yaml",
@@ -180,18 +180,18 @@
     },
     {
       "path": "evidence/commands.local.txt",
-      "bytes": 2097,
-      "sha256": "b5396c10abc90bddafc69fa3873182190890bfc4fcb2cf0452d98633912f8bcf"
+      "bytes": 2512,
+      "sha256": "1e6788174d43a5092e9eec9807af1d62ca26554b26577cfa51e45ec2d824b52f"
     },
     {
       "path": "evidence/evidence.draft.json",
-      "bytes": 7457,
-      "sha256": "c4d8d067ce65326a6df92ac6f622d42a421f2d535f530a8dff27342494ae55e5"
+      "bytes": 7956,
+      "sha256": "80b4b1c3859ce574812e9e52299468d222f9acbd478509d50a9e15a0929b851c"
     },
     {
       "path": "evidence/hume-handoff.md",
-      "bytes": 2287,
-      "sha256": "5b7b4b5eba8c8d9f95715327d2aea21d5dca601a5a36aa34dbe6056c7023735c"
+      "bytes": 2803,
+      "sha256": "1cd1244daaf9ce2af29f95f12c9695dfb12bd92c21324f150d1daafd7cdb597d"
     },
     {
       "path": "evidence/inventory.json",
@@ -260,8 +260,8 @@
     },
     {
       "path": "package.json",
-      "bytes": 789,
-      "sha256": "413ea71fcc8415fd01fb5e9e383a3780e530fd16bfa6a967e1a71acb542a5f32"
+      "bytes": 1124,
+      "sha256": "ffdaff93f4774a7ee23aaf5cb34fdac0fc1fd4764c667d21dc2a38927b36b6fd"
     },
     {
       "path": "pinned-source-coverage.md",
@@ -270,8 +270,8 @@
     },
     {
       "path": "report.draft.md",
-      "bytes": 6327,
-      "sha256": "c66d4065f96780769478286a90a5b676dbbf3bdc86e193bddccb34d39340a9e3"
+      "bytes": 6874,
+      "sha256": "2ab9b5b89e9ea75f6e077fd19c046edcfad614a4e3f8f44c697ca37a7b5a7053"
     },
     {
       "path": "reproduce.md",
@@ -284,9 +284,14 @@
       "sha256": "8e68fe4dfb08c8b865e88c5da85552e9f8c66f832d154e5d5832b6b1347ca749"
     },
     {
+      "path": "scripts/capture-governed-receipt.mjs",
+      "bytes": 14615,
+      "sha256": "fb28d0fce67c62c59b798bf0f3f46b2a99642d85d28141202170bf570e3e75a7"
+    },
+    {
       "path": "scripts/generate-godoc-snapshot.mjs",
-      "bytes": 2099,
-      "sha256": "11a145367338d3811c068687bd3e5ca11d0d87a99b40be56eb47a6e148251038"
+      "bytes": 2055,
+      "sha256": "e04af5f8ef86735cc18440f417c824d27eac8825eb990a207b1f19c5a087f489"
     },
     {
       "path": "scripts/generate-hashes.mjs",
@@ -304,9 +309,29 @@
       "sha256": "e39c4ca4244badc69af7afb7a8acaa29889e84341b727f512b5d47b6f7d9b88d"
     },
     {
+      "path": "scripts/materialize-deliveries.mjs",
+      "bytes": 21210,
+      "sha256": "c287cb7c157db64d6ee022ea107289bf4a7b8c669dfa2d3b3bdf6b3ed8d3d472"
+    },
+    {
+      "path": "scripts/materialize-receipt-proof.mjs",
+      "bytes": 7520,
+      "sha256": "e74b44f7237da39c7c9de4af9b1c7506c8bb405da1bf60762a1ba19e84e9549c"
+    },
+    {
+      "path": "scripts/npx-invocation.mjs",
+      "bytes": 1108,
+      "sha256": "f676ef556a0169d78d4dc40b56c10689453fa6f604851592c2e7519721dd6ce1"
+    },
+    {
       "path": "scripts/repository-bytes.mjs",
       "bytes": 335,
       "sha256": "daf69fad64afb5882963f54ddf3d7de0faed6740bac8272c1d1b15c30b3ac4d3"
+    },
+    {
+      "path": "scripts/verify-delivery-preparation.mjs",
+      "bytes": 1866,
+      "sha256": "e931b5e5cb2d07eca240c2d4f71656893727cf4d3134d81d472816bf2e2d8c8d"
     },
     {
       "path": "scripts/verify-local-live-evidence.mjs",
@@ -335,8 +360,8 @@
     },
     {
       "path": "source/redsync/.source-pin.json",
-      "bytes": 579,
-      "sha256": "3cec6606882d7693248e887551a2d390bf25eaca5788676c2e87eb6e7e0b6616"
+      "bytes": 449,
+      "sha256": "86819b65ea2902d5c39e21f0e8473abdee368b6359cc454dde774de6415a801c"
     },
     {
       "path": "source/redsync/.travis.yml",
@@ -529,14 +554,24 @@
       "sha256": "c672993df238bd5c856092db488d1ddc4ca96898d4791acb7df0d1d238e19f7f"
     },
     {
+      "path": "tests/delivery-preparation.test.mjs",
+      "bytes": 14712,
+      "sha256": "a9fa33edbb42c4924d5104e48d6cb7898cc5392c5205a382594f55075f3764b9"
+    },
+    {
       "path": "tests/package.test.mjs",
-      "bytes": 21372,
-      "sha256": "0b4d053f5e7d1e5d5729f0a1971819c6238c85d4b30040682f0aeafa632d507a"
+      "bytes": 23090,
+      "sha256": "b61f65eb307f266c7e537d4971dd724090ada5a126f0476dcb2c816a91b10ec0"
     },
     {
       "path": "tests/validation-skill.test.mjs",
-      "bytes": 43080,
-      "sha256": "9bff69cd24ebeae1d7af10984f3867a155dd62eab0ac5f73ab97d32919a29794"
+      "bytes": 45906,
+      "sha256": "f2dd3130dbe1099677e3ebd421d6784c05e37dab67742af005fd9eb98b81ea2c"
+    },
+    {
+      "path": "tests/workspace-temp.mjs",
+      "bytes": 1158,
+      "sha256": "8a635ce1cfafa9b4bbde00f119815fba01a6527caadb110478301807ff0634bc"
     },
     {
       "path": "upstream-pr-rationale.md",
@@ -555,8 +590,8 @@
     },
     {
       "path": "validation-skill/redsync-sourcey-validation/X.yaml",
-      "bytes": 2157,
-      "sha256": "f9a9b0d54bab3ed1649e6249f4e5e4eb5f43dcf2c471c3abe88c0006fe0c3c91"
+      "bytes": 2333,
+      "sha256": "f119d3b0fe43b0da905f0f721c9a1b49b9fe9fce76537ffd0fa9fb816c58a30f"
     },
     {
       "path": "validation-skill/redsync-sourcey-validation/scripts/bounded-get.mjs",
@@ -580,8 +615,8 @@
     },
     {
       "path": "validation-skill/redsync-sourcey-validation/scripts/run.mjs",
-      "bytes": 38362,
-      "sha256": "06b5ea0dc358af474aecb228313d6536e04dad8d68f40d41653fca655cd2a5fa"
+      "bytes": 41646,
+      "sha256": "8750b5d432612e2bd4212f2474e85485c904e33685ef294369cb6e08aced7e05"
     }
   ]
 }

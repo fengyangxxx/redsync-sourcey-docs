@@ -6,11 +6,26 @@ import { canonicalizeReadTheDocsPage } from "./rtd-canonicalizer.mjs";
 
 const EXPECTED_TARGET_REPO = "https://github.com/go-redsync/redsync";
 const EXPECTED_MODULE = "github.com/go-redsync/redsync/v4";
-const EXPECTED_CLI_VERSION = "runx-cli 0.6.14";
+const MINIMUM_CLI_VERSION = [0, 6, 14];
 const EXPECTED_LICENSE = "BSD-3-Clause";
 const EXPECTED_SOURCEY_COMMAND =
   "sourcey godoc --module ./source/redsync --packages ./... --out godoc.json";
 const UNRESOLVED_FINAL_RE = new RegExp(["PLACE", "HOLDER_[A-Z0-9_]+"].join(""), "g");
+
+function parseRunxVersion(output) {
+  const match = /^runx-cli (\d+)\.(\d+)\.(\d+)$/.exec(output);
+  if (!match) return null;
+  return match.slice(1).map(Number);
+}
+
+function isAtLeastVersion(actual, minimum) {
+  if (!actual) return false;
+  for (let index = 0; index < minimum.length; index += 1) {
+    if (actual[index] > minimum[index]) return true;
+    if (actual[index] < minimum[index]) return false;
+  }
+  return true;
+}
 
 function input(name, fallback = "") {
   return (process.env[`RUNX_INPUT_${name.toUpperCase()}`] ?? fallback).trim();
@@ -108,6 +123,7 @@ async function main() {
     upstream_pr_head_commit: input("upstream_pr_head_commit"),
     mappings_url: input("mappings_url"),
     runx_version_output: input("runx_version_output"),
+    claimant_github_login: input("claimant_github_login"),
     output_dir: input("output_dir"),
     validation_mode: input("validation_mode", "live").toLowerCase(),
     fixture_proxy_url: input("fixture_proxy_url"),
@@ -228,6 +244,12 @@ async function main() {
   for (const name of ["docs_commit", "target_commit", "upstream_pr_head_commit"]) {
     if (inputs[name] && !/^[0-9a-f]{40}$/i.test(inputs[name])) inputFailures.push(`${name} must be a full SHA`);
   }
+  if (
+    inputs.claimant_github_login &&
+    !/^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/.test(inputs.claimant_github_login)
+  ) {
+    inputFailures.push("claimant_github_login must be a public GitHub login");
+  }
   addCheck(
     "input_contract",
     "All immutable inputs are present and target go-redsync/redsync.",
@@ -235,8 +257,11 @@ async function main() {
     { failures: inputFailures, target_repo_url: inputs.target_repo_url },
   );
 
+  const parsedCliVersion = parseRunxVersion(inputs.runx_version_output);
   const cliVersion = {
-    command: "npx -y @runxhq/cli@0.6.14 --version",
+    command: parsedCliVersion
+      ? `npx -y @runxhq/cli@${parsedCliVersion.join(".")} --version`
+      : "npx -y @runxhq/cli@<invalid> --version",
     output: inputs.runx_version_output,
     exit_code: inputs.runx_version_output ? 0 : 1,
     source: "captured_outer_command",
@@ -248,8 +273,8 @@ async function main() {
   if (cliVersion.stderr) transcript.push(`CLI_STDERR ${JSON.stringify(cliVersion.stderr)}`);
   addCheck(
     "cli_version_exact",
-    `Governed CLI output is exactly ${EXPECTED_CLI_VERSION}.`,
-    cliVersion.exit_code === 0 && cliVersion.output === EXPECTED_CLI_VERSION,
+    "Governed CLI output is a literal runx-cli semantic version at or above 0.6.14.",
+    cliVersion.exit_code === 0 && isAtLeastVersion(parsedCliVersion, MINIMUM_CLI_VERSION),
     cliVersion,
   );
 
@@ -291,6 +316,7 @@ async function main() {
       adoption: false,
       endorsement: false,
     },
+    claimant_sourcey_star: null,
   };
   if (docsRepo && targetRepo && pull && inputFailures.length === 0) {
     addCheck(
@@ -743,6 +769,59 @@ async function main() {
       head_sha: prFields.head_sha,
     };
 
+    if (inputs.claimant_github_login) {
+      const starApiUrl =
+        `https://api.github.com/users/${inputs.claimant_github_login}/starred?per_page=100`;
+      const listUrls = [];
+      const httpStatuses = [];
+      let listItemCount = 0;
+      let matchedRepository = null;
+      let parseError = null;
+      for (let page = 1; page <= 10; page += 1) {
+        const pageUrl = page === 1 ? starApiUrl : `${starApiUrl}&page=${page}`;
+        const response = await fetchText(pageUrl, `claimant_sourcey_star_page_${page}`);
+        listUrls.push(pageUrl);
+        httpStatuses.push(response.http_status);
+        if (response.http_status !== 200) break;
+        let repositories;
+        try {
+          repositories = JSON.parse(response.body);
+          if (!Array.isArray(repositories)) throw new Error("response is not an array");
+        } catch (error) {
+          parseError = error instanceof Error ? error.message : String(error);
+          break;
+        }
+        listItemCount += repositories.length;
+        if (repositories.some((repository) => repository?.full_name === "sourcey/sourcey")) {
+          matchedRepository = "sourcey/sourcey";
+          break;
+        }
+        if (repositories.length < 100) break;
+      }
+      const starObserved = {
+        claimant: inputs.claimant_github_login,
+        repository: "sourcey/sourcey",
+        url: starApiUrl,
+        http_status: httpStatuses[0] ?? null,
+        authentication: "none",
+        matched_repository: matchedRepository,
+        list_item_count: listItemCount,
+        pages_checked: listUrls.length,
+        parse_error: parseError,
+      };
+      addCheck(
+        "claimant_sourcey_star",
+        "The claimant's public starred-repository list contains exact full_name sourcey/sourcey and the check uses no authentication.",
+        httpStatuses.length > 0 &&
+          httpStatuses.every((status) => status === 200) &&
+          parseError === null &&
+          matchedRepository === "sourcey/sourcey",
+        starObserved,
+        listUrls,
+      );
+      projectFacts.claimant_sourcey_star = starObserved;
+    }
+
     const placeholders = [];
     for (const surface of placeholderSurfaces) {
       const matches = [...new Set(surface.body.match(UNRESOLVED_FINAL_RE) ?? [])];
@@ -817,6 +896,11 @@ async function main() {
     `Coverage: packages=${projectFacts.package_count ?? "unverified"}, non-test Go files=${projectFacts.non_test_go_file_count ?? "unverified"}, exported symbols=${projectFacts.exported_symbol_count ?? "unverified"}`,
     `Public host boundary: ${projectFacts.public_host.classification}; target_owned=false; official=false`,
     `Upstream PR boundary: ${projectFacts.upstream_pr.role}; adoption=false; endorsement=false`,
+    ...(projectFacts.claimant_sourcey_star
+      ? [
+          `Public star: ${projectFacts.claimant_sourcey_star.claimant} stars sourcey/sourcey; HTTP ${projectFacts.claimant_sourcey_star.http_status}; authentication=none`,
+        ]
+      : []),
   ];
   const evidenceItems = [
     { type: "literal_runx_version", observed: cliVersion.output, command: cliVersion.command },

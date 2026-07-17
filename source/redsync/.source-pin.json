@@ -5,8 +5,6 @@
   "godoc_generated_at_policy": "source_commit_committed_at_utc",
   "source_checkout": "work/preflight-frantic-113-redsync",
   "source_checkout_clean": true,
-  "snapshot_prepared_before_current_claim": true,
-  "preclaim_work_override": "fy_task_specific_override",
-  "current_publication_claim_id": "4ec19597-79e9-499b-a932-d91fc0150881",
-  "current_publication_claimed_at": "2026-07-16T19:14:58.021Z"
+  "snapshot_prepared_before_publication_candidate": true,
+  "preclaim_work_override": "fy_task_specific_override"
 }
