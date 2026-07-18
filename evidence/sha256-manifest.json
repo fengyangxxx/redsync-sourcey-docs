@@ -15,8 +15,8 @@
     },
     {
       "path": ".gitignore",
-      "bytes": 68,
-      "sha256": "c9a07e85a644c4284a6c0101b792fe1d148bb6c39e2b03d91b941740ac1472a2"
+      "bytes": 94,
+      "sha256": "041915712ceb161457c011d93da8563c89b4ca246d1c1f94180340aae7c675d8"
     },
     {
       "path": ".readthedocs.yaml",
@@ -115,28 +115,28 @@
     },
     {
       "path": "dist/hosting-decision.html",
-      "bytes": 23200,
-      "sha256": "c7c4cef8d173d8febf1e6ecb37090c7a9dfefbbf1dd835adde0a88e8680a4c89"
+      "bytes": 23920,
+      "sha256": "b291c124ffd1f86320a25d08fdf6af8b4b3439c5fff6b745d2e29e3fe704bc3a"
     },
     {
       "path": "dist/index.html",
-      "bytes": 22844,
-      "sha256": "6c6d01cba9613c6ba72dc653906cd6e9e9bda32ba4761a0e0c406e6ce3f52dc8"
+      "bytes": 22843,
+      "sha256": "b6f20c2921be2fe959811f36b836a26f90187cce83cc6d5c257fbeb85cf188f6"
     },
     {
       "path": "dist/introduction.html",
-      "bytes": 22844,
-      "sha256": "6c6d01cba9613c6ba72dc653906cd6e9e9bda32ba4761a0e0c406e6ce3f52dc8"
+      "bytes": 22843,
+      "sha256": "b6f20c2921be2fe959811f36b836a26f90187cce83cc6d5c257fbeb85cf188f6"
     },
     {
       "path": "dist/llms-full.txt",
-      "bytes": 27764,
-      "sha256": "1a2db56702053e1dd94dbabafa6bf0f907aabf842d49e7743312edaf1772546d"
+      "bytes": 28415,
+      "sha256": "cb6edfd4cc8208cb7b90fc2b79049c6863c1d0c15f9e8da6711d60b8111723e1"
     },
     {
       "path": "dist/llms.txt",
-      "bytes": 3653,
-      "sha256": "b830d3345f35592854b34aae697f659b3ca5be3395a731d6d77d781b3767da6f"
+      "bytes": 3771,
+      "sha256": "a235a6edb8ee4186d5ea3021665e811ad19433b37091194f6a80490779b55850"
     },
     {
       "path": "dist/maintainer-gap-analysis.html",
@@ -145,8 +145,8 @@
     },
     {
       "path": "dist/pinned-source-coverage.html",
-      "bytes": 25352,
-      "sha256": "d96bb2ecee865c1019bfb304692f9e11161a80c10429cd9c4613ff63f9c31ed7"
+      "bytes": 25421,
+      "sha256": "9fa9d34c776b02e733dd33e7d49f2e1c35d59d59cd4d2b678f1f82e8743b8b49"
     },
     {
       "path": "dist/reproduce.html",
@@ -155,8 +155,8 @@
     },
     {
       "path": "dist/search-index.json",
-      "bytes": 29601,
-      "sha256": "fa066608bc3b4b8191b9309829ebe506b757cde51dd15b6182a73b2eb284473d"
+      "bytes": 29719,
+      "sha256": "6d7b978ce4d1c9839a0fc048d03cdfb80ce67aee1b390768f005234c9f41c547"
     },
     {
       "path": "dist/sitemap.xml",
@@ -175,8 +175,8 @@
     },
     {
       "path": "dist/upstream-pr-rationale.html",
-      "bytes": 24716,
-      "sha256": "3443f7117c8df59255798628a02ea648be1d8765b476bbfcc605e45cad51192a"
+      "bytes": 24930,
+      "sha256": "7e53933b6ba84d3b7df7c17a6f60cfdca7dae62213c55677fb8bf2d6f90cfce0"
     },
     {
       "path": "evidence/commands.local.txt",
@@ -240,13 +240,13 @@
     },
     {
       "path": "hosting-decision.md",
-      "bytes": 1537,
-      "sha256": "52d9368dc0e1d6a8fb34deba568caafaba65010aa7ecbecf7490549db41d07de"
+      "bytes": 1784,
+      "sha256": "b3dc780abc8e3167a4ffd325764c79e8e51646d988b11c159736f9c2714b077c"
     },
     {
       "path": "introduction.md",
-      "bytes": 1113,
-      "sha256": "654c4f43a8816d543b568745d7a5bd4ebf0e6c07cb625b15349bfb7b8f5ccdf6"
+      "bytes": 1123,
+      "sha256": "845bf9031decb63ac25fa22554c1ffeac9ed2343b85afddafab37f0633e182d9"
     },
     {
       "path": "maintainer-gap-analysis.md",
@@ -265,8 +265,8 @@
     },
     {
       "path": "pinned-source-coverage.md",
-      "bytes": 1715,
-      "sha256": "c8bba0b7ab8d7cd0c91827698f28727aea0eca2ef3ee041bf97e089250f47fd6"
+      "bytes": 1784,
+      "sha256": "5836df564bc18a1e4cbd6aa070d82a0125f12d49338b6c7284eb3859059b2a9c"
     },
     {
       "path": "report.draft.md",
@@ -285,8 +285,8 @@
     },
     {
       "path": "scripts/generate-godoc-snapshot.mjs",
-      "bytes": 2099,
-      "sha256": "11a145367338d3811c068687bd3e5ca11d0d87a99b40be56eb47a6e148251038"
+      "bytes": 2055,
+      "sha256": "e04af5f8ef86735cc18440f417c824d27eac8825eb990a207b1f19c5a087f489"
     },
     {
       "path": "scripts/generate-hashes.mjs",
@@ -530,8 +530,8 @@
     },
     {
       "path": "tests/package.test.mjs",
-      "bytes": 21372,
-      "sha256": "0b4d053f5e7d1e5d5729f0a1971819c6238c85d4b30040682f0aeafa632d507a"
+      "bytes": 23574,
+      "sha256": "309975f9cded6ae3fd0c2bb58f2ccbc12d731861a2ab01068a8172802937ab3c"
     },
     {
       "path": "tests/validation-skill.test.mjs",
@@ -540,8 +540,8 @@
     },
     {
       "path": "upstream-pr-rationale.md",
-      "bytes": 2020,
-      "sha256": "3d675ebf9a4f097f78f7fb353c4363ab0a47b3852f24b23a0f138063ca4af6bb"
+      "bytes": 2234,
+      "sha256": "ba16d13ea5019b9702ca2dd2cdce952daa113f0d51f82b7c18447486f309067d"
     },
     {
       "path": "upstream/README-sourcey-docs.patch",
