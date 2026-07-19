@@ -1,0 +1,166 @@
+{
+  "schema_version": "frantic.delivery-preparation.evidence.v1",
+  "task": 33,
+  "posting_id": "p-8b91e1ac8c",
+  "preparation_state": "preclaim_pending_fresh_claim_and_governed_receipt",
+  "platform_live_state": {
+    "work_status": null,
+    "available": null,
+    "active": null,
+    "snapshot_status": "unresolved_preclaim"
+  },
+  "outbound_publication_plan": {
+    "repository": "https://github.com/fengyangxxx/redsync-sourcey-docs",
+    "destination_ref": "refs/heads/fix/frantic33-governed-receipt-v11",
+    "expected_pre_push_state": "branch_absent",
+    "workflow": ".github/workflows/validate-sourcey-adoption.yml",
+    "dispatch_ref": "fix/frantic33-governed-receipt-v11",
+    "final_delivery_authorization": false
+  },
+  "provenance_roles": {
+    "docs_commit": "bc5585dae317d2fcbd48b3774ba10a27f2e585d6",
+    "docs_deployment_status": "required_before_workflow_dispatch",
+    "workflow_candidate_ref": "refs/heads/fix/frantic33-governed-receipt-v11",
+    "workflow_candidate_role": "workflow/receipt tooling only",
+    "workflow_candidate_requires_readthedocs_deployment": false
+  },
+  "summary": "Claimant-authored ReadTheDocs community publication for pinned Redsync is prepared for Sourcey and runx-cli 0.7.1 validation across complete package coverage while preserving the honest non-official and non-adopted boundary; Linux CI receipt sealing remains explicit.",
+  "observations": [
+    "runx-cli 0.7.1",
+    "Target repository: https://github.com/go-redsync/redsync",
+    "Pinned target commit: 79f6ba24a8bf41f35141de700d410a06bb27622f",
+    "License: BSD-3-Clause at the pinned target commit",
+    "Sourcey adapter: godoc",
+    "Sourcey command: sourcey godoc --module ./source/redsync --packages ./... --out godoc.json",
+    "Sourcey config: sourcey.config.ts; snapshot mode; 15 packages; zero diagnostics",
+    "Generated site: 23 Sourcey HTML pages plus one navigation compatibility redirect; 30 packaged files",
+    "Coverage: 15 packages, 19 non-test Go files, 110 exported symbols",
+    "Five exact generated-page to pinned-source mappings: evidence/page-source-mappings.json",
+    "Public host: claimant-authored project-named ReadTheDocs community documentation, not target-owned or official",
+    "Upstream PR #245: open and unmerged optional proposal, not adoption or endorsement",
+    "Independent raw machine proof: evidence/local-live-validation/evidence.json and transcript.txt",
+    "Receipt tree publication: filename-safe archive with exact path, byte length, and SHA-256 reconstruction",
+    "Receipt status audit: raw run status must be sealed and every parseable stored receipt JSON must contain no failure, false success, or nonzero exit signal"
+  ],
+  "evidence_items": [
+    {
+      "type": "source_pin",
+      "local_ref": "source/redsync/.source-pin.json"
+    },
+    {
+      "type": "license",
+      "external_ref": "https://raw.githubusercontent.com/go-redsync/redsync/79f6ba24a8bf41f35141de700d410a06bb27622f/LICENSE"
+    },
+    {
+      "type": "sourcey_config_and_command",
+      "local_ref": "sourcey.config.ts"
+    },
+    {
+      "type": "godoc_snapshot",
+      "local_ref": "godoc.json"
+    },
+    {
+      "type": "api_inventory",
+      "local_ref": "evidence/inventory.json"
+    },
+    {
+      "type": "page_list_and_static_hashes",
+      "local_ref": "evidence/sha256-manifest.json"
+    },
+    {
+      "type": "five_page_source_checks",
+      "local_ref": "evidence/page-source-mappings.json"
+    },
+    {
+      "type": "independent_live_machine_evidence",
+      "local_ref": "evidence/local-live-validation/evidence.json"
+    },
+    {
+      "type": "independent_raw_transcript",
+      "local_ref": "evidence/local-live-validation/transcript.txt"
+    },
+    {
+      "type": "public_host",
+      "external_ref": "https://redsync-sourcey-docs.readthedocs.io/en/latest/"
+    },
+    {
+      "type": "optional_unmerged_proposal",
+      "external_ref": "https://github.com/go-redsync/redsync/pull/245"
+    },
+    {
+      "type": "receipt_status_audit_contract",
+      "local_ref": "validation-skill/redsync-sourcey-validation/scripts/extract-root-receipt.mjs"
+    },
+    {
+      "type": "preparation_evidence",
+      "local_ref": "evidence/evidence.draft.json",
+      "sha256": "b0f3fd41f7d815bac6b073667a7537fb3abfabca32dadbc9c557a80257ca215b"
+    },
+    {
+      "type": "receipt_gate",
+      "local_ref": "deliveries/shared-receipt/receipt-proof.json",
+      "status": "BLOCKED"
+    }
+  ],
+  "target": {
+    "repository": "https://github.com/go-redsync/redsync",
+    "commit": "79f6ba24a8bf41f35141de700d410a06bb27622f",
+    "license": "BSD-3-Clause"
+  },
+  "sourcey": {
+    "version": "3.6.3",
+    "adapter": "godoc",
+    "command": "sourcey godoc --module ./source/redsync --packages ./... --out godoc.json",
+    "config": "sourcey.config.ts"
+  },
+  "coverage": {
+    "package_count": 15,
+    "non_test_go_file_count": 19,
+    "exported_symbols": 110,
+    "generated_pages": [
+      "go-api.html",
+      "go-api/index.html",
+      "go-api/package-root.html",
+      "go-api/pkg-examples-goredis-v7.html",
+      "go-api/pkg-examples-goredis-v8.html",
+      "go-api/pkg-examples-goredis-v9.html",
+      "go-api/pkg-examples-goredis.html",
+      "go-api/pkg-examples-redigo.html",
+      "go-api/pkg-examples-valkego.html",
+      "go-api/pkg-redis-goredis-v7.html",
+      "go-api/pkg-redis-goredis-v8.html",
+      "go-api/pkg-redis-goredis-v9.html",
+      "go-api/pkg-redis-goredis.html",
+      "go-api/pkg-redis-redigo.html",
+      "go-api/pkg-redis-rueidis.html",
+      "go-api/pkg-redis-valkeygo.html",
+      "go-api/pkg-redis.html",
+      "hosting-decision.html",
+      "index.html",
+      "introduction.html",
+      "maintainer-gap-analysis.html",
+      "pinned-source-coverage.html",
+      "reproduce.html",
+      "upstream-pr-rationale.html"
+    ]
+  },
+  "public_host": {
+    "url": "https://redsync-sourcey-docs.readthedocs.io/en/latest/",
+    "classification": "claimant-authored project-named community documentation",
+    "target_owned": false,
+    "official": false,
+    "public_source": "https://github.com/fengyangxxx/redsync-sourcey-docs",
+    "required_deployed_commit": "bc5585dae317d2fcbd48b3774ba10a27f2e585d6",
+    "deployment_proof": null,
+    "current_deployment_status": "required_before_workflow_dispatch"
+  },
+  "governed_receipt": {
+    "status": "BLOCKED",
+    "receipt_ref": null,
+    "proof_path": "deliveries/shared-receipt/receipt-proof.json",
+    "proof_sha256": null,
+    "archive_sha256": null,
+    "blocker": "linux_ci_receipt_required",
+    "final_delivery_authorization": false
+  }
+}

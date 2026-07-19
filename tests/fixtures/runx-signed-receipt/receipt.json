@@ -1,0 +1,149 @@
+{
+  "schema": "runx.receipt.v1",
+  "id": "sha256:fc1bb8c2027c1b0a76d8095a1d6c112e37a4f4d144991be4d505ec21314ccd39",
+  "created_at": "2026-06-10T00:00:00Z",
+  "canonicalization": "runx.receipt.c14n.v1",
+  "issuer": {
+    "type": "hosted",
+    "kid": "runx-cli-verify-fixture-key",
+    "public_key_sha256": "sha256:63ed95d660e07cb98ff0e163db81e165d32e0ff9717c6c430a477d6946c99614"
+  },
+  "signature": {
+    "alg": "Ed25519",
+    "value": "base64:eA_ArVNbtVLzPGXyAyhO6c9Ibd623vu5VSGFtoBTZaJAX4syLrbnr46DOLhhZh-KHe8bF1SYPFM8RXxHF_xCBw"
+  },
+  "digest": "sha256:e843a3e47631146b1dac7abae3c40adffc32b1ef3c167ed317b1d163afdb41a4",
+  "idempotency": {
+    "intent_key": "sha256:receipt-verify-production-verified-intent",
+    "trigger_fingerprint": "sha256:receipt-verify-production-verified-trigger",
+    "content_hash": "sha256:receipt-verify-production-verified-content"
+  },
+  "subject": {
+    "kind": "skill",
+    "ref": {
+      "type": "harness",
+      "uri": "hrn_receipt-verify_production-verified"
+    },
+    "commitments": []
+  },
+  "authority": {
+    "actor_ref": {
+      "type": "principal",
+      "uri": "runx:principal:local_runtime"
+    },
+    "grant_refs": [],
+    "scope_refs": [],
+    "authority_proof_refs": [],
+    "attenuation": {
+      "parent_authority_ref": null,
+      "subset_proof": null
+    },
+    "terms": [],
+    "enforcement": {
+      "profile_hash": "sha256:runtime-skeleton-enforcement",
+      "redaction_refs": [],
+      "setup_refs": [],
+      "teardown_refs": []
+    }
+  },
+  "signals": [],
+  "decisions": [
+    {
+      "decision_id": "dec_production-verified",
+      "choice": "open",
+      "inputs": {
+        "signal_refs": [],
+        "target_ref": null,
+        "opportunity_refs": [],
+        "selection_ref": null
+      },
+      "proposed_intent": {
+        "purpose": "Open runtime node production-verified",
+        "legitimacy": "Local graph execution requested this node",
+        "success_criteria": [],
+        "constraints": [],
+        "derived_from": []
+      },
+      "selected_act_id": "act_production-verified",
+      "selected_harness_ref": null,
+      "justification": {
+        "summary": "runtime graph planner selected this node",
+        "evidence_refs": []
+      },
+      "closure": null,
+      "artifact_refs": [
+        {
+          "type": "artifact",
+          "uri": "runx:artifact:artifact_production-verified",
+          "locator": "artifact_production-verified",
+          "label": "artifact"
+        }
+      ]
+    }
+  ],
+  "acts": [
+    {
+      "id": "act_production-verified",
+      "form": "observation",
+      "intent": {
+        "purpose": "Run graph step production-verified",
+        "legitimacy": "Runtime graph execution was admitted by the local harness",
+        "success_criteria": [
+          {
+            "criterion_id": "process_exit",
+            "statement": "cli-tool exits successfully",
+            "required": true
+          }
+        ],
+        "constraints": [],
+        "derived_from": []
+      },
+      "summary": "Executed graph step production-verified",
+      "criterion_bindings": [
+        {
+          "criterion_id": "process_exit",
+          "status": "verified",
+          "evidence_refs": [],
+          "verification_refs": [],
+          "summary": "cli-tool exited successfully"
+        }
+      ],
+      "source_refs": [],
+      "target_refs": [],
+      "artifact_refs": [
+        {
+          "type": "artifact",
+          "uri": "runx:artifact:artifact_production-verified",
+          "locator": "artifact_production-verified",
+          "label": "artifact"
+        }
+      ],
+      "closure": {
+        "disposition": "closed",
+        "reason_code": "process_exit",
+        "summary": "cli-tool exited successfully",
+        "closed_at": "2026-06-10T00:00:00Z"
+      }
+    }
+  ],
+  "seal": {
+    "disposition": "closed",
+    "reason_code": "process_closed",
+    "summary": "step production-verified completed",
+    "closed_at": "2026-06-10T00:00:00Z",
+    "last_observed_at": "2026-06-10T00:00:00Z",
+    "criteria": [
+      {
+        "criterion_id": "process_exit",
+        "status": "verified",
+        "evidence_refs": [],
+        "verification_refs": [],
+        "summary": "cli-tool exited successfully"
+      }
+    ]
+  },
+  "lineage": {
+    "children": [],
+    "sync": []
+  }
+}

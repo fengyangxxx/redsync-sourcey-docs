@@ -1,0 +1,41 @@
+{
+  "schema_version": "frantic.delivery-preparation.manifest.v1",
+  "task": 33,
+  "posting_id": "p-8b91e1ac8c",
+  "validation_evidence": {
+    "status": "unresolved",
+    "path": "evidence/evidence.draft.json",
+    "sha256": "b0f3fd41f7d815bac6b073667a7537fb3abfabca32dadbc9c557a80257ca215b"
+  },
+  "shared_receipt": {
+    "status": "unresolved",
+    "proof_path": "deliveries/shared-receipt/receipt-proof.json",
+    "proof_sha256": null
+  },
+  "ci_workflow_inputs": {
+    "path": "deliveries/linux-ci-inputs.json",
+    "sha256": "1e5e5af2fe1c94212725bc10dbfca1e7debacfb662f040cb0691ad7c3e77a08e"
+  },
+  "files": [
+    {
+      "path": "acceptance.json",
+      "bytes": 1838,
+      "sha256": "a3478d56b67881773176dce8c6a26c4a21f3176d59be03529d8adb49617f6263"
+    },
+    {
+      "path": "delivery.json",
+      "bytes": 205,
+      "sha256": "21b396aebade950352134d6e8617ee0e83e2b12f38c50d44e28c42d3b35bf009"
+    },
+    {
+      "path": "evidence.json",
+      "bytes": 6567,
+      "sha256": "c2577a3ca2d09f21ab4789d3d15a7083c1feb44f9d6f0d6efdf0908b0f0f9a32"
+    },
+    {
+      "path": "report.md",
+      "bytes": 3366,
+      "sha256": "6eafd0c829381cad36f02d1a3e2ebb16355d515b3cab808b15584c017ebab852"
+    }
+  ]
+}

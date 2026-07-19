@@ -37,6 +37,11 @@ on:
         description: Immutable raw URL for page-source-mappings.json
         required: true
         type: string
+      claimant_github_login:
+        description: Public GitHub login whose anonymous Sourcey star is checked
+        required: true
+        default: fengyangxxx
+        type: string
 permissions:
   contents: read
 
@@ -54,18 +59,18 @@ jobs:
       INPUT_UPSTREAM_PR_URL: ${{ inputs.upstream_pr_url }}
       INPUT_UPSTREAM_PR_HEAD_COMMIT: ${{ inputs.upstream_pr_head_commit }}
       INPUT_MAPPINGS_URL: ${{ inputs.mappings_url }}
-      SKILL_ARTIFACT_DIR: ${{ github.workspace }}/validation-skill/redsync-sourcey-validation/artifacts
+      INPUT_CLAIMANT_GITHUB_LOGIN: ${{ inputs.claimant_github_login }}
 
     steps:
       - name: Check out the exact workflow revision
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5d # v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v5
         with:
           node-version: "22"
 
-      - name: Provision Linux bubblewrap sandbox
+      - name: Provision enforced Linux bubblewrap sandbox
         shell: bash
         run: |
           set -uo pipefail
@@ -77,24 +82,86 @@ jobs:
           } >>"$GITHUB_ENV"
           mkdir -p "$runx_receipt_dir" "$validation_output_dir"
 
-          install_exit=0
-          apt_update_exit=0
-          apt_install_exit=0
+          apparmor_sysctl="/proc/sys/kernel/apparmor_restrict_unprivileged_userns"
+          apparmor_exit=0
+          apparmor_pre="missing"
+          apparmor_post="missing"
+          apparmor_pre_read_exit="SKIPPED"
+          apparmor_write_exit="SKIPPED"
+          apparmor_post_read_exit="SKIPPED"
           {
-            printf '%s\n' 'command=sudo apt-get update'
-            sudo apt-get update
-            apt_update_exit=$?
-            printf 'apt_update_exit_code=%s\n' "$apt_update_exit"
-            if [[ "$apt_update_exit" -eq 0 ]]; then
-              printf '%s\n' 'command=sudo apt-get install --yes --no-install-recommends bubblewrap'
-              sudo apt-get install --yes --no-install-recommends bubblewrap
-              apt_install_exit=$?
-              printf 'apt_install_exit_code=%s\n' "$apt_install_exit"
-              install_exit="$apt_install_exit"
+            printf 'sysctl_path=%s\n' "$apparmor_sysctl"
+            if [[ -e "$apparmor_sysctl" ]]; then
+              printf '%s\n' 'sysctl_exists=true'
+              apparmor_pre_read_exit=0
+              apparmor_pre="$(cat "$apparmor_sysctl")" \
+                || apparmor_pre_read_exit=$?
+              printf 'pre_value=%s\n' "$apparmor_pre"
+              if [[ "$apparmor_pre_read_exit" -ne 0 ]]; then
+                apparmor_exit=1
+              elif [[ "$apparmor_pre" == "1" ]]; then
+                printf '%s\n' \
+                  'command=printf 0 | sudo tee /proc/sys/kernel/apparmor_restrict_unprivileged_userns'
+                apparmor_write_exit=0
+                printf '0\n' | sudo tee "$apparmor_sysctl" \
+                  || apparmor_write_exit=$?
+                if [[ "$apparmor_write_exit" -ne 0 ]]; then
+                  apparmor_exit=1
+                fi
+              elif [[ "$apparmor_pre" == "0" ]]; then
+                printf '%s\n' 'write=SKIPPED_ALREADY_UNRESTRICTED'
+              else
+                printf '%s\n' 'write=BLOCKED_UNEXPECTED_PRE_VALUE'
+                apparmor_exit=1
+              fi
+              apparmor_post_read_exit=0
+              apparmor_post="$(cat "$apparmor_sysctl")" \
+                || apparmor_post_read_exit=$?
+              printf 'post_value=%s\n' "$apparmor_post"
+              if [[ "$apparmor_post_read_exit" -ne 0 || "$apparmor_post" != "0" ]]; then
+                apparmor_exit=1
+              fi
             else
-              printf '%s\n' 'apt_install_exit_code=SKIPPED'
-              install_exit="$apt_update_exit"
+              printf '%s\n' 'sysctl_exists=false'
+              printf '%s\n' 'write=SKIPPED_SYSCTL_ABSENT'
             fi
+            printf 'pre_read_exit_code=%s\n' "$apparmor_pre_read_exit"
+            printf 'write_exit_code=%s\n' "$apparmor_write_exit"
+            printf 'post_read_exit_code=%s\n' "$apparmor_post_read_exit"
+            printf 'apparmor_setup_exit_code=%s\n' "$apparmor_exit"
+          } >"$validation_output_dir/apparmor-userns.txt" 2>&1
+          printf '%s\n' "$apparmor_exit" \
+            >"$validation_output_dir/apparmor-userns-exit-code.txt"
+
+          install_exit=0
+          apt_update_exit="SKIPPED"
+          apt_install_exit="SKIPPED"
+          {
+            if bwrap_path="$(command -v bwrap)"; then
+              printf 'preinstalled_path=%s\n' "$bwrap_path"
+            else
+              apt_update_exit=0
+              printf '%s\n' 'command=sudo apt-get update'
+              sudo apt-get update || apt_update_exit=$?
+              if [[ "$apt_update_exit" -eq 0 ]]; then
+                apt_install_exit=0
+                printf '%s\n' \
+                  'command=sudo apt-get install --yes --no-install-recommends bubblewrap'
+                sudo apt-get install --yes --no-install-recommends bubblewrap \
+                  || apt_install_exit=$?
+              else
+                install_exit=1
+              fi
+              if [[ "$apt_install_exit" != "SKIPPED" && "$apt_install_exit" -ne 0 ]]; then
+                install_exit=1
+              fi
+            fi
+            if ! command -v bwrap >/dev/null 2>&1; then
+              install_exit=1
+            fi
+            printf 'apt_update_exit_code=%s\n' "$apt_update_exit"
+            printf 'apt_install_exit_code=%s\n' "$apt_install_exit"
+            printf 'install_exit_code=%s\n' "$install_exit"
           } >"$validation_output_dir/bubblewrap-install.txt" 2>&1
           printf '%s\n' "$install_exit" \
             >"$validation_output_dir/bubblewrap-install-exit-code.txt"
@@ -108,23 +175,84 @@ jobs:
             } >"$validation_output_dir/bubblewrap-version.txt" 2>&1 \
               || version_exit=$?
           else
-            printf '%s\n' 'bubblewrap version check skipped because installation failed' \
+            printf '%s\n' 'BLOCKED: bubblewrap installation was not verified' \
               >"$validation_output_dir/bubblewrap-version.txt"
             version_exit=1
           fi
           printf '%s\n' "$version_exit" \
             >"$validation_output_dir/bubblewrap-version-exit-code.txt"
 
-          if [[ "$install_exit" -ne 0 || "$version_exit" -ne 0 ]]; then
-            exit 1
+          node_exit=0
+          {
+            node_source="$(command -v node)" || node_exit=$?
+            printf 'source_path=%s\n' "${node_source:-missing}"
+            printf '%s\n' 'command=sudo install -m 0755 <setup-node> /usr/local/bin/runx-node'
+            if [[ "$node_exit" -eq 0 ]]; then
+              sudo install -m 0755 "$node_source" /usr/local/bin/runx-node \
+                || node_exit=$?
+            fi
+            if [[ "$node_exit" -eq 0 ]]; then
+              /usr/local/bin/runx-node --version || node_exit=$?
+              sha256sum /usr/local/bin/runx-node || node_exit=$?
+            fi
+            printf 'node_bridge_exit_code=%s\n' "$node_exit"
+          } >"$validation_output_dir/sandbox-node.txt" 2>&1
+          printf '%s\n' "$node_exit" \
+            >"$validation_output_dir/sandbox-node-exit-code.txt"
+
+          probe_exit=0
+          if [[ "$apparmor_exit" -eq 0 && "$install_exit" -eq 0 && "$version_exit" -eq 0 && "$node_exit" -eq 0 ]]; then
+            {
+              bwrap --unshare-all --share-net --die-with-parent \
+                --proc /proc \
+                --dev /dev \
+                --tmpfs /tmp \
+                --ro-bind /usr /usr \
+                --ro-bind-try /bin /bin \
+                --ro-bind-try /lib /lib \
+                --ro-bind-try /lib64 /lib64 \
+                --chdir / \
+                -- /usr/local/bin/runx-node -e \
+                  'if (process.version.length < 2) process.exit(1); console.log("probe=PASS")'
+            } >"$validation_output_dir/bubblewrap-probe.txt" 2>&1 \
+              || probe_exit=$?
+          else
+            printf '%s\n' 'BLOCKED: AppArmor or bubblewrap setup prerequisite failed' \
+              >"$validation_output_dir/bubblewrap-probe.txt"
+            probe_exit=1
           fi
+          printf '%s\n' "$probe_exit" \
+            >"$validation_output_dir/bubblewrap-probe-exit-code.txt"
+
+          setup_exit=0
+          if [[ "$apparmor_exit" -ne 0 || "$install_exit" -ne 0 || "$version_exit" -ne 0 || "$node_exit" -ne 0 || "$probe_exit" -ne 0 ]]; then
+            setup_exit=1
+          fi
+          {
+            printf '%s\n' 'profile=network'
+            printf '%s\n' 'network=true'
+            printf '%s\n' 'require_enforcement=true'
+            if [[ "$setup_exit" -eq 0 ]]; then
+              printf '%s\n' 'runtime_enforcer=bubblewrap'
+              printf '%s\n' 'enforcement_probe=PASS'
+            else
+              printf '%s\n' 'runtime_enforcer=BLOCKED'
+              printf '%s\n' 'enforcement_probe=BLOCKED'
+            fi
+            printf 'apparmor_pre=%s\n' "$apparmor_pre"
+            printf 'apparmor_post=%s\n' "$apparmor_post"
+            printf '%s\n' 'sandbox_node=/usr/local/bin/runx-node'
+          } >"$validation_output_dir/sandbox-policy.txt"
+          printf '%s\n' "$setup_exit" \
+            >"$validation_output_dir/sandbox-setup-exit-code.txt"
+          exit "$setup_exit"
 
       - name: Create ephemeral CI receipt identity
         shell: bash
         run: |
           set -euo pipefail
           node <<'NODE'
-          const { appendFileSync } = require("node:fs");
+          const { appendFileSync, writeFileSync } = require("node:fs");
           const { createPrivateKey, createPublicKey, randomBytes } = require("node:crypto");
 
           const seed = randomBytes(32);
@@ -153,65 +281,106 @@ jobs:
             `RUNX_RECEIPT_VERIFY_ED25519_PUBLIC_KEY_BASE64=${publicKey.toString("base64")}`,
           ];
           appendFileSync(process.env.GITHUB_ENV, `${lines.join("\n")}\n`);
+          writeFileSync(
+            `${process.env.VALIDATION_OUTPUT_DIR}/verification-public-key.json`,
+            `${JSON.stringify({
+              schema_version: "redsync.runx-public-verification-key.v1",
+              algorithm: "Ed25519",
+              kid,
+              issuer_type: "ci",
+              public_key_base64: publicKey.toString("base64"),
+            }, null, 2)}\n`,
+          );
           NODE
 
       - name: Record exact pinned CLI version
         shell: bash
         run: |
           set -euo pipefail
-          npx -y @runxhq/cli@0.6.14 --version \
+          npx -y @runxhq/cli@0.7.1 --version \
             | tee "$VALIDATION_OUTPUT_DIR/runx-version.txt"
-          test "$(cat "$VALIDATION_OUTPUT_DIR/runx-version.txt")" = "runx-cli 0.6.14"
+          test "$(cat "$VALIDATION_OUTPUT_DIR/runx-version.txt")" = "runx-cli 0.7.1"
 
       - name: Run governed live validation and verify its receipt
         shell: bash
         run: |
           set -uo pipefail
+          operator_context_exit=0
+          approval_parse_exit=0
           validation_exit=0
-          artifact_copy_exit=0
+          artifact_extract_exit=1
           receipt_resolution_exit=0
           receipt_archive_exit=0
           receipt_reconstruction_exit=0
           verify_exit=0
+          verify_verdict_exit=1
+          proof_exit=0
+          hosted_provenance_exit=0
 
-          npx -y @runxhq/cli@0.6.14 skill \
-            ./validation-skill/redsync-sourcey-validation default \
-            -i "public_url=$INPUT_PUBLIC_URL" \
-            -i "docs_repo_url=$INPUT_DOCS_REPO_URL" \
-            -i "docs_commit=$INPUT_DOCS_COMMIT" \
-            -i "target_repo_url=$INPUT_TARGET_REPO_URL" \
-            -i "target_commit=$INPUT_TARGET_COMMIT" \
-            -i "upstream_pr_url=$INPUT_UPSTREAM_PR_URL" \
-            -i "upstream_pr_head_commit=$INPUT_UPSTREAM_PR_HEAD_COMMIT" \
-            -i "mappings_url=$INPUT_MAPPINGS_URL" \
-            -i "runx_version_output=$(cat "$VALIDATION_OUTPUT_DIR/runx-version.txt")" \
-            -i "validation_mode=live" \
-            -i "output_dir=artifacts" \
-            -R "$RUNX_RECEIPT_DIR" \
-            -j \
+          node ./scripts/capture-hosted-run-provenance.mjs \
+            --output "$VALIDATION_OUTPUT_DIR/hosted-run-provenance.json" \
+            >"$VALIDATION_OUTPUT_DIR/hosted-run-provenance-stdout.txt" \
+            2>"$VALIDATION_OUTPUT_DIR/hosted-run-provenance-stderr.txt" \
+            || hosted_provenance_exit=$?
+          printf '%s\n' "$hosted_provenance_exit" \
+            >"$VALIDATION_OUTPUT_DIR/hosted-run-provenance-exit-code.txt"
+
+          run_validation() {
+            npx -y @runxhq/cli@0.7.1 skill \
+              ./validation-skill/redsync-sourcey-validation default \
+              -i "public_url=$INPUT_PUBLIC_URL" \
+              -i "docs_repo_url=$INPUT_DOCS_REPO_URL" \
+              -i "docs_commit=$INPUT_DOCS_COMMIT" \
+              -i "target_repo_url=$INPUT_TARGET_REPO_URL" \
+              -i "target_commit=$INPUT_TARGET_COMMIT" \
+              -i "upstream_pr_url=$INPUT_UPSTREAM_PR_URL" \
+              -i "upstream_pr_head_commit=$INPUT_UPSTREAM_PR_HEAD_COMMIT" \
+              -i "mappings_url=$INPUT_MAPPINGS_URL" \
+              -i "runx_version_output=$(cat "$VALIDATION_OUTPUT_DIR/runx-version.txt")" \
+              -i "claimant_github_login=$INPUT_CLAIMANT_GITHUB_LOGIN" \
+              -i "validation_mode=live" \
+              -i "output_dir=artifacts" \
+              -i "artifact_mode=stdout-only" \
+              -R "$RUNX_RECEIPT_DIR" \
+              -j \
+              "$@"
+          }
+
+          run_validation \
+            >"$VALIDATION_OUTPUT_DIR/runx-operator-context-stdout.json" \
+            2>"$VALIDATION_OUTPUT_DIR/runx-operator-context-stderr.txt" \
+            || operator_context_exit=$?
+          printf '%s\n' "$operator_context_exit" \
+            >"$VALIDATION_OUTPUT_DIR/runx-operator-context-exit-code.txt"
+
+          approval_digest="$(node - "$VALIDATION_OUTPUT_DIR/runx-operator-context-stdout.json" <<'NODE'
+          const { readFileSync } = require("node:fs");
+          const response = JSON.parse(readFileSync(process.argv[2], "utf8"));
+          const digest = response.digest;
+          if (
+            response.status !== "needs_operator_approval" ||
+            !/^sha256:[0-9a-f]{64}$/.test(digest ?? "") ||
+            response.approval_flag !== `--approve-operator-context ${digest}`
+          ) process.exit(1);
+          process.stdout.write(digest);
+          NODE
+          )" || approval_parse_exit=$?
+          printf '%s\n' "$approval_parse_exit" \
+            >"$VALIDATION_OUTPUT_DIR/operator-context-approval-parse-exit-code.txt"
+
+          if [[ "$operator_context_exit" -ne 0 && "$approval_parse_exit" -eq 0 ]]; then
+            run_validation --approve-operator-context "$approval_digest" \
             >"$VALIDATION_OUTPUT_DIR/runx-raw-stdout.json" \
             2>"$VALIDATION_OUTPUT_DIR/runx-raw-stderr.txt" \
             || validation_exit=$?
+          else
+            printf '%s\n' '{"status":"BLOCKED","reason":"operator_context_approval_invalid"}' \
+              >"$VALIDATION_OUTPUT_DIR/runx-raw-stdout.json"
+            printf '%s\n' 'Exact operator-context approval could not be established.' \
+              >"$VALIDATION_OUTPUT_DIR/runx-raw-stderr.txt"
+            validation_exit=1
+          fi
           printf '%s\n' "$validation_exit" >"$VALIDATION_OUTPUT_DIR/runx-exit-code.txt"
-
-          if [[ -f "$SKILL_ARTIFACT_DIR/evidence.json" ]]; then
-            cp "$SKILL_ARTIFACT_DIR/evidence.json" "$VALIDATION_OUTPUT_DIR/evidence.json" \
-              || artifact_copy_exit=$?
-          else
-            printf '%s\n' 'Runner evidence.json is missing.' \
-              >>"$VALIDATION_OUTPUT_DIR/artifact-copy-stderr.txt"
-            artifact_copy_exit=1
-          fi
-          if [[ -f "$SKILL_ARTIFACT_DIR/transcript.txt" ]]; then
-            cp "$SKILL_ARTIFACT_DIR/transcript.txt" "$VALIDATION_OUTPUT_DIR/transcript.txt" \
-              || artifact_copy_exit=$?
-          else
-            printf '%s\n' 'Runner transcript.txt is missing.' \
-              >>"$VALIDATION_OUTPUT_DIR/artifact-copy-stderr.txt"
-            artifact_copy_exit=1
-          fi
-          printf '%s\n' "$artifact_copy_exit" \
-            >"$VALIDATION_OUTPUT_DIR/artifact-copy-exit-code.txt"
 
           node ./validation-skill/redsync-sourcey-validation/scripts/extract-root-receipt.mjs \
             --run-json "$VALIDATION_OUTPUT_DIR/runx-raw-stdout.json" \
@@ -264,8 +433,8 @@ jobs:
             >"$VALIDATION_OUTPUT_DIR/receipt-archive-reconstruction-exit-code.txt"
 
           if [[ "$receipt_resolution_exit" -eq 0 ]]; then
-            npx -y @runxhq/cli@0.6.14 verify \
-              --receipt "$VALIDATION_OUTPUT_DIR/root-receipt.json" \
+            npx -y @runxhq/cli@0.7.1 verify \
+              --receipt-dir "$RUNX_RECEIPT_DIR" \
               -j \
               >"$VALIDATION_OUTPUT_DIR/runx-verify.json" \
               2>"$VALIDATION_OUTPUT_DIR/runx-verify-stderr.txt" \
@@ -279,28 +448,89 @@ jobs:
           fi
           printf '%s\n' "$verify_exit" >"$VALIDATION_OUTPUT_DIR/runx-verify-exit-code.txt"
 
-          if [[ "$validation_exit" -ne 0 || "$artifact_copy_exit" -ne 0 || "$receipt_resolution_exit" -ne 0 || "$receipt_archive_exit" -ne 0 || "$receipt_reconstruction_exit" -ne 0 || "$verify_exit" -ne 0 ]]; then
+          if [[ "$verify_exit" -eq 0 && "$receipt_resolution_exit" -eq 0 ]]; then
+            verify_verdict_exit=0
+            node ./scripts/runx-verify-verdict.mjs \
+              --input "$VALIDATION_OUTPUT_DIR/runx-verify.json" \
+              --receipt-ref "$(cat "$VALIDATION_OUTPUT_DIR/root-receipt-ref.txt")" \
+              >"$VALIDATION_OUTPUT_DIR/runx-verify-verdict-stdout.txt" \
+              2>"$VALIDATION_OUTPUT_DIR/runx-verify-verdict-stderr.txt" \
+              || verify_verdict_exit=$?
+          else
+            printf '%s\n' 'Runx verification verdict parsing requires successful receipt resolution and verification.' \
+              >"$VALIDATION_OUTPUT_DIR/runx-verify-verdict-stderr.txt"
+          fi
+          printf '%s\n' "$verify_verdict_exit" \
+            >"$VALIDATION_OUTPUT_DIR/runx-verify-verdict-exit-code.txt"
+
+          if [[ "$validation_exit" -eq 0 && "$receipt_resolution_exit" -eq 0 && "$receipt_archive_exit" -eq 0 && "$receipt_reconstruction_exit" -eq 0 && "$verify_exit" -eq 0 && "$verify_verdict_exit" -eq 0 ]]; then
+            artifact_extract_exit=0
+            node ./validation-skill/redsync-sourcey-validation/scripts/extract-runner-artifacts.mjs \
+              --run-json "$VALIDATION_OUTPUT_DIR/runx-raw-stdout.json" \
+              --output-dir "$VALIDATION_OUTPUT_DIR" \
+              >"$VALIDATION_OUTPUT_DIR/artifact-extraction.json" \
+              2>"$VALIDATION_OUTPUT_DIR/artifact-extract-stderr.txt" \
+              || artifact_extract_exit=$?
+          else
+            printf '%s\n' 'Runner artifact extraction requires a successful governed run, complete receipt tree, reconstruction, and signature verification.' \
+              >"$VALIDATION_OUTPUT_DIR/artifact-extract-stderr.txt"
+          fi
+          printf '%s\n' "$artifact_extract_exit" \
+            >"$VALIDATION_OUTPUT_DIR/artifact-extract-exit-code.txt"
+
+          if [[ "$hosted_provenance_exit" -eq 0 && "$operator_context_exit" -ne 0 && "$approval_parse_exit" -eq 0 && "$validation_exit" -eq 0 && "$artifact_extract_exit" -eq 0 && "$receipt_resolution_exit" -eq 0 && "$receipt_archive_exit" -eq 0 && "$receipt_reconstruction_exit" -eq 0 && "$verify_exit" -eq 0 && "$verify_verdict_exit" -eq 0 ]]; then
+            node ./scripts/materialize-receipt-proof.mjs \
+              --artifact-dir "$VALIDATION_OUTPUT_DIR" \
+              >"$VALIDATION_OUTPUT_DIR/materialize-receipt-proof-stdout.txt" \
+              2>"$VALIDATION_OUTPUT_DIR/materialize-receipt-proof-stderr.txt" \
+              || proof_exit=$?
+          else
+            printf '%s\n' 'Receipt proof materialization skipped because a governed prerequisite failed.' \
+              >"$VALIDATION_OUTPUT_DIR/materialize-receipt-proof-stderr.txt"
+            proof_exit=1
+          fi
+          printf '%s\n' "$proof_exit" \
+            >"$VALIDATION_OUTPUT_DIR/materialize-receipt-proof-exit-code.txt"
+
+          if [[ "$hosted_provenance_exit" -ne 0 || "$operator_context_exit" -eq 0 || "$approval_parse_exit" -ne 0 || "$validation_exit" -ne 0 || "$artifact_extract_exit" -ne 0 || "$receipt_resolution_exit" -ne 0 || "$receipt_archive_exit" -ne 0 || "$receipt_reconstruction_exit" -ne 0 || "$verify_exit" -ne 0 || "$verify_verdict_exit" -ne 0 || "$proof_exit" -ne 0 ]]; then
             exit 1
           fi
 
       - name: Upload raw governed validation artifacts
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v5
         with:
           name: sourcey-community-publication-${{ github.run_id }}
           if-no-files-found: error
           retention-days: 14
           path: |
+            ${{ runner.temp }}/sourcey-validation/apparmor-userns.txt
+            ${{ runner.temp }}/sourcey-validation/apparmor-userns-exit-code.txt
             ${{ runner.temp }}/sourcey-validation/bubblewrap-install.txt
             ${{ runner.temp }}/sourcey-validation/bubblewrap-install-exit-code.txt
             ${{ runner.temp }}/sourcey-validation/bubblewrap-version.txt
             ${{ runner.temp }}/sourcey-validation/bubblewrap-version-exit-code.txt
+            ${{ runner.temp }}/sourcey-validation/sandbox-node.txt
+            ${{ runner.temp }}/sourcey-validation/sandbox-node-exit-code.txt
+            ${{ runner.temp }}/sourcey-validation/bubblewrap-probe.txt
+            ${{ runner.temp }}/sourcey-validation/bubblewrap-probe-exit-code.txt
+            ${{ runner.temp }}/sourcey-validation/sandbox-policy.txt
+            ${{ runner.temp }}/sourcey-validation/sandbox-setup-exit-code.txt
             ${{ runner.temp }}/sourcey-validation/runx-version.txt
+            ${{ runner.temp }}/sourcey-validation/runx-operator-context-stdout.json
+            ${{ runner.temp }}/sourcey-validation/runx-operator-context-stderr.txt
+            ${{ runner.temp }}/sourcey-validation/runx-operator-context-exit-code.txt
+            ${{ runner.temp }}/sourcey-validation/operator-context-approval-parse-exit-code.txt
             ${{ runner.temp }}/sourcey-validation/runx-raw-stdout.json
             ${{ runner.temp }}/sourcey-validation/runx-raw-stderr.txt
             ${{ runner.temp }}/sourcey-validation/runx-exit-code.txt
-            ${{ runner.temp }}/sourcey-validation/artifact-copy-stderr.txt
-            ${{ runner.temp }}/sourcey-validation/artifact-copy-exit-code.txt
+            ${{ runner.temp }}/sourcey-validation/artifact-extraction.json
+            ${{ runner.temp }}/sourcey-validation/artifact-extract-stderr.txt
+            ${{ runner.temp }}/sourcey-validation/artifact-extract-exit-code.txt
+            ${{ runner.temp }}/sourcey-validation/hosted-run-provenance.json
+            ${{ runner.temp }}/sourcey-validation/hosted-run-provenance-stdout.txt
+            ${{ runner.temp }}/sourcey-validation/hosted-run-provenance-stderr.txt
+            ${{ runner.temp }}/sourcey-validation/hosted-run-provenance-exit-code.txt
             ${{ runner.temp }}/sourcey-validation/evidence.json
             ${{ runner.temp }}/sourcey-validation/transcript.txt
             ${{ runner.temp }}/sourcey-validation/root-receipt-id.txt
@@ -324,3 +554,11 @@ jobs:
             ${{ runner.temp }}/sourcey-validation/runx-verify.json
             ${{ runner.temp }}/sourcey-validation/runx-verify-stderr.txt
             ${{ runner.temp }}/sourcey-validation/runx-verify-exit-code.txt
+            ${{ runner.temp }}/sourcey-validation/runx-verify-verdict-stdout.txt
+            ${{ runner.temp }}/sourcey-validation/runx-verify-verdict-stderr.txt
+            ${{ runner.temp }}/sourcey-validation/runx-verify-verdict-exit-code.txt
+            ${{ runner.temp }}/sourcey-validation/verification-public-key.json
+            ${{ runner.temp }}/sourcey-validation/receipt-proof.json
+            ${{ runner.temp }}/sourcey-validation/materialize-receipt-proof-stdout.txt
+            ${{ runner.temp }}/sourcey-validation/materialize-receipt-proof-stderr.txt
+            ${{ runner.temp }}/sourcey-validation/materialize-receipt-proof-exit-code.txt

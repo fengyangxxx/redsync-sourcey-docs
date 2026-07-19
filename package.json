@@ -10,8 +10,12 @@
     "mappings": "node scripts/generate-mappings.mjs",
     "hashes": "node scripts/generate-hashes.mjs",
     "prepare:docs": "npm run snapshot && npm run inventory && npm run build && npm run mappings && npm run hashes",
-    "test": "node --test --test-concurrency=1 tests/package.test.mjs tests/validation-skill.test.mjs",
-    "verify:runx-version": "npx -y @runxhq/cli@0.6.14 --version",
+    "test": "node --test --test-concurrency=1 tests/package.test.mjs tests/validation-skill.test.mjs tests/delivery-preparation.test.mjs tests/v5-regressions.test.mjs tests/v9-trust-boundary.test.mjs tests/v10-trust-boundary.test.mjs",
+    "capture:receipt": "node scripts/capture-governed-receipt.mjs",
+    "materialize:receipt-proof": "node scripts/materialize-receipt-proof.mjs",
+    "prepare:deliveries": "node scripts/materialize-deliveries.mjs",
+    "verify:delivery:33": "node scripts/verify-delivery-preparation.mjs --task 33",
+    "verify:runx-version": "npx -y @runxhq/cli@0.7.1 --version",
     "verify:local-live": "node scripts/verify-local-live-evidence.mjs"
   },
   "devDependencies": {

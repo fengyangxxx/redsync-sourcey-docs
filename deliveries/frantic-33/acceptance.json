@@ -1,0 +1,54 @@
+{
+  "schema_version": "frantic.delivery-preparation.acceptance.v1",
+  "task": 33,
+  "posting_id": "p-8b91e1ac8c",
+  "preparation_state": "preclaim_pending_fresh_claim_and_governed_receipt",
+  "criteria": [
+    {
+      "id": "runx_version",
+      "requirement": "Literal runx-cli 0.7.1 satisfies the required >=0.6.13 CLI floor.",
+      "status": "PASS"
+    },
+    {
+      "id": "third_party_oss",
+      "requirement": "Redsync is maintained third-party BSD-3-Clause OSS at an immutable commit.",
+      "status": "PASS"
+    },
+    {
+      "id": "project_depth",
+      "requirement": "The pinned project covers 15 packages, 19 non-test Go files, and 110 exported symbols.",
+      "status": "PASS"
+    },
+    {
+      "id": "public_sourcey_site",
+      "requirement": "The anonymous ReadTheDocs home and generated API pages pass live content checks.",
+      "status": "PASS"
+    },
+    {
+      "id": "durable_host_boundary",
+      "requirement": "The project-named community ReadTheDocs home has public source and an honest non-official boundary.",
+      "status": "PASS"
+    },
+    {
+      "id": "source_generated_items",
+      "requirement": "The Sourcey output contains at least 20 generated documentation pages.",
+      "status": "PASS"
+    },
+    {
+      "id": "evidence_content",
+      "requirement": "Evidence records exact repository, commit, license, adapter, command, config, pages, and coverage.",
+      "status": "PASS"
+    },
+    {
+      "id": "governed_receipt",
+      "requirement": "A sealed runx receipt is verified and its complete tree reconstructs byte-for-byte.",
+      "status": "BLOCKED",
+      "blocker": "linux_ci_receipt_required"
+    },
+    {
+      "id": "maintainer_gap_report",
+      "requirement": "The report gives concrete source-linked gaps useful to Redsync maintainers.",
+      "status": "PASS"
+    }
+  ]
+}

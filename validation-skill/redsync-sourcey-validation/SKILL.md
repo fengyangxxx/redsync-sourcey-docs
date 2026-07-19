@@ -20,9 +20,24 @@ one recognized Read the Docs addon immediately before `</head>`; all removed
 fragment identity and hash fields are recorded. Placeholder checks cover only
 runtime inputs and explicit public/immutable non-draft artifacts, never commit
 API patch metadata. Final evidence/report files are intentionally not inputs
-because they are created after this run and its receipt. The runner writes `evidence.json` and
-`transcript.txt` under `output_dir`. Every check is `PASS` or `BLOCKED`.
+because they are created after this run and its receipt. Local fixture runs can
+write `evidence.json` and `transcript.txt` under `output_dir`. Governed network
+runs use `artifact_mode=stdout-only`; after the receipt tree and signature pass,
+the workflow extracts the byte-bound artifacts from runx's captured stdout.
+Every check is `PASS` or `BLOCKED`.
 Idempotent GETs use at most four attempts; only network errors, HTTP 429, and
 HTTP 5xx are retried with bounded deterministic backoff. Every attempt is
 recorded. Failures exit nonzero; exhausted retries are failures and remain
 visible in both artifacts and stdout.
+
+The cli-tool declares `profile=network`, `network=true`, and
+`require_enforcement=true`. On Linux, runx must resolve Bubblewrap and records
+that runtime enforcer in the signed receipt; declared-policy-only or direct
+execution is not allowed. The ephemeral Ubuntu runner records the AppArmor
+user-namespace setting before and after any one-boot change, installs and
+versions Bubblewrap, and passes a minimal user-namespace probe before runx.
+The workflow copies its pinned setup-node runtime to the audited
+`/usr/local/bin/runx-node` path mounted by Bubblewrap and probes that exact
+executable inside the namespace.
+The operator-context digest approval remains separate from sandbox escalation;
+this skill neither declares nor self-approves an unrestricted escalation.

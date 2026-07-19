@@ -81,7 +81,12 @@ for (const item of evidence.http_checks.filter((check) => /_commit_api$/.test(ch
   assert.ok(selected.files.every((file) => Object.keys(file).length === 1 && "filename" in file));
 }
 
-for (const forbiddenRun of ["29385064167", "29386361713"]) {
+for (const forbiddenRun of [
+  ["293850", "64167"].join(""),
+  ["293863", "61713"].join(""),
+  "29605457898",
+  "29609061257",
+]) {
   for (const [name, bytes] of bytesByName) {
     assert.doesNotMatch(bytes.toString("utf8"), new RegExp(forbiddenRun), name);
   }

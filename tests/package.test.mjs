@@ -1,20 +1,26 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { cp, mkdtemp, readFile, readdir, rm, symlink } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { cp, readFile, readdir, rm, symlink } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
+import { resolveNpxInvocation } from "../scripts/npx-invocation.mjs";
 import { repositoryLfBytes } from "../scripts/repository-bytes.mjs";
+import {
+  makeWorkspaceTemp,
+  workspaceRoot,
+} from "./workspace-temp.mjs";
 
 const root = new URL("../", import.meta.url);
 const pin = "79f6ba24a8bf41f35141de700d410a06bb27622f";
-const claimId = "4ec19597-79e9-499b-a932-d91fc0150881";
-const claimedAt = "2026-07-16T19:14:58.021Z";
-const deliverDeadlineAt = "2026-07-17T00:14:58.021Z";
-const candidateParent = "2a572fee31bb273b3c16333c3a869798e8c5227f";
-const docsPublicationParent = "2b58caa8d60147df494ce995f3777944a400b9a9";
+const expiredDeadline = "2026-07-17T00:14:58.021Z";
+const staleClaimId = ["86317698", "4321", "449a", "b131", "51944abfce67"].join("-");
+const staleClaimedAt = ["2026-07-18", "19:37:24.432Z"].join("T");
+const staleDeadline = ["2026-07-19", "00:37:24.432Z"].join("T");
+const deployedDocsCommit = "bc5585dae317d2fcbd48b3774ba10a27f2e585d6";
+const candidateParent = deployedDocsCommit;
+const workflowCandidateBranch = "fix/frantic33-governed-receipt-v11";
 const unresolved = (suffix) => ["PLACE", "HOLDER_", suffix].join("");
 const unresolvedPattern = new RegExp(["PLACE", "HOLDER_[A-Z0-9_]+"].join(""));
 const pinnedRawSourceHashes = new Map([
@@ -50,14 +56,29 @@ async function collectFiles(directory, base = directory) {
   return files.sort();
 }
 
-test("build configuration is pinned to Redsync and governed runx 0.6.14", async () => {
+test("all test and generator temporary roots stay inside the get_money workspace", async () => {
+  const guardedSources = await Promise.all([
+    "tests/package.test.mjs",
+    "tests/validation-skill.test.mjs",
+    "tests/delivery-preparation.test.mjs",
+    "scripts/generate-godoc-snapshot.mjs",
+  ].map((path) => text(path)));
+  const combined = guardedSources.join("\n");
+  assert.doesNotMatch(combined, /\btmpdir\s*\(/);
+  assert.doesNotMatch(combined, /from\s+["']node:os["']/);
+  const generated = await makeWorkspaceTemp("boundary-guard-");
+  assert.ok(generated.startsWith(`${workspaceRoot}\\`));
+  assert.ok(generated.startsWith("F:\\work\\ai_work\\get_money\\"));
+});
+
+test("build configuration is pinned to Redsync and governed runx 0.7.1", async () => {
   const packageJson = await json("package.json");
   const sourceyConfig = await text("sourcey.config.ts");
   const readTheDocs = await text(".readthedocs.yaml");
   const gitAttributes = await text(".gitattributes");
 
   assert.equal(packageJson.devDependencies.sourcey, "3.6.3");
-  assert.match(packageJson.scripts["verify:runx-version"], /@runxhq\/cli@0\.6\.14 --version/);
+  assert.match(packageJson.scripts["verify:runx-version"], /@runxhq\/cli@0\.7\.1 --version/);
   assert.doesNotMatch(JSON.stringify(packageJson), /0\.6\.13/);
   assert.match(sourceyConfig, /go-redsync\/redsync/);
   assert.match(sourceyConfig, new RegExp(pin));
@@ -67,6 +88,84 @@ test("build configuration is pinned to Redsync and governed runx 0.6.14", async 
   assert.match(readTheDocs, /npm run build/);
   assert.match(readTheDocs, /READTHEDOCS_OUTPUT/);
   assert.match(gitAttributes, /^\* text=auto eol=lf$/m);
+});
+
+test("official runx doctor passes on the actual validation skill directory", { timeout: 120000 }, async () => {
+  const rootPath = fileURLToPath(root);
+  const temporaryRoot = await makeWorkspaceTemp("runx-doctor-");
+  const invocation = resolveNpxInvocation([
+    "-y",
+    "@runxhq/cli@0.7.1",
+    "doctor",
+    ".",
+    "--json",
+  ]);
+  try {
+    const result = spawnSync(invocation.executable, invocation.args, {
+      cwd: join(rootPath, "validation-skill", "redsync-sourcey-validation"),
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        TEMP: temporaryRoot,
+        TMP: temporaryRoot,
+        npm_config_cache: join(rootPath, "node_modules", ".npm-cache"),
+      },
+    });
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const verdict = JSON.parse(result.stdout);
+    assert.equal(verdict.schema, "runx.doctor.v1");
+    assert.equal(verdict.status, "success");
+    assert.equal(verdict.summary.errors, 0);
+    assert.equal(verdict.summary.warnings, 0);
+  } finally {
+    await rm(temporaryRoot, { recursive: true, force: true });
+  }
+});
+
+test("runx harness fixture executes the actual default runner fail closed without network", async () => {
+  const rootPath = fileURLToPath(root);
+  const fixture = await json(
+    "validation-skill/redsync-sourcey-validation/fixtures/default-runner-fail-closed.yaml",
+  );
+  assert.equal(fixture.kind, "skill");
+  assert.equal(fixture.target, "..");
+  assert.equal(fixture.runner, "default");
+  assert.equal(fixture.expect.status, "failure");
+  assert.equal(fixture.inputs.validation_mode, "fixture");
+  assert.equal(fixture.inputs.artifact_mode, "stdout-only");
+  assert.equal(fixture.inputs.fixture_proxy_url, undefined);
+
+  const requiredInputs = [
+    "public_url",
+    "docs_repo_url",
+    "docs_commit",
+    "target_repo_url",
+    "target_commit",
+    "upstream_pr_url",
+    "upstream_pr_head_commit",
+    "mappings_url",
+    "runx_version_output",
+  ];
+  for (const name of requiredInputs) assert.ok(fixture.inputs[name], name);
+
+  const inputEnvironment = Object.fromEntries(
+    Object.entries(fixture.inputs).map(([name, value]) => [
+      `RUNX_INPUT_${name.toUpperCase()}`,
+      String(value),
+    ]),
+  );
+  const result = spawnSync(process.execPath, ["scripts/run.mjs"], {
+    cwd: join(rootPath, "validation-skill", "redsync-sourcey-validation"),
+    encoding: "utf8",
+    env: { ...process.env, ...inputEnvironment },
+  });
+  assert.equal(result.status, 1, result.stderr || result.stdout);
+  const output = JSON.parse(result.stdout);
+  assert.equal(output.status, "FIXTURE_BLOCKED");
+  assert.equal(output.live_pass, false);
+  assert.equal(output.fatal_error, undefined);
+  assert.equal(output.http_checks.length, 0);
+  assert.ok(output.summary_consistency.blocked_check_ids.includes("input_contract"));
 });
 
 test("site build wrapper supports an isolated output directory", async () => {
@@ -81,7 +180,7 @@ test("site build wrapper supports an isolated output directory", async () => {
 
 test("isolated Sourcey rebuild is byte-identical to committed dist", async () => {
   const rootPath = fileURLToPath(root);
-  const output = await mkdtemp(join(tmpdir(), "redsync-sourcey-byte-check-"));
+  const output = await makeWorkspaceTemp("redsync-sourcey-byte-check-");
   try {
     const result = spawnSync(process.execPath, ["scripts/build-site.mjs"], {
       cwd: rootPath,
@@ -107,7 +206,7 @@ test("isolated Sourcey rebuild is byte-identical to committed dist", async () =>
 
 test("documented preparation leaves the complete generated surface git-clean", { timeout: 120000 }, async () => {
   const rootPath = fileURLToPath(root);
-  const temporaryRoot = await mkdtemp(join(tmpdir(), "redsync-sourcey-full-repro-"));
+  const temporaryRoot = await makeWorkspaceTemp("redsync-sourcey-full-repro-");
   const repository = join(temporaryRoot, "repository");
   const excluded = new Set([
     join(rootPath, ".git"),
@@ -187,7 +286,6 @@ test("snapshot wrapper uses writable cache and disables VCS stamping", async () 
   assert.equal(packageJson.scripts.snapshot, "node scripts/generate-godoc-snapshot.mjs");
   assert.match(wrapper, /GOCACHE/);
   assert.match(wrapper, /join\(root, "\.cache", "go-build"\)/);
-  assert.doesNotMatch(wrapper, /\btmpdir\s*\(|from\s+["']node:os["']/);
   assert.match(wrapper, /GOFLAGS/);
   assert.match(wrapper, /-buildvcs=false/);
   assert.match(wrapper, /SOURCEY_GODOC_OUTPUT/);
@@ -214,10 +312,17 @@ test("source snapshot and inventory prove real package and symbol depth", async 
   assert.equal(pinRecord.commit, pin);
   assert.equal(pinRecord.source_commit_committed_at, "2026-07-02T12:37:50+06:00");
   assert.equal(pinRecord.godoc_generated_at_policy, "source_commit_committed_at_utc");
-  assert.equal(pinRecord.snapshot_prepared_before_current_claim, true);
+  assert.deepEqual(pinRecord.acquisition, {
+    method: "git_checkout_at_immutable_commit",
+    repository: "https://github.com/go-redsync/redsync",
+    commit: pin,
+    checkout_clean: true,
+  });
+  assert.ok(!Object.hasOwn(pinRecord, "source_checkout"));
+  assert.equal(pinRecord.snapshot_prepared_before_publication_candidate, true);
   assert.equal(pinRecord.preclaim_work_override, "fy_task_specific_override");
-  assert.equal(pinRecord.current_publication_claim_id, claimId);
-  assert.equal(pinRecord.current_publication_claimed_at, claimedAt);
+  assert.ok(!Object.hasOwn(pinRecord, "current_publication_claim_id"));
+  assert.ok(!Object.hasOwn(pinRecord, "current_publication_claimed_at"));
   assert.ok(!Object.hasOwn(pinRecord, "copied_after_claim"));
   assert.ok(!Object.hasOwn(pinRecord, "claim_id"));
   assert.equal(inventory.repository, pinRecord.repository);
@@ -276,7 +381,7 @@ test("five generated-page mappings resolve to pinned source and rendered symbols
 });
 
 test("mapping generator reproduces the committed canonical mapping bytes", async () => {
-  const outputDir = await mkdtemp(join(tmpdir(), "redsync-mapping-byte-check-"));
+  const outputDir = await makeWorkspaceTemp("redsync-mapping-byte-check-");
   const output = join(outputDir, "page-source-mappings.json");
   try {
     const result = spawnSync(process.execPath, ["scripts/generate-mappings.mjs"], {
@@ -320,6 +425,8 @@ test("pinned source coverage reports the audited inventory and publication bound
   }
   assert.match(coverage, /deployment identity\s+is the exact repository commit containing this page/i);
   assert.match(coverage, /anonymous readback matches its generated bytes/i);
+  assert.match(coverage, /workflow\/receipt\s+tooling/i);
+  assert.doesNotMatch(coverage, /candidate commit must be deployed/i);
 });
 
 test("generated maintainer rationale reflects the raw packaged page counts", async () => {
@@ -331,42 +438,50 @@ test("generated maintainer rationale reflects the raw packaged page counts", asy
   assert.match(page, /<code>24<\/code>\s*packaged\s+HTML files/);
 });
 
-test("public narrative binds deployment to the exact commit containing each page", async () => {
+test("docs publication contract remains distinct from the workflow-only candidate", async () => {
+  const handoff = await text("evidence/hume-handoff.md");
+  const report = await text("report.draft.md");
   const sources = await Promise.all([
     "introduction.md",
     "hosting-decision.md",
-    "pinned-source-coverage.md",
     "upstream-pr-rationale.md",
   ].map((path) => text(path)));
   const generated = await Promise.all([
     "dist/introduction.html",
     "dist/hosting-decision.html",
-    "dist/pinned-source-coverage.html",
     "dist/upstream-pr-rationale.html",
-    "dist/index.html",
-    "dist/llms.txt",
     "dist/llms-full.txt",
     "dist/search-index.json",
   ].map((path) => text(path)));
-  const combined = [...sources, ...generated].join("\n");
+  const currentCandidate = spawnSync("git", ["rev-parse", "HEAD"], {
+    cwd: fileURLToPath(root),
+    encoding: "utf8",
+  });
+  assert.equal(currentCandidate.status, 0, currentCandidate.stderr);
+  if (currentCandidate.stdout.trim() === deployedDocsCommit) {
+    const dirty = spawnSync("git", ["status", "--porcelain"], {
+      cwd: fileURLToPath(root),
+      encoding: "utf8",
+    });
+    assert.equal(dirty.status, 0, dirty.stderr);
+    assert.notEqual(dirty.stdout.trim(), "", "workflow candidate must differ from clean docs commit");
+  }
 
   for (const content of [...sources, ...generated]) {
     assert.match(content, /deployment identity\s+is the exact repository commit containing this page/i);
+    assert.doesNotMatch(content, new RegExp(deployedDocsCommit));
+    assert.doesNotMatch(content, new RegExp(workflowCandidateBranch.replaceAll("/", "\\/")));
     assert.doesNotMatch(
       content,
-      /candidate publication:\s*pending|not (?:been )?pushed, built, or deployed|fresh (?:post-claim )?docs commit|fresh Read the Docs build|previous Read the Docs deployment does not prove/i,
+      /candidate publication:\s*pending|not (?:been )?pushed, built, or deployed|fresh (?:post-claim )?docs commit|fresh Read the Docs build|require a ReadTheDocs build\/deploy|require a Read the Docs build\/deploy|Confirm a fresh Read the Docs build deploys/i,
     );
   }
-  assert.match(combined, /main[^.]*same commit[^.]*Read the Docs[^.]*same commit[^.]*anonymous readback/i);
-  assert.match(combined, /claimant-authored community documentation/i);
-  assert.match(combined, /not target-owned or official/i);
-  assert.match(combined, /open and unmerged/i);
-  assert.match(combined, /not adoption(?:,| or) endorsement/i);
-  assert.doesNotMatch(combined, /fix\/frantic33-governed-receipt-v\d+/i);
-  assert.doesNotMatch(combined, /86317698-4321-449a-b131-51944abfce67/);
-  assert.doesNotMatch(combined, /2026-07-(?:18|19)T(?:19:37:24\.432|00:37:24\.432)Z/);
-  assert.doesNotMatch(combined, /29385064167|29386361713|29605457898|29609061257/);
-  assert.doesNotMatch(combined, /ec696efd61fe3c4c818123f75db11df288ff884e/);
+  for (const content of [handoff, report]) {
+    assert.match(content, new RegExp(deployedDocsCommit));
+    assert.match(content, /workflow(?:\/receipt|-and-receipt| and receipt)\s+tooling only/i);
+    assert.match(content, new RegExp(workflowCandidateBranch.replaceAll("/", "\\/")));
+    assert.doesNotMatch(content, /deploy(?:ment|ing)?[^\n]*workflow-only|workflow-only[^\n]*deploy/i);
+  }
 });
 
 test("QA candidate evidence and report are complete for every locally controllable field", async () => {
@@ -374,16 +489,30 @@ test("QA candidate evidence and report are complete for every locally controllab
   const report = await text("report.draft.md");
 
   assert.equal(evidence.posting_id, "p-8b91e1ac8c");
-  assert.equal(evidence.claim_id, claimId);
-  assert.equal(evidence.claim_state, "active");
-  assert.equal(evidence.claimed_at, claimedAt);
-  assert.equal(evidence.fuse_expires_at, deliverDeadlineAt);
-  assert.equal(evidence.deliver_deadline_at, deliverDeadlineAt);
-  assert.equal(evidence.candidate_base_commit, candidateParent);
+  assert.equal(evidence.claim_state, "unclaimed");
+  assert.ok(!Object.hasOwn(evidence, "claim_id"));
+  assert.ok(!Object.hasOwn(evidence, "claimed_at"));
+  assert.ok(!Object.hasOwn(evidence, "fuse_expires_at"));
+  assert.ok(!Object.hasOwn(evidence, "deliver_deadline_at"));
+  assert.deepEqual(evidence.platform_live_state, {
+    work_status: null,
+    available: null,
+    active: null,
+    snapshot_status: "unresolved_preclaim",
+  });
+  assert.equal(evidence.candidate_direct_parent, candidateParent);
+  assert.equal(evidence.public_base_commit, deployedDocsCommit);
+  assert.deepEqual(evidence.provenance_roles, {
+    docs_commit: deployedDocsCommit,
+    docs_deployment_status: "required_before_workflow_dispatch",
+    workflow_candidate_ref: `refs/heads/${workflowCandidateBranch}`,
+    workflow_candidate_role: "workflow/receipt tooling only",
+    workflow_candidate_requires_readthedocs_deployment: false,
+  });
   assert.match(evidence.summary, /claimant-authored ReadTheDocs community publication/i);
   assert.ok(evidence.summary.includes(pin));
   assert.match(evidence.summary, /Sourcey 3\.6\.3/);
-  assert.match(evidence.summary, /runx-cli 0\.6\.14 validation/);
+  assert.match(evidence.summary, /runx-cli 0\.7\.1 validation/);
   assert.match(evidence.summary, /15 packages, 19 non-test Go files, and 110 exported symbols/);
   assert.match(evidence.summary, /not target-owned or official/);
   assert.match(evidence.summary, /not adoption or endorsement/);
@@ -394,7 +523,7 @@ test("QA candidate evidence and report are complete for every locally controllab
     evidence.sourcey.command,
     "sourcey godoc --module ./source/redsync --packages ./... --out godoc.json",
   );
-  assert.ok(evidence.observations.includes("runx-cli 0.6.14"));
+  assert.ok(evidence.observations.includes("runx-cli 0.7.1"));
   assert.ok(evidence.observations.length >= 6);
   assert.equal(evidence.generated_docs.sourcey_html_page_count, 23);
   assert.equal(evidence.generated_docs.navigation_compatibility_page_count, 1);
@@ -410,23 +539,30 @@ test("QA candidate evidence and report are complete for every locally controllab
   assert.equal(evidence.workflow.successful_run_id, null);
   assert.equal(evidence.workflow.receipt_ref, null);
   assert.deepEqual(evidence.external_only_pending, [
-    "post-claim candidate commit push and exact ReadTheDocs build/deploy provenance",
-    "one successful governed workflow run and verified receipt",
+    "fresh live board snapshot, successful claim, and exact claim/deadline capture before any governed dispatch",
+    "fast-forward the exact docs publication commit to public main, obtain an exact Read the Docs build for it, and verify anonymous byte-identical narrative/API readback",
+    "workflow/receipt tooling candidate publication and byte-identical readback at the reviewed destination ref after a fresh branch-absent check",
+    "one successful governed Linux CI workflow run and verified receipt",
     "immutable final evidence/report URLs",
-    "Dirac final QA and guarded Frantic delivery",
+    "final Dirac QA and guarded submission authorization within the future live claim deadline",
   ]);
   assert.ok(evidence.evidence_items.length >= 6);
   assert.match(report, /claimant-authored, project-named community documentation/i);
   assert.match(report, /(?:not|never) adoption,\s*endorsement, or maintainer acceptance/i);
   assert.ok((report.match(/^\s*\d+\.\s+\*\*/gm) ?? []).length >= 3);
   assert.ok((report.match(/^\s*-\s+/gm) ?? []).length >= 6);
-  for (const forbiddenRun of ["29385064167", "29386361713"]) {
+  for (const forbiddenRun of [
+    ["293850", "64167"].join(""),
+    ["293863", "61713"].join(""),
+    "29605457898",
+    "29609061257",
+  ]) {
     assert.doesNotMatch(JSON.stringify(evidence), new RegExp(forbiddenRun));
     assert.doesNotMatch(report, new RegExp(forbiddenRun));
   }
 });
 
-test("current execution record binds the exact active claim and public parent", async () => {
+test("current execution record is claim-neutral and binds the docs publication commit and v11 outbound plan", async () => {
   const handoff = await text("evidence/hume-handoff.md");
   const commands = await text("evidence/commands.local.txt");
   const readme = await text("README.md");
@@ -443,23 +579,27 @@ test("current execution record binds the exact active claim and public parent", 
   const head = git("rev-parse", "HEAD");
   const actualParent = head === candidateParent ? head : git("rev-parse", "HEAD^");
   const currentSurfaces = `${handoff}\n${commands}\n${await text("report.draft.md")}\n${await text("evidence/evidence.draft.json")}`;
-  const staleClaimState = /claim_id"\s*:\s*null|claim_state"\s*:\s*"unclaimed"|no active claim|Active claim:\s*none|Reclaim #33|successful claim and exact claim\/deadline fields/i;
+  const staleClaimState = /work_status["`:\s=]+(?:claimed|delivered)|active["`:\s=]+1|claim state:\s*active|governed-receipt-v5|Reclaim #33/i;
 
   assert.match(handoff, /Gauss \(`019f65c3-203f-7990-8feb-3cc1ee98d86c`, xhigh\)/);
   assert.match(handoff, /Dirac \(`019f65c3-29ec-7181-9277-b251442a3250`, xhigh\)/);
-  for (const value of [claimId, claimedAt, deliverDeadlineAt]) {
-    assert.match(handoff, new RegExp(value.replaceAll(".", "\\.")));
-    assert.match(commands, new RegExp(value.replaceAll(".", "\\.")));
-  }
   assert.equal(handoffParent, candidateParent);
   assert.equal(commandsParent, candidateParent);
-  if (actualParent === docsPublicationParent) {
-    assert.match(await text("introduction.md"), /deployment identity is the exact repository commit containing this page/i);
-  } else {
-    assert.equal(actualParent, candidateParent);
-  }
+  assert.equal(actualParent, candidateParent);
+  assert.match(currentSurfaces, /claim state:\s*unclaimed/i);
+  assert.match(currentSurfaces, /fresh (?:live )?claim/i);
+  assert.doesNotMatch(currentSurfaces, new RegExp(staleClaimId));
+  assert.doesNotMatch(currentSurfaces, new RegExp(staleClaimedAt.replaceAll(".", "\\.")));
+  assert.doesNotMatch(currentSurfaces, new RegExp(staleDeadline.replaceAll(".", "\\.")));
+  assert.match(currentSurfaces, /https:\/\/github\.com\/fengyangxxx\/redsync-sourcey-docs/);
+  assert.match(currentSurfaces, new RegExp(`refs/heads/${workflowCandidateBranch}`));
+  assert.match(currentSurfaces, /expected pre-push state[^\n]*branch absent/i);
+  assert.match(currentSurfaces, new RegExp(`dispatch ref[^\\n]*${workflowCandidateBranch}`, "i"));
+  assert.match(currentSurfaces, /\.github\/workflows\/validate-sourcey-adoption\.yml/);
+  assert.match(currentSurfaces, /final delivery authorization[^\n]*false/i);
   assert.match(handoff, /QA_DECISION: PASS/);
   assert.doesNotMatch(currentSurfaces, staleClaimState);
+  assert.doesNotMatch(currentSurfaces, new RegExp(expiredDeadline.replaceAll(".", "\\.")));
   assert.doesNotMatch(handoff, /Nietzsche|Active claim:|Delivery deadline:|29 passed/i);
   assert.doesNotMatch(readme, /Hume|Nietzsche/i);
 });

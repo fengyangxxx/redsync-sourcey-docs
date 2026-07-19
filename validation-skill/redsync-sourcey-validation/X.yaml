@@ -11,14 +11,15 @@ runners:
   default:
     default: true
     type: cli-tool
-    command: node
+    command: /usr/local/bin/runx-node
     timeout_seconds: 240
     args:
       - scripts/run.mjs
     sandbox:
       profile: network
       cwd_policy: skill-directory
-      require_enforcement: false
+      network: true
+      require_enforcement: true
     inputs:
       public_url:
         type: string
@@ -56,10 +57,18 @@ runners:
         type: string
         required: true
         description: Literal output captured from the pinned outer runx --version command.
+      claimant_github_login:
+        type: string
+        required: false
+        description: Public GitHub login whose anonymous sourcey/sourcey star state must be verified.
       output_dir:
         type: string
         required: false
         description: Directory for evidence.json and transcript.txt.
+      artifact_mode:
+        type: string
+        required: false
+        description: files by default; stdout-only emits exact artifact bytes without sandbox writes.
       validation_mode:
         type: string
         required: false

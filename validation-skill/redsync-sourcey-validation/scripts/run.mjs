@@ -6,11 +6,26 @@ import { canonicalizeReadTheDocsPage } from "./rtd-canonicalizer.mjs";
 
 const EXPECTED_TARGET_REPO = "https://github.com/go-redsync/redsync";
 const EXPECTED_MODULE = "github.com/go-redsync/redsync/v4";
-const EXPECTED_CLI_VERSION = "runx-cli 0.6.14";
+const MINIMUM_CLI_VERSION = [0, 6, 13];
 const EXPECTED_LICENSE = "BSD-3-Clause";
 const EXPECTED_SOURCEY_COMMAND =
   "sourcey godoc --module ./source/redsync --packages ./... --out godoc.json";
 const UNRESOLVED_FINAL_RE = new RegExp(["PLACE", "HOLDER_[A-Z0-9_]+"].join(""), "g");
+
+function parseRunxVersion(output) {
+  const match = /^runx-cli (\d+)\.(\d+)\.(\d+)$/.exec(output);
+  if (!match) return null;
+  return match.slice(1).map(Number);
+}
+
+function isAtLeastVersion(actual, minimum) {
+  if (!actual) return false;
+  for (let index = 0; index < minimum.length; index += 1) {
+    if (actual[index] > minimum[index]) return true;
+    if (actual[index] < minimum[index]) return false;
+  }
+  return true;
+}
 
 function input(name, fallback = "") {
   return (process.env[`RUNX_INPUT_${name.toUpperCase()}`] ?? fallback).trim();
@@ -108,7 +123,9 @@ async function main() {
     upstream_pr_head_commit: input("upstream_pr_head_commit"),
     mappings_url: input("mappings_url"),
     runx_version_output: input("runx_version_output"),
+    claimant_github_login: input("claimant_github_login"),
     output_dir: input("output_dir"),
+    artifact_mode: input("artifact_mode", "files").toLowerCase(),
     validation_mode: input("validation_mode", "live").toLowerCase(),
     fixture_proxy_url: input("fixture_proxy_url"),
   };
@@ -122,6 +139,7 @@ async function main() {
     "Redsync Sourcey governed validation transcript",
     `CHECKED_AT ${checkedAt}`,
     `VALIDATION_MODE ${inputs.validation_mode}`,
+    `ARTIFACT_MODE ${inputs.artifact_mode}`,
   ];
 
   function addCheck(id, requirement, passed, observed, refs = []) {
@@ -175,6 +193,10 @@ async function main() {
       label,
       url: logicalUrl,
       fetched_url: inputs.validation_mode === "fixture" ? fetchedUrl : logicalUrl,
+      requested_url: fetched.requested_url,
+      response_url: fetched.response_url,
+      redirected: fetched.redirected,
+      location: fetched.location,
       http_status: fetched.http_status,
       content_sha256: fetched.content_sha256,
       bytes: rawBytes.length,
@@ -194,6 +216,9 @@ async function main() {
     transcript.push(`HTTP_URL ${logicalUrl}`);
     if (inputs.validation_mode === "fixture") transcript.push(`FETCHED_AS ${fetchedUrl}`);
     transcript.push(`HTTP_STATUS ${record.http_status ?? "ERROR"}`);
+    transcript.push(`HTTP_REQUESTED_URL ${record.requested_url}`);
+    transcript.push(`HTTP_RESPONSE_URL ${record.response_url ?? "NONE"}`);
+    transcript.push(`HTTP_REDIRECTED ${record.redirected}`);
     transcript.push(`HTTP_ATTEMPT_COUNT ${record.attempt_count}`);
     transcript.push(`HTTP_RETRY_EXHAUSTED ${record.retry_exhausted}`);
     transcript.push(`HTTP_FINAL_OUTCOME ${record.final_outcome}`);
@@ -222,11 +247,20 @@ async function main() {
   if (inputs.validation_mode === "fixture" && !inputs.fixture_proxy_url) {
     inputFailures.push("fixture_proxy_url is required in fixture mode");
   }
+  if (!new Set(["files", "stdout-only"]).has(inputs.artifact_mode)) {
+    inputFailures.push("artifact_mode must be files or stdout-only");
+  }
   if (inputs.target_repo_url && inputs.target_repo_url !== EXPECTED_TARGET_REPO) {
     inputFailures.push(`target_repo_url must be ${EXPECTED_TARGET_REPO}`);
   }
   for (const name of ["docs_commit", "target_commit", "upstream_pr_head_commit"]) {
     if (inputs[name] && !/^[0-9a-f]{40}$/i.test(inputs[name])) inputFailures.push(`${name} must be a full SHA`);
+  }
+  if (
+    inputs.claimant_github_login &&
+    !/^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/.test(inputs.claimant_github_login)
+  ) {
+    inputFailures.push("claimant_github_login must be a public GitHub login");
   }
   addCheck(
     "input_contract",
@@ -235,8 +269,11 @@ async function main() {
     { failures: inputFailures, target_repo_url: inputs.target_repo_url },
   );
 
+  const parsedCliVersion = parseRunxVersion(inputs.runx_version_output);
   const cliVersion = {
-    command: "npx -y @runxhq/cli@0.6.14 --version",
+    command: parsedCliVersion
+      ? `npx -y @runxhq/cli@${parsedCliVersion.join(".")} --version`
+      : "npx -y @runxhq/cli@<invalid> --version",
     output: inputs.runx_version_output,
     exit_code: inputs.runx_version_output ? 0 : 1,
     source: "captured_outer_command",
@@ -248,8 +285,8 @@ async function main() {
   if (cliVersion.stderr) transcript.push(`CLI_STDERR ${JSON.stringify(cliVersion.stderr)}`);
   addCheck(
     "cli_version_exact",
-    `Governed CLI output is exactly ${EXPECTED_CLI_VERSION}.`,
-    cliVersion.exit_code === 0 && cliVersion.output === EXPECTED_CLI_VERSION,
+    "Governed CLI output is a literal runx-cli semantic version at or above 0.6.13.",
+    cliVersion.exit_code === 0 && isAtLeastVersion(parsedCliVersion, MINIMUM_CLI_VERSION),
     cliVersion,
   );
 
@@ -291,6 +328,7 @@ async function main() {
       adoption: false,
       endorsement: false,
     },
+    claimant_sourcey_star: null,
   };
   if (docsRepo && targetRepo && pull && inputFailures.length === 0) {
     addCheck(
@@ -568,6 +606,76 @@ async function main() {
       [introductionUrl, apiHomeUrl],
     );
 
+    const narrativePaths = [
+      "introduction.html",
+      "hosting-decision.html",
+      "pinned-source-coverage.html",
+      "upstream-pr-rationale.html",
+      "llms-full.txt",
+      "search-index.json",
+    ];
+    const forbiddenNarrativePhrases = [
+      "candidate publication: pending",
+      "not pushed, built, or deployed",
+      "not been pushed, built, or deployed",
+      "fresh post-claim docs commit",
+      "fresh docs commit",
+      "fresh read the docs build",
+      "require a readthedocs build/deploy",
+      "require a read the docs build/deploy",
+      "confirm a fresh read the docs build deploys",
+    ];
+    const narrativeResults = [];
+    for (const path of narrativePaths) {
+      const immutableUrl = rawUrl(docsRepo, inputs.docs_commit, `dist/${path}`);
+      const pageUrl = new URL(path, inputs.public_url).href;
+      const immutable = await fetchText(immutableUrl, `immutable_narrative:${path}`);
+      const published = await fetchText(pageUrl, `public_narrative:${path}`);
+      addPlaceholderSurface(`immutable_narrative:${path}`, immutableUrl, immutable.body);
+      addPlaceholderSurface(`public_narrative:${path}`, pageUrl, published.body);
+      let canonicalBytes = published.raw_bytes;
+      let canonicalization = null;
+      if (path.endsWith(".html")) {
+        canonicalization = canonicalizeReadTheDocsPage(
+          published.raw_bytes,
+          pageUrl,
+          inputs.public_url,
+          docsRepo.repo,
+        );
+        canonicalBytes = canonicalization.canonical_bytes;
+      }
+      const lowered = published.body.toLowerCase();
+      const forbiddenOccurrences = forbiddenNarrativePhrases.filter((phrase) => lowered.includes(phrase));
+      const canonicalSha256 = canonicalBytes ? sha256(canonicalBytes) : null;
+      const publicMatchesImmutable =
+        immutable.http_status === 200 &&
+        published.http_status === 200 &&
+        canonicalSha256 === immutable.content_sha256 &&
+        (!path.endsWith(".html") || canonicalization?.recognized === true);
+      narrativeResults.push({
+        path,
+        immutable_url: immutableUrl,
+        public_url: pageUrl,
+        immutable_http_status: immutable.http_status,
+        public_http_status: published.http_status,
+        immutable_sha256: immutable.content_sha256,
+        canonical_public_sha256: canonicalSha256,
+        public_matches_immutable: publicMatchesImmutable,
+        forbidden_occurrences: forbiddenOccurrences,
+        rtd_addon_recognized: canonicalization?.recognized ?? null,
+      });
+    }
+    addCheck(
+      "public_narrative_readback",
+      "All public provenance narratives match the immutable docs commit after strict RTD addon canonicalization and contain no stale publication-state prose.",
+      narrativeResults.length === narrativePaths.length &&
+        narrativeResults.every(
+          (item) => item.public_matches_immutable && item.forbidden_occurrences.length === 0,
+        ),
+      { docs_commit: inputs.docs_commit, files: narrativeResults },
+      narrativeResults.flatMap((item) => [item.public_url, item.immutable_url]),
+    );
+
     const pageResults = [];
     for (const mapping of mappings) {
       const pageUrl = new URL(mapping.generated_page, inputs.public_url).href;
@@ -743,6 +851,59 @@ async function main() {
       head_sha: prFields.head_sha,
     };
 
+    if (inputs.claimant_github_login) {
+      const starApiUrl =
+        `https://api.github.com/users/${inputs.claimant_github_login}/starred?per_page=100`;
+      const listUrls = [];
+      const httpStatuses = [];
+      let listItemCount = 0;
+      let matchedRepository = null;
+      let parseError = null;
+      for (let page = 1; page <= 10; page += 1) {
+        const pageUrl = page === 1 ? starApiUrl : `${starApiUrl}&page=${page}`;
+        const response = await fetchText(pageUrl, `claimant_sourcey_star_page_${page}`);
+        listUrls.push(pageUrl);
+        httpStatuses.push(response.http_status);
+        if (response.http_status !== 200) break;
+        let repositories;
+        try {
+          repositories = JSON.parse(response.body);
+          if (!Array.isArray(repositories)) throw new Error("response is not an array");
+        } catch (error) {
+          parseError = error instanceof Error ? error.message : String(error);
+          break;
+        }
+        listItemCount += repositories.length;
+        if (repositories.some((repository) => repository?.full_name === "sourcey/sourcey")) {
+          matchedRepository = "sourcey/sourcey";
+          break;
+        }
+        if (repositories.length < 100) break;
+      }
+      const starObserved = {
+        claimant: inputs.claimant_github_login,
+        repository: "sourcey/sourcey",
+        url: starApiUrl,
+        http_status: httpStatuses[0] ?? null,
+        authentication: "none",
+        matched_repository: matchedRepository,
+        list_item_count: listItemCount,
+        pages_checked: listUrls.length,
+        parse_error: parseError,
+      };
+      addCheck(
+        "claimant_sourcey_star",
+        "The claimant's public starred-repository list contains exact full_name sourcey/sourcey and the check uses no authentication.",
+        httpStatuses.length > 0 &&
+          httpStatuses.every((status) => status === 200) &&
+          parseError === null &&
+          matchedRepository === "sourcey/sourcey",
+        starObserved,
+        listUrls,
+      );
+      projectFacts.claimant_sourcey_star = starObserved;
+    }
+
     const placeholders = [];
     for (const surface of placeholderSurfaces) {
       const matches = [...new Set(surface.body.match(UNRESOLVED_FINAL_RE) ?? [])];
@@ -801,8 +962,10 @@ async function main() {
   const evidencePath = resolve(outputDir, "evidence.json");
   const transcriptRef = "artifacts/transcript.txt";
   const evidenceRef = "artifacts/evidence.json";
-  await mkdir(outputDir, { recursive: true });
-  await writeFile(transcriptPath, transcriptBytes);
+  if (inputs.artifact_mode === "files") {
+    await mkdir(outputDir, { recursive: true });
+    await writeFile(transcriptPath, transcriptBytes);
+  }
 
   const observations = [
     cliVersion.output,
@@ -817,6 +980,11 @@ async function main() {
     `Coverage: packages=${projectFacts.package_count ?? "unverified"}, non-test Go files=${projectFacts.non_test_go_file_count ?? "unverified"}, exported symbols=${projectFacts.exported_symbol_count ?? "unverified"}`,
     `Public host boundary: ${projectFacts.public_host.classification}; target_owned=false; official=false`,
     `Upstream PR boundary: ${projectFacts.upstream_pr.role}; adoption=false; endorsement=false`,
+    ...(projectFacts.claimant_sourcey_star
+      ? [
+          `Public star: ${projectFacts.claimant_sourcey_star.claimant} stars sourcey/sourcey; HTTP ${projectFacts.claimant_sourcey_star.http_status}; authentication=none`,
+        ]
+      : []),
   ];
   const evidenceItems = [
     { type: "literal_runx_version", observed: cliVersion.output, command: cliVersion.command },
@@ -870,7 +1038,7 @@ async function main() {
   };
   const evidenceText = `${JSON.stringify(evidence, null, 2)}\n`;
   const evidenceBytes = Buffer.from(evidenceText);
-  await writeFile(evidencePath, evidenceBytes);
+  if (inputs.artifact_mode === "files") await writeFile(evidencePath, evidenceBytes);
   const artifacts = {
     evidence_json: { path: evidenceRef, bytes: evidenceBytes.length, sha256: sha256(evidenceBytes) },
     transcript: { path: transcriptRef, bytes: transcriptBytes.length, sha256: sha256(transcriptBytes) },

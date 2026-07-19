@@ -32,7 +32,7 @@ npm run hashes
 npm test
 ```
 
-`verify:runx-version` is pinned to `@runxhq/cli@0.6.14`. The older PATH
+`verify:runx-version` is pinned to `@runxhq/cli@0.7.1`. The older PATH
 installation must not be used for governed evidence.
 
 ## Package Shape
@@ -62,10 +62,12 @@ requires both the fixed upstream GitHub raw SHA-256 and pinned Git blob SHA-1.
 The root `.gitattributes` is a policy for future text normalization; it is not
 evidence that the existing snapshot blobs or every checkout are LF.
 
-This directory contains no publication receipt and makes no claim that the
-current commit is deployed. The Read the Docs project and upstream PR #245
-exist, but the PR is open and unmerged; it is an optional link proposal, not
-proof of upstream adoption.
+This directory contains no publication receipt. The documentation publication
+commit is `bc5585dae317d2fcbd48b3774ba10a27f2e585d6`; workflow dispatch is blocked
+until public `main`, Read the Docs build metadata, and anonymous narrative/API
+readback all prove that exact commit. The later workflow/receipt tooling commit
+is separate and is never itself an RTD deployment input. Upstream PR #245 is
+open and unmerged; it is an optional link proposal, not proof of adoption.
 
 ## Governed community publication validation
 
@@ -74,7 +76,7 @@ values replacing the angle-bracket metavariables in this non-executable
 example:
 
 ```powershell
-npx -y @runxhq/cli@0.6.14 skill .\validation-skill\redsync-sourcey-validation default `
+npx -y @runxhq/cli@0.7.1 skill .\validation-skill\redsync-sourcey-validation default `
   -i 'public_url=<verified-public-url>' `
   -i 'docs_repo_url=<docs-repository-url>' `
   -i 'docs_commit=<docs-commit>' `
@@ -87,7 +89,7 @@ npx -y @runxhq/cli@0.6.14 skill .\validation-skill\redsync-sourcey-validation de
   -i 'output_dir=<local-output-directory>' -j
 ```
 
-The runner checks the public community documentation, immutable documentation
+The runner checks all public provenance narratives, the community API pages, immutable documentation
 commit, five API page/source mappings, pinned target source, and the optional
 open, unmerged upstream proposal fields. The PR is never evidence of adoption,
 endorsement, or maintainer acceptance.
@@ -123,7 +125,7 @@ nonzero. It has not been dispatched for the current candidate and is not
 evidence of hosted authority.
 
 After the workflow artifact is downloaded, the main agent performs hosted
-notary publication separately with pinned runx 0.6.14 and its existing login.
+notary publication separately with pinned runx 0.7.1 and its existing login.
 The workflow never receives a token or login secret. Final evidence and report
 are then created in a later commit and explicitly reference the already
 validated docs commit, root receipt, verification output, and notary result.

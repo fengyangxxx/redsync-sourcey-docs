@@ -1,0 +1,30 @@
+{
+  "name": "redsync-sourcey-validation-default-runner-fail-closed",
+  "kind": "skill",
+  "target": "..",
+  "runner": "default",
+  "inputs": {
+    "public_url": "https://redsync-sourcey-docs.readthedocs.io/en/latest/",
+    "docs_repo_url": "https://github.com/fengyangxxx/redsync-sourcey-docs",
+    "docs_commit": "bc5585dae317d2fcbd48b3774ba10a27f2e585d6",
+    "target_repo_url": "https://github.com/go-redsync/redsync",
+    "target_commit": "79f6ba24a8bf41f35141de700d410a06bb27622f",
+    "upstream_pr_url": "https://github.com/go-redsync/redsync/pull/245",
+    "upstream_pr_head_commit": "f13cd302b903ae84fc21d914bbeb631a21bb9521",
+    "mappings_url": "https://raw.githubusercontent.com/fengyangxxx/redsync-sourcey-docs/bc5585dae317d2fcbd48b3774ba10a27f2e585d6/evidence/page-source-mappings.json",
+    "runx_version_output": "runx-cli 0.7.1",
+    "claimant_github_login": "fengyangxxx",
+    "output_dir": "artifacts",
+    "artifact_mode": "stdout-only",
+    "validation_mode": "fixture"
+  },
+  "expect": {
+    "status": "failure"
+  },
+  "metadata": {
+    "source": "skills-fixture",
+    "source_case": "fixture-proxy-required",
+    "network_access": "none",
+    "final_evidence": false
+  }
+}

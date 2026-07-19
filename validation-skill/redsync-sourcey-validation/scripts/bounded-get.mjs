@@ -33,15 +33,56 @@ export async function boundedGet(fetchUrl, options = {}) {
     );
     try {
       const response = await fetchImpl(fetchUrl, {
-        redirect: "follow",
+        redirect: "manual",
         signal: controller.signal,
         headers: options.headers,
       });
+      const responseUrl = response.url || fetchUrl;
+      const redirected = response.redirected === true;
+      const redirectStatus = response.status >= 300 && response.status < 400;
+      const responseUrlMismatch = responseUrl !== fetchUrl;
+      if (redirectStatus || redirected || responseUrlMismatch) {
+        const attemptRecord = {
+          attempt,
+          url: auditUrl,
+          requested_url: fetchUrl,
+          response_url: responseUrl,
+          redirected,
+          location: response.headers.get("location"),
+          http_status: response.status,
+          retryable: false,
+          elapsed_ms: Date.now() - startedAt,
+          bytes: 0,
+          content_sha256: null,
+          error: "redirect or response URL substitution blocked",
+        };
+        attempts.push(attemptRecord);
+        options.onAttempt?.(attemptRecord);
+        return {
+          requested_url: fetchUrl,
+          response_url: responseUrl,
+          redirected,
+          location: attemptRecord.location,
+          http_status: response.status,
+          content_sha256: null,
+          bytes: Buffer.alloc(0),
+          content_type: "",
+          attempts,
+          attempt_count: attempts.length,
+          max_attempts: maxAttempts,
+          retry_exhausted: false,
+          final_outcome: "redirect_blocked",
+          error: attemptRecord.error,
+        };
+      }
       const bytes = Buffer.from(await response.arrayBuffer());
       const canRetry = retryableStatus(response.status);
       const attemptRecord = {
         attempt,
         url: auditUrl,
+        requested_url: fetchUrl,
+        response_url: responseUrl,
+        redirected,
         http_status: response.status,
         retryable: canRetry,
         elapsed_ms: Date.now() - startedAt,
@@ -60,6 +101,10 @@ export async function boundedGet(fetchUrl, options = {}) {
       }
 
       return {
+        requested_url: fetchUrl,
+        response_url: responseUrl,
+        redirected,
+        location: null,
         http_status: response.status,
         content_sha256: attemptRecord.content_sha256,
         bytes,
@@ -80,6 +125,9 @@ export async function boundedGet(fetchUrl, options = {}) {
       const attemptRecord = {
         attempt,
         url: auditUrl,
+        requested_url: fetchUrl,
+        response_url: null,
+        redirected: false,
         http_status: null,
         retryable: true,
         elapsed_ms: Date.now() - startedAt,
@@ -96,6 +144,10 @@ export async function boundedGet(fetchUrl, options = {}) {
         continue;
       }
       return {
+        requested_url: fetchUrl,
+        response_url: null,
+        redirected: false,
+        location: null,
         http_status: null,
         content_sha256: null,
         bytes: Buffer.alloc(0),
